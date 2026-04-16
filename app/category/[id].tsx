@@ -39,15 +39,13 @@ export default function CategoryScreen() {
   const insets = useSafeAreaInsets();
 
   const isAll = id === '_all';
-  const isRandom = id === '_random';
-  const isSpecial = isAll || isRandom;
-  const category = isSpecial ? null : getCategoryById(id ?? '');
+  const category = isAll ? null : getCategoryById(id ?? '');
 
   const [words, setWords] = useState<Word[]>(() => {
-    if (isRandom) return shuffleWords(getAllWords());
     if (isAll) return getAllWords();
     return category?.words ?? [];
   });
+  const [shuffled, setShuffled] = useState(false);
 
   const lang = useCardStore((s) => s.lang);
   const toggleLang = useCardStore((s) => s.toggleLang);
@@ -62,10 +60,15 @@ export default function CategoryScreen() {
 
   const width = Dimensions.get('window').width;
 
-  const reshuffle = useCallback(() => {
-    setWords(shuffleWords(getAllWords()));
-    setIndex(0);
-  }, []);
+  const toggleShuffle = useCallback(() => {
+    setShuffled((prev) => {
+      const next = !prev;
+      const base = isAll ? getAllWords() : category?.words ?? [];
+      setWords(next ? shuffleWords(base) : base);
+      setIndex(0);
+      return next;
+    });
+  }, [isAll, category]);
 
   useEffect(() => {
     warmUpTTS();
@@ -74,8 +77,8 @@ export default function CategoryScreen() {
   // Reset index / words when category changes.
   useEffect(() => {
     setIndex(0);
-    if (isRandom) setWords(shuffleWords(getAllWords()));
-    else if (isAll) setWords(getAllWords());
+    setShuffled(false);
+    if (isAll) setWords(getAllWords());
     else if (category) setWords(category.words);
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -229,15 +232,13 @@ export default function CategoryScreen() {
       }
     });
 
-  const headerLabel = isRandom
-    ? lang === 'ko' ? '랜덤' : 'Random'
-    : isAll
+  const headerLabel = isAll
     ? lang === 'ko' ? '전체보기' : 'All Cards'
     : lang === 'ko' ? category?.ko ?? '' : category?.en ?? '';
 
-  const bgColor = isRandom ? '#FDE68A' : isAll ? '#E0E7FF' : category?.color ?? '#fff';
+  const bgColor = isAll ? '#E0E7FF' : category?.color ?? '#fff';
 
-  if ((!isSpecial && !category) || !word) {
+  if ((!isAll && !category) || !word) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>카테고리를 찾을 수 없어요</Text>
@@ -311,20 +312,21 @@ export default function CategoryScreen() {
         </Animated.View>
       </GestureDetector>
 
-      {/* Page indicator (current / total) */}
+      {/* Page indicator + shuffle */}
       <View style={styles.pager}>
-        {isRandom && (
-          <Pressable
-            onPress={reshuffle}
-            style={({ pressed }) => [
-              styles.reshuffleBtn,
-              pressed && { opacity: 0.7 },
-            ]}
-            accessibilityLabel={lang === 'ko' ? '다시 섞기' : 'Reshuffle'}
-          >
-            <Text style={styles.reshuffleText}>🔀 {lang === 'ko' ? '다시 섞기' : 'Shuffle'}</Text>
-          </Pressable>
-        )}
+        <Pressable
+          onPress={toggleShuffle}
+          style={({ pressed }) => [
+            styles.shuffleBtn,
+            shuffled && styles.shuffleBtnActive,
+            pressed && { opacity: 0.7 },
+          ]}
+          accessibilityLabel={shuffled ? (lang === 'ko' ? '순서대로' : 'In Order') : (lang === 'ko' ? '섞기' : 'Shuffle')}
+        >
+          <Text style={styles.shuffleText}>
+            🔀 {shuffled ? (lang === 'ko' ? '순서대로' : 'Order') : (lang === 'ko' ? '섞기' : 'Shuffle')}
+          </Text>
+        </Pressable>
         <Text style={styles.pagerText}>
           <Text style={styles.pagerCurrent}>{index + 1}</Text>
           <Text style={styles.pagerDivider}> / </Text>
@@ -463,13 +465,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     gap: 8,
   },
-  reshuffleBtn: {
+  shuffleBtn: {
     paddingHorizontal: 16,
     paddingVertical: 6,
     borderRadius: 999,
     backgroundColor: 'rgba(255,255,255,0.8)',
   },
-  reshuffleText: {
+  shuffleBtnActive: {
+    backgroundColor: theme.colors.primary,
+  },
+  shuffleText: {
     fontSize: 15,
     fontWeight: '700',
     color: theme.colors.text,
