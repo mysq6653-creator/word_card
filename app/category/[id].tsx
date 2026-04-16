@@ -21,7 +21,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
-import { getCategoryById } from '../../src/data/words';
+import { getAllWords, getCategoryById, shuffleWords } from '../../src/data/words';
+import type { Word } from '../../src/data/words';
 import { loadRecordingUri } from '../../src/lib/audioStorage';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
 import { theme } from '../../src/lib/theme';
@@ -36,7 +37,17 @@ export default function CategoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const category = getCategoryById(id ?? '');
+
+  const isAll = id === '_all';
+  const isRandom = id === '_random';
+  const isSpecial = isAll || isRandom;
+  const category = isSpecial ? null : getCategoryById(id ?? '');
+
+  const [words, setWords] = useState<Word[]>(() => {
+    if (isRandom) return shuffleWords(getAllWords());
+    if (isAll) return getAllWords();
+    return category?.words ?? [];
+  });
 
   const lang = useCardStore((s) => s.lang);
   const toggleLang = useCardStore((s) => s.toggleLang);
@@ -51,16 +62,24 @@ export default function CategoryScreen() {
 
   const width = Dimensions.get('window').width;
 
+  const reshuffle = useCallback(() => {
+    setWords(shuffleWords(getAllWords()));
+    setIndex(0);
+  }, []);
+
   useEffect(() => {
     warmUpTTS();
   }, []);
 
-  // Reset index when category changes.
+  // Reset index / words when category changes.
   useEffect(() => {
     setIndex(0);
-  }, [id]);
+    if (isRandom) setWords(shuffleWords(getAllWords()));
+    else if (isAll) setWords(getAllWords());
+    else if (category) setWords(category.words);
+  }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const word = category?.words[index];
+  const word = words[index];
 
   // Pre-load the recording URI whenever the visible word / language /
   // recording version changes. Keeping this async work out of the play
@@ -99,43 +118,40 @@ export default function CategoryScreen() {
   }, [word, lang, recordingUri]);
 
   const goNext = useCallback(() => {
-    if (!category) return;
-    setIndex((i) => (i + 1) % category.words.length);
-  }, [category]);
+    if (words.length === 0) return;
+    setIndex((i) => (i + 1) % words.length);
+  }, [words]);
 
   const goPrev = useCallback(() => {
-    if (!category) return;
-    setIndex((i) => (i - 1 + category.words.length) % category.words.length);
-  }, [category]);
+    if (words.length === 0) return;
+    setIndex((i) => (i - 1 + words.length) % words.length);
+  }, [words]);
 
-  // Tap-driven nav: unlock audio and speak the next word synchronously.
   const handleNext = useCallback(() => {
-    if (!category) return;
+    if (words.length === 0) return;
     unlockAudio();
     stopSpeaking();
     stopPlayback().catch(() => {});
-    const next = (index + 1) % category.words.length;
-    const nextWord = category.words[next];
+    const next = (index + 1) % words.length;
+    const nextWord = words[next];
     setIndex(next);
     if (nextWord) {
-      // We speak the TTS fallback immediately within the gesture; if a
-      // recording exists for the new card, the next tap will play it.
       speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang);
     }
-  }, [category, index, lang]);
+  }, [words, index, lang]);
 
   const handlePrev = useCallback(() => {
-    if (!category) return;
+    if (words.length === 0) return;
     unlockAudio();
     stopSpeaking();
     stopPlayback().catch(() => {});
-    const prev = (index - 1 + category.words.length) % category.words.length;
-    const prevWord = category.words[prev];
+    const prev = (index - 1 + words.length) % words.length;
+    const prevWord = words[prev];
     setIndex(prev);
     if (prevWord) {
       speak(lang === 'ko' ? prevWord.ko : prevWord.en, lang);
     }
-  }, [category, index, lang]);
+  }, [words, index, lang]);
 
   // Autoplay slideshow. The speak() on each tick runs inside a timer,
   // but iOS WebKit allows it because audio was unlocked by the tap on
@@ -157,10 +173,10 @@ export default function CategoryScreen() {
       activateKeepAwakeAsync();
     }
     autoplayRef.current = setInterval(() => {
-      if (!category) return;
+      if (words.length === 0) return;
       setIndex((i) => {
-        const next = (i + 1) % category.words.length;
-        const nextWord = category.words[next];
+        const next = (i + 1) % words.length;
+        const nextWord = words[next];
         if (nextWord) {
           stopSpeaking();
           speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang);
@@ -171,7 +187,7 @@ export default function CategoryScreen() {
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [autoplay, category, lang]);
+  }, [autoplay, words, lang]);
 
   // Stop autoplay on unmount.
   useEffect(() => {
@@ -213,7 +229,15 @@ export default function CategoryScreen() {
       }
     });
 
-  if (!category || !word) {
+  const headerLabel = isRandom
+    ? lang === 'ko' ? '랜덤' : 'Random'
+    : isAll
+    ? lang === 'ko' ? '전체보기' : 'All Cards'
+    : lang === 'ko' ? category?.ko ?? '' : category?.en ?? '';
+
+  const bgColor = isRandom ? '#FDE68A' : isAll ? '#E0E7FF' : category?.color ?? '#fff';
+
+  if ((!isSpecial && !category) || !word) {
     return (
       <View style={styles.center}>
         <Text style={styles.errorText}>카테고리를 찾을 수 없어요</Text>
@@ -228,7 +252,7 @@ export default function CategoryScreen() {
   }
 
   return (
-    <View style={[styles.root, { backgroundColor: category.color }]}>
+    <View style={[styles.root, { backgroundColor: bgColor }]}>
       {/* Top bar */}
       <View
         style={[
@@ -248,7 +272,7 @@ export default function CategoryScreen() {
         </Pressable>
 
         <Text style={styles.categoryLabel}>
-          {lang === 'ko' ? category.ko : category.en}
+          {headerLabel}
         </Text>
 
         <Pressable
@@ -289,10 +313,22 @@ export default function CategoryScreen() {
 
       {/* Page indicator (current / total) */}
       <View style={styles.pager}>
+        {isRandom && (
+          <Pressable
+            onPress={reshuffle}
+            style={({ pressed }) => [
+              styles.reshuffleBtn,
+              pressed && { opacity: 0.7 },
+            ]}
+            accessibilityLabel={lang === 'ko' ? '다시 섞기' : 'Reshuffle'}
+          >
+            <Text style={styles.reshuffleText}>🔀 {lang === 'ko' ? '다시 섞기' : 'Shuffle'}</Text>
+          </Pressable>
+        )}
         <Text style={styles.pagerText}>
           <Text style={styles.pagerCurrent}>{index + 1}</Text>
           <Text style={styles.pagerDivider}> / </Text>
-          <Text style={styles.pagerTotal}>{category.words.length}</Text>
+          <Text style={styles.pagerTotal}>{words.length}</Text>
         </Text>
       </View>
 
@@ -425,6 +461,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 8,
+    gap: 8,
+  },
+  reshuffleBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.8)',
+  },
+  reshuffleText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: theme.colors.text,
   },
   pagerText: {
     paddingHorizontal: 16,

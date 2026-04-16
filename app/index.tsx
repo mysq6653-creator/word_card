@@ -46,6 +46,37 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
+      <View style={styles.specialRow}>
+        <Pressable
+          onPress={() => router.push('/category/_all')}
+          style={({ pressed }) => [
+            styles.specialTile,
+            { backgroundColor: '#E0E7FF' },
+            pressed && { transform: [{ scale: 0.97 }] },
+          ]}
+          accessibilityLabel="전체 낱말카드 보기"
+        >
+          <Text style={styles.specialEmoji}>📚</Text>
+          <Text style={styles.specialLabel}>
+            {lang === 'ko' ? '전체보기' : 'All Cards'}
+          </Text>
+        </Pressable>
+        <Pressable
+          onPress={() => router.push('/category/_random')}
+          style={({ pressed }) => [
+            styles.specialTile,
+            { backgroundColor: '#FDE68A' },
+            pressed && { transform: [{ scale: 0.97 }] },
+          ]}
+          accessibilityLabel="랜덤 낱말카드 보기"
+        >
+          <Text style={styles.specialEmoji}>🎲</Text>
+          <Text style={styles.specialLabel}>
+            {lang === 'ko' ? '랜덤' : 'Random'}
+          </Text>
+        </Pressable>
+      </View>
+
       <View style={styles.grid}>
         {categories.map((cat) => (
           <Pressable
@@ -102,6 +133,29 @@ const styles = StyleSheet.create({
   langBtnText: {
     fontSize: 18,
     fontWeight: '700',
+    color: theme.colors.text,
+  },
+  specialRow: {
+    flexDirection: 'row',
+    gap: 16,
+    marginBottom: 16,
+  },
+  specialTile: {
+    flex: 1,
+    height: 100,
+    borderRadius: theme.radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 10,
+    padding: 16,
+  },
+  specialEmoji: {
+    fontSize: 36,
+  },
+  specialLabel: {
+    fontSize: 22,
+    fontWeight: '800',
     color: theme.colors.text,
   },
   grid: {

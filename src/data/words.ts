@@ -249,3 +249,16 @@ export const categories: Category[] = [
 
 export const getCategoryById = (id: string): Category | undefined =>
   categories.find((c) => c.id === id);
+
+export function getAllWords(): Word[] {
+  return categories.flatMap((c) => c.words);
+}
+
+export function shuffleWords(words: Word[]): Word[] {
+  const a = [...words];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
