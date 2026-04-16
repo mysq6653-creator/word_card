@@ -16,7 +16,6 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
   withTiming,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -136,23 +135,25 @@ export default function CategoryScreen() {
   const pan = Gesture.Pan()
     .activeOffsetX([-12, 12])
     .onUpdate((e) => {
-      translateX.value = e.translationX;
+      // Dampen the drag so the card doesn't feel overly loose.
+      translateX.value = e.translationX * 0.6;
     })
     .onEnd((e) => {
       if (e.translationX < -SWIPE_THRESHOLD) {
         translateX.value = withTiming(-width, { duration: 180 }, () => {
           translateX.value = width;
           runOnJS(goNext)();
-          translateX.value = withSpring(0, { damping: 18 });
+          translateX.value = withTiming(0, { duration: 220 });
         });
       } else if (e.translationX > SWIPE_THRESHOLD) {
         translateX.value = withTiming(width, { duration: 180 }, () => {
           translateX.value = -width;
           runOnJS(goPrev)();
-          translateX.value = withSpring(0, { damping: 18 });
+          translateX.value = withTiming(0, { duration: 220 });
         });
       } else {
-        translateX.value = withSpring(0);
+        // Return to center without spring bounce.
+        translateX.value = withTiming(0, { duration: 200 });
       }
     });
 
@@ -227,17 +228,13 @@ export default function CategoryScreen() {
         </Animated.View>
       </GestureDetector>
 
-      {/* Page indicator */}
+      {/* Page indicator (current / total) */}
       <View style={styles.pager}>
-        {category.words.map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.pagerDot,
-              i === index && styles.pagerDotActive,
-            ]}
-          />
-        ))}
+        <Text style={styles.pagerText}>
+          <Text style={styles.pagerCurrent}>{index + 1}</Text>
+          <Text style={styles.pagerDivider}> / </Text>
+          <Text style={styles.pagerTotal}>{category.words.length}</Text>
+        </Text>
       </View>
 
       {/* Bottom bar */}
@@ -360,21 +357,31 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   pager: {
-    flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'center',
     paddingVertical: 8,
   },
-  pagerDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.2)',
+  pagerText: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 999,
+    backgroundColor: 'rgba(255,255,255,0.7)',
+    overflow: 'hidden',
   },
-  pagerDotActive: {
-    backgroundColor: theme.colors.text,
-    width: 20,
+  pagerCurrent: {
+    fontSize: 18,
+    fontWeight: '900',
+    color: theme.colors.text,
+  },
+  pagerDivider: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: theme.colors.textMuted,
+  },
+  pagerTotal: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: theme.colors.textMuted,
   },
   bottomBar: {
     paddingHorizontal: 16,
