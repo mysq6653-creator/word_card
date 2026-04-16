@@ -25,7 +25,7 @@ import { getCategoryById } from '../../src/data/words';
 import { loadRecordingUri } from '../../src/lib/audioStorage';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
 import { theme } from '../../src/lib/theme';
-import { speak, stopSpeaking, warmUpTTS } from '../../src/lib/tts';
+import { speak, stopSpeaking, unlockAudio, warmUpTTS } from '../../src/lib/tts';
 import { VoiceRecorder } from '../../src/components/VoiceRecorder';
 import { useCardStore } from '../../src/store/useCardStore';
 
@@ -45,6 +45,7 @@ export default function CategoryScreen() {
   const recordingVersion = useCardStore((s) => s.recordingVersion);
 
   const [index, setIndex] = useState(0);
+  const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
@@ -61,28 +62,41 @@ export default function CategoryScreen() {
 
   const word = category?.words[index];
 
-  // Play either the parent's recording (if exists) or TTS fallback.
-  const playCurrent = useCallback(async () => {
+  // Pre-load the recording URI whenever the visible word / language /
+  // recording version changes. Keeping this async work out of the play
+  // path is critical on iOS WebKit: speak() / play() must fire within
+  // the same synchronous tick as the user gesture, so no awaits allowed
+  // between the tap and the audio API call.
+  useEffect(() => {
+    if (!word) {
+      setRecordingUri(null);
+      return;
+    }
+    let cancelled = false;
+    loadRecordingUri(word.id, lang).then((uri) => {
+      if (!cancelled) setRecordingUri(uri);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [word?.id, lang, recordingVersion]);
+
+  // Synchronous play — safe to call from onPress handlers on iOS Safari.
+  // The first invocation must come from a real user gesture to unlock
+  // audio; all subsequent timer-driven speak() calls then work for the
+  // rest of the page session.
+  const playCurrent = useCallback(() => {
     if (!word) return;
+    unlockAudio();
     stopSpeaking();
-    await stopPlayback();
-    const uri = await loadRecordingUri(word.id, lang);
-    if (uri) {
-      await playUri(uri);
+    // Fire-and-forget: do not await before calling audio APIs.
+    stopPlayback().catch(() => {});
+    if (recordingUri) {
+      playUri(recordingUri).catch(() => {});
     } else {
       speak(lang === 'ko' ? word.ko : word.en, lang);
     }
-  }, [word, lang, recordingVersion]);
-
-  // Play when card becomes visible (and when language changes).
-  useEffect(() => {
-    if (!word) return;
-    playCurrent();
-    return () => {
-      stopSpeaking();
-      stopPlayback();
-    };
-  }, [word?.id, lang, playCurrent]);
+  }, [word, lang, recordingUri]);
 
   const goNext = useCallback(() => {
     if (!category) return;
@@ -94,7 +108,38 @@ export default function CategoryScreen() {
     setIndex((i) => (i - 1 + category.words.length) % category.words.length);
   }, [category]);
 
-  // Autoplay slideshow.
+  // Tap-driven nav: unlock audio and speak the next word synchronously.
+  const handleNext = useCallback(() => {
+    if (!category) return;
+    unlockAudio();
+    stopSpeaking();
+    stopPlayback().catch(() => {});
+    const next = (index + 1) % category.words.length;
+    const nextWord = category.words[next];
+    setIndex(next);
+    if (nextWord) {
+      // We speak the TTS fallback immediately within the gesture; if a
+      // recording exists for the new card, the next tap will play it.
+      speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang);
+    }
+  }, [category, index, lang]);
+
+  const handlePrev = useCallback(() => {
+    if (!category) return;
+    unlockAudio();
+    stopSpeaking();
+    stopPlayback().catch(() => {});
+    const prev = (index - 1 + category.words.length) % category.words.length;
+    const prevWord = category.words[prev];
+    setIndex(prev);
+    if (prevWord) {
+      speak(lang === 'ko' ? prevWord.ko : prevWord.en, lang);
+    }
+  }, [category, index, lang]);
+
+  // Autoplay slideshow. The speak() on each tick runs inside a timer,
+  // but iOS WebKit allows it because audio was unlocked by the tap on
+  // the autoplay toggle (handled by onPress → playCurrent → unlockAudio).
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
     if (!autoplay) {
@@ -111,11 +156,22 @@ export default function CategoryScreen() {
     if (Platform.OS !== 'web') {
       activateKeepAwakeAsync();
     }
-    autoplayRef.current = setInterval(goNext, AUTOPLAY_INTERVAL_MS);
+    autoplayRef.current = setInterval(() => {
+      if (!category) return;
+      setIndex((i) => {
+        const next = (i + 1) % category.words.length;
+        const nextWord = category.words[next];
+        if (nextWord) {
+          stopSpeaking();
+          speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang);
+        }
+        return next;
+      });
+    }, AUTOPLAY_INTERVAL_MS);
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [autoplay, goNext]);
+  }, [autoplay, category, lang]);
 
   // Stop autoplay on unmount.
   useEffect(() => {
@@ -196,7 +252,10 @@ export default function CategoryScreen() {
         </Text>
 
         <Pressable
-          onPress={toggleLang}
+          onPress={() => {
+            unlockAudio();
+            toggleLang();
+          }}
           style={({ pressed }) => [
             styles.iconBtn,
             pressed && { opacity: 0.7 },
@@ -246,7 +305,7 @@ export default function CategoryScreen() {
       >
         <View style={styles.bottomRow}>
           <Pressable
-            onPress={goPrev}
+            onPress={handlePrev}
             style={({ pressed }) => [
               styles.navBtn,
               pressed && { opacity: 0.7 },
@@ -257,7 +316,13 @@ export default function CategoryScreen() {
           </Pressable>
 
           <Pressable
-            onPress={() => setAutoplay(!autoplay)}
+            onPress={() => {
+              const next = !autoplay;
+              // Unlock audio and speak immediately from this user gesture
+              // so iOS WebKit allows the timer-driven speaks that follow.
+              if (next) playCurrent();
+              setAutoplay(next);
+            }}
             style={({ pressed }) => [
               styles.autoplayBtn,
               autoplay && styles.autoplayBtnActive,
@@ -278,7 +343,7 @@ export default function CategoryScreen() {
           </Pressable>
 
           <Pressable
-            onPress={goNext}
+            onPress={handleNext}
             style={({ pressed }) => [
               styles.navBtn,
               pressed && { opacity: 0.7 },
