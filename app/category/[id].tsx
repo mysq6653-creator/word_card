@@ -32,6 +32,7 @@ import {
 import type { Word } from '../../src/data/words';
 import { loadRecordingUri } from '../../src/lib/audioStorage';
 import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
+import { resizeImage } from '../../src/lib/imageResize';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
 import { speak, stopSpeaking, unlockAudio, warmUpTTS } from '../../src/lib/tts';
@@ -219,10 +220,11 @@ export default function CategoryScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      quality: 0.6,
     });
     if (!result.canceled && result.assets[0]) {
-      await saveImage(word.id, result.assets[0].uri);
+      const resized = await resizeImage(result.assets[0].uri);
+      await saveImage(word.id, resized);
       if (!word.isCustom) {
         addImageOverride(word.id);
       }

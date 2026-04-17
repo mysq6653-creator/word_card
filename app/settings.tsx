@@ -195,10 +195,24 @@ export default function SettingsScreen() {
         colors={colors}
       />
 
-      {/* Delete all recordings */}
+      {/* Data management */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
         {lang === 'ko' ? '데이터 관리' : 'Data'}
       </Text>
+      <Pressable
+        onPress={() => router.push('/manage')}
+        style={({ pressed }) => [
+          styles.manageBtn,
+          { backgroundColor: colors.surface },
+          pressed && { opacity: 0.7 },
+        ]}
+      >
+        <Text style={[styles.manageBtnText, { color: colors.text }]}>
+          📂 {lang === 'ko' ? '카드 · 녹음 · 사진 관리' : 'Cards · Recordings · Photos'}
+        </Text>
+        <Text style={[styles.manageArrow, { color: colors.textMuted }]}>→</Text>
+      </Pressable>
+
       <Pressable
         onPress={handleDeleteAll}
         disabled={deleting}
@@ -242,6 +256,9 @@ const styles = StyleSheet.create({
   backText: { fontSize: 18, fontWeight: '700' },
   title: { fontSize: 32, fontWeight: '800', marginBottom: 24 },
   sectionLabel: { fontSize: 15, fontWeight: '600', marginTop: 16, marginBottom: 8, marginLeft: 4 },
+  manageBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md, marginBottom: 12 },
+  manageBtnText: { fontSize: 17, fontWeight: '700' },
+  manageArrow: { fontSize: 20, fontWeight: '700' },
   dangerBtn: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center' },
   dangerBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
   linkBtn: { paddingVertical: 14, alignItems: 'center' },

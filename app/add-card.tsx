@@ -15,6 +15,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories } from '../src/data/words';
 import { saveImage } from '../src/lib/imageStorage';
+import { resizeImage } from '../src/lib/imageResize';
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import {
@@ -67,10 +68,11 @@ export default function AddCardScreen() {
       mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
-      quality: 0.7,
+      quality: 0.6,
     });
     if (!result.canceled && result.assets[0]) {
-      setImageUri(result.assets[0].uri);
+      const resized = await resizeImage(result.assets[0].uri);
+      setImageUri(resized);
     }
   }, []);
 

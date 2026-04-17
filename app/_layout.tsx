@@ -25,6 +25,7 @@ export default function RootLayout() {
           <Stack.Screen name="settings" />
           <Stack.Screen name="privacy" />
           <Stack.Screen name="add-card" />
+          <Stack.Screen name="manage" />
           <Stack.Screen name="quiz/[id]" />
           <Stack.Screen name="listen/[id]" />
         </Stack>
