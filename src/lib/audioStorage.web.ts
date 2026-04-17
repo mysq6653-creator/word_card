@@ -1,4 +1,4 @@
-import { get, set, del } from 'idb-keyval';
+import { get, set, del, clear } from 'idb-keyval';
 import type { Lang } from '../data/words';
 
 /**
@@ -46,4 +46,8 @@ export async function hasRecording(
 ): Promise<boolean> {
   const blob = await get<Blob>(key(wordId, lang));
   return !!blob;
+}
+
+export async function deleteAllRecordings(): Promise<void> {
+  await clear();
 }

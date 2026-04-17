@@ -93,6 +93,20 @@ export default function HomeScreen() {
             {lang === 'ko' ? '퀴즈' : 'Quiz'}
           </Text>
         </Pressable>
+        <Pressable
+          onPress={() => router.push('/listen/_all')}
+          style={({ pressed }) => [
+            styles.specialTile,
+            { backgroundColor: isDark ? '#2A3A2A' : '#E8F5E9' },
+            pressed && { transform: [{ scale: 0.97 }] },
+          ]}
+          accessibilityLabel="듣기 퀴즈"
+        >
+          <Text style={styles.specialEmoji}>🔊</Text>
+          <Text style={[styles.specialLabel, { color: colors.text }]}>
+            {lang === 'ko' ? '듣기' : 'Listen'}
+          </Text>
+        </Pressable>
       </View>
 
       <View style={styles.grid}>

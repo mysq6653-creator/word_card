@@ -62,3 +62,12 @@ export async function hasRecording(
 ): Promise<boolean> {
   return (await loadRecordingUri(wordId, lang)) !== null;
 }
+
+export async function deleteAllRecordings(): Promise<void> {
+  const dir = `${FileSystem.documentDirectory}recordings`;
+  try {
+    await FileSystem.deleteAsync(dir, { idempotent: true });
+  } catch {
+    // ignore
+  }
+}

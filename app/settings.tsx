@@ -1,6 +1,9 @@
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useCallback, useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { deleteAllRecordings } from '../src/lib/audioStorage';
 
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore, type ColorMode } from '../src/store/useCardStore';
@@ -78,6 +81,35 @@ export default function SettingsScreen() {
   const setAutoplaySpeed = useCardStore((s) => s.setAutoplaySpeed);
   const ttsRate = useCardStore((s) => s.ttsRate);
   const setTtsRate = useCardStore((s) => s.setTtsRate);
+  const bumpRecordingVersion = useCardStore((s) => s.bumpRecordingVersion);
+  const [deleting, setDeleting] = useState(false);
+
+  const handleDeleteAll = useCallback(() => {
+    const doDelete = async () => {
+      setDeleting(true);
+      try {
+        await deleteAllRecordings();
+        bumpRecordingVersion();
+      } finally {
+        setDeleting(false);
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(lang === 'ko' ? '모든 녹음을 삭제할까요?' : 'Delete all recordings?')) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        lang === 'ko' ? '녹음 삭제' : 'Delete Recordings',
+        lang === 'ko' ? '모든 녹음을 삭제할까요? 되돌릴 수 없어요.' : 'Delete all recordings? This cannot be undone.',
+        [
+          { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
+          { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: doDelete },
+        ],
+      );
+    }
+  }, [lang, bumpRecordingVersion]);
 
   return (
     <ScrollView
@@ -163,6 +195,39 @@ export default function SettingsScreen() {
         colors={colors}
       />
 
+      {/* Delete all recordings */}
+      <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
+        {lang === 'ko' ? '데이터 관리' : 'Data'}
+      </Text>
+      <Pressable
+        onPress={handleDeleteAll}
+        disabled={deleting}
+        style={({ pressed }) => [
+          styles.dangerBtn,
+          { backgroundColor: colors.danger },
+          (pressed || deleting) && { opacity: 0.6 },
+        ]}
+      >
+        <Text style={styles.dangerBtnText}>
+          🗑️ {deleting
+            ? (lang === 'ko' ? '삭제 중...' : 'Deleting...')
+            : (lang === 'ko' ? '모든 녹음 삭제' : 'Delete All Recordings')}
+        </Text>
+      </Pressable>
+
+      {/* Privacy policy */}
+      <Pressable
+        onPress={() => router.push('/privacy')}
+        style={({ pressed }) => [
+          styles.linkBtn,
+          pressed && { opacity: 0.6 },
+        ]}
+      >
+        <Text style={[styles.linkText, { color: colors.primary }]}>
+          {lang === 'ko' ? '📋 개인정보 처리방침' : '📋 Privacy Policy'}
+        </Text>
+      </Pressable>
+
       <Text style={[styles.versionText, { color: colors.textMuted }]}>
         낱말 카드 v1.0.0
       </Text>
@@ -177,5 +242,9 @@ const styles = StyleSheet.create({
   backText: { fontSize: 18, fontWeight: '700' },
   title: { fontSize: 32, fontWeight: '800', marginBottom: 24 },
   sectionLabel: { fontSize: 15, fontWeight: '600', marginTop: 16, marginBottom: 8, marginLeft: 4 },
+  dangerBtn: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center' },
+  dangerBtnText: { fontSize: 17, fontWeight: '700', color: '#fff' },
+  linkBtn: { paddingVertical: 14, alignItems: 'center' },
+  linkText: { fontSize: 17, fontWeight: '600' },
   versionText: { textAlign: 'center', marginTop: 40, fontSize: 13 },
 });
