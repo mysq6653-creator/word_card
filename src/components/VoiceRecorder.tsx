@@ -8,7 +8,7 @@ import {
   saveRecording,
 } from '../lib/audioStorage';
 import { requestPermission, startRecording } from '../lib/recorder';
-import { theme } from '../lib/theme';
+import { radius, useThemeColors } from '../lib/theme';
 import { useCardStore } from '../store/useCardStore';
 
 type Props = {
@@ -23,7 +23,6 @@ type RecState =
 
 function showMessage(message: string) {
   if (Platform.OS === 'web') {
-    // Alert.alert on web shows a native alert which is fine.
     // eslint-disable-next-line no-alert
     window.alert(message);
   } else {
@@ -36,6 +35,7 @@ export function VoiceRecorder({ word, lang }: Props) {
   const [hasRec, setHasRec] = useState(false);
   const bumpRecordingVersion = useCardStore((s) => s.bumpRecordingVersion);
   const recordingVersion = useCardStore((s) => s.recordingVersion);
+  const colors = useThemeColors();
 
   useEffect(() => {
     let cancelled = false;
@@ -56,7 +56,7 @@ export function VoiceRecorder({ word, lang }: Props) {
           await saveRecording(word.id, lang, uri);
           bumpRecordingVersion();
         }
-      } catch (e) {
+      } catch {
         showMessage('녹음 저장에 실패했어요');
       } finally {
         setState({ kind: 'idle' });
@@ -77,7 +77,7 @@ export function VoiceRecorder({ word, lang }: Props) {
       try {
         const handle = await startRecording();
         setState({ kind: 'recording', handle });
-      } catch (e) {
+      } catch {
         showMessage('녹음을 시작할 수 없어요');
       }
     }
@@ -97,24 +97,19 @@ export function VoiceRecorder({ word, lang }: Props) {
         disabled={state.kind === 'saving'}
         style={({ pressed }) => [
           styles.recBtn,
-          isRecording && styles.recBtnActive,
+          { backgroundColor: colors.surface, borderColor: colors.primary },
+          isRecording && { backgroundColor: colors.danger, borderColor: colors.danger },
           pressed && { opacity: 0.7 },
         ]}
         accessibilityLabel={isRecording ? '녹음 중지' : '녹음 시작'}
       >
         <Text style={styles.recIcon}>{isRecording ? '⏺' : '🎙️'}</Text>
-        <Text style={styles.recLabel}>
+        <Text style={[styles.recLabel, { color: colors.text }]}>
           {isRecording
-            ? lang === 'ko'
-              ? '녹음 중...'
-              : 'Recording...'
+            ? lang === 'ko' ? '녹음 중...' : 'Recording...'
             : hasRec
-            ? lang === 'ko'
-              ? '다시 녹음'
-              : 'Re-record'
-            : lang === 'ko'
-            ? '내 목소리'
-            : 'Record'}
+            ? lang === 'ko' ? '다시 녹음' : 'Re-record'
+            : lang === 'ko' ? '내 목소리' : 'Record'}
         </Text>
       </Pressable>
 
@@ -123,6 +118,7 @@ export function VoiceRecorder({ word, lang }: Props) {
           onPress={handleDelete}
           style={({ pressed }) => [
             styles.deleteBtn,
+            { backgroundColor: colors.surface, borderColor: colors.textMuted },
             pressed && { opacity: 0.7 },
           ]}
           accessibilityLabel="녹음 삭제"
@@ -135,45 +131,10 @@ export function VoiceRecorder({ word, lang }: Props) {
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  recBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderRadius: theme.radius.md,
-    backgroundColor: theme.colors.surface,
-    borderWidth: 2,
-    borderColor: theme.colors.primary,
-  },
-  recBtnActive: {
-    backgroundColor: theme.colors.danger,
-    borderColor: theme.colors.danger,
-  },
-  recIcon: {
-    fontSize: 24,
-  },
-  recLabel: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: theme.colors.text,
-  },
-  deleteBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: theme.colors.surface,
-    borderWidth: 2,
-    borderColor: theme.colors.textMuted,
-  },
-  deleteIcon: {
-    fontSize: 20,
-  },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  recBtn: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 12, borderRadius: radius.md, borderWidth: 2 },
+  recIcon: { fontSize: 24 },
+  recLabel: { fontSize: 16, fontWeight: '700' },
+  deleteBtn: { width: 48, height: 48, borderRadius: 24, alignItems: 'center', justifyContent: 'center', borderWidth: 2 },
+  deleteIcon: { fontSize: 20 },
 });

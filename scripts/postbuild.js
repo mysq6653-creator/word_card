@@ -30,10 +30,26 @@ const tags = `
 
 let html = fs.readFileSync(indexPath, 'utf8');
 
+const swRegister = `
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js');
+      });
+    }
+  </script>
+`;
+
 if (html.includes('rel="manifest"')) {
   console.log('postbuild: manifest tag already present, skipping injection.');
 } else {
   html = html.replace('</head>', `${tags}</head>`);
-  fs.writeFileSync(indexPath, html);
   console.log('postbuild: injected PWA manifest + Apple meta tags into index.html');
 }
+
+if (!html.includes('serviceWorker.register')) {
+  html = html.replace('</body>', `${swRegister}</body>`);
+  console.log('postbuild: injected service worker registration');
+}
+
+fs.writeFileSync(indexPath, html);

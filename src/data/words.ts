@@ -262,3 +262,10 @@ export function shuffleWords(words: Word[]): Word[] {
   }
   return a;
 }
+
+export function getQuizChoices(pool: Word[], correct: Word, count = 3): Word[] {
+  const others = pool.filter((w) => w.id !== correct.id);
+  const shuffled = shuffleWords(others).slice(0, count - 1);
+  const choices = [...shuffled, correct];
+  return shuffleWords(choices);
+}

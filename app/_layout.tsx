@@ -5,27 +5,32 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
-import { theme } from '../src/lib/theme';
+import { useIsDark, useThemeColors } from '../src/lib/theme';
 
 export default function RootLayout() {
+  const colors = useThemeColors();
+  const isDark = useIsDark();
+
   return (
-    <GestureHandlerRootView style={styles.root}>
+    <GestureHandlerRootView style={[styles.root, { backgroundColor: colors.bg }]}>
       <SafeAreaProvider>
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: theme.colors.bg },
+            contentStyle: { backgroundColor: colors.bg },
           }}
         >
           <Stack.Screen name="index" />
           <Stack.Screen name="category/[id]" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="quiz/[id]" />
         </Stack>
-        <StatusBar style="dark" />
+        <StatusBar style={isDark ? 'light' : 'dark'} />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: theme.colors.bg },
+  root: { flex: 1 },
 });

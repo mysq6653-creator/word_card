@@ -17,7 +17,7 @@ const hasWebSpeech =
 let warmedUp = false;
 let unlocked = false;
 
-function webSpeak(text: string, lang: Lang): void {
+function webSpeak(text: string, lang: Lang, rate = 0.9): void {
   if (!hasWebSpeech) return;
   const synth = (globalThis as any).window.speechSynthesis as SpeechSynthesis;
   try {
@@ -29,7 +29,7 @@ function webSpeak(text: string, lang: Lang): void {
     text,
   ) as SpeechSynthesisUtterance;
   utterance.lang = LANG_MAP[lang];
-  utterance.rate = 0.9;
+  utterance.rate = rate;
   utterance.pitch = 1.0;
   synth.speak(utterance);
 }
@@ -72,9 +72,9 @@ export async function warmUpTTS(): Promise<void> {
  * Speak synchronously. Must be called from within a user gesture on
  * iOS WebKit browsers for the very first speak of the session.
  */
-export function speak(text: string, lang: Lang): void {
+export function speak(text: string, lang: Lang, rate = 0.9): void {
   if (isWeb) {
-    webSpeak(text, lang);
+    webSpeak(text, lang, rate);
     return;
   }
   try {
@@ -84,7 +84,7 @@ export function speak(text: string, lang: Lang): void {
   }
   Speech.speak(text, {
     language: LANG_MAP[lang],
-    rate: 0.9,
+    rate,
     pitch: 1.0,
   });
 }
