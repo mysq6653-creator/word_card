@@ -63,7 +63,20 @@ export default function CategoryScreen() {
 
   const width = Dimensions.get('window').width;
 
+  const stopAudio = useCallback(() => {
+    stopSpeaking();
+    stopPlayback().catch(() => {});
+  }, []);
+
+  const pauseAutoplay = useCallback(() => {
+    if (autoplay) {
+      setAutoplay(false);
+      stopAudio();
+    }
+  }, [autoplay, setAutoplay, stopAudio]);
+
   const toggleShuffle = useCallback(() => {
+    pauseAutoplay();
     setShuffled((prev) => {
       const next = !prev;
       const base = isAll ? getAllWords() : category?.words ?? [];
@@ -71,7 +84,7 @@ export default function CategoryScreen() {
       setIndex(0);
       return next;
     });
-  }, [isAll, category]);
+  }, [isAll, category, pauseAutoplay]);
 
   useEffect(() => {
     warmUpTTS();
@@ -103,14 +116,13 @@ export default function CategoryScreen() {
   const playCurrent = useCallback(() => {
     if (!word) return;
     unlockAudio();
-    stopSpeaking();
-    stopPlayback().catch(() => {});
+    stopAudio();
     if (recordingUri) {
       playUri(recordingUri).catch(() => {});
     } else {
       speak(lang === 'ko' ? word.ko : word.en, lang, ttsRate);
     }
-  }, [word, lang, recordingUri, ttsRate]);
+  }, [word, lang, recordingUri, ttsRate, stopAudio]);
 
   const goNext = useCallback(() => {
     if (words.length === 0) return;
@@ -124,29 +136,29 @@ export default function CategoryScreen() {
 
   const handleNext = useCallback(() => {
     if (words.length === 0) return;
+    pauseAutoplay();
     unlockAudio();
-    stopSpeaking();
-    stopPlayback().catch(() => {});
+    stopAudio();
     const next = (index + 1) % words.length;
     const nextWord = words[next];
     setIndex(next);
     if (nextWord) {
       speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang, ttsRate);
     }
-  }, [words, index, lang, ttsRate]);
+  }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
 
   const handlePrev = useCallback(() => {
     if (words.length === 0) return;
+    pauseAutoplay();
     unlockAudio();
-    stopSpeaking();
-    stopPlayback().catch(() => {});
+    stopAudio();
     const prev = (index - 1 + words.length) % words.length;
     const prevWord = words[prev];
     setIndex(prev);
     if (prevWord) {
       speak(lang === 'ko' ? prevWord.ko : prevWord.en, lang, ttsRate);
     }
-  }, [words, index, lang, ttsRate]);
+  }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
 
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
@@ -247,7 +259,11 @@ export default function CategoryScreen() {
         </Pressable>
         <Text style={[styles.categoryLabel, { color: colors.text }]}>{headerLabel}</Text>
         <Pressable
-          onPress={() => { unlockAudio(); toggleLang(); }}
+          onPress={() => {
+            pauseAutoplay();
+            unlockAudio();
+            toggleLang();
+          }}
           style={({ pressed }) => [styles.iconBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
           accessibilityLabel="언어 전환"
         >
@@ -257,10 +273,24 @@ export default function CategoryScreen() {
 
       <GestureDetector gesture={pan}>
         <Animated.View style={[styles.cardArea, animatedStyle]}>
-          <Pressable onPress={playCurrent} style={styles.cardPressable} accessibilityLabel={`${word.ko} 발음 듣기`}>
+          <Pressable
+            onPress={() => {
+              if (autoplay) {
+                pauseAutoplay();
+                return;
+              }
+              playCurrent();
+            }}
+            style={styles.cardPressable}
+            accessibilityLabel={`${word.ko} 발음 듣기`}
+          >
             <Text style={styles.emoji}>{word.emoji}</Text>
             <Text style={[styles.word, { color: colors.text }]}>{lang === 'ko' ? word.ko : word.en}</Text>
-            <Text style={[styles.hint, { color: colors.textMuted }]}>{lang === 'ko' ? '탭하여 듣기' : 'Tap to hear'}</Text>
+            <Text style={[styles.hint, { color: colors.textMuted }]}>
+              {autoplay
+                ? (lang === 'ko' ? '탭하여 멈추기' : 'Tap to stop')
+                : (lang === 'ko' ? '탭하여 듣기' : 'Tap to hear')}
+            </Text>
           </Pressable>
         </Animated.View>
       </GestureDetector>
@@ -288,8 +318,14 @@ export default function CategoryScreen() {
           </Pressable>
           <Pressable
             onPress={() => {
+              unlockAudio();
               const next = !autoplay;
-              if (next) playCurrent();
+              if (next) {
+                stopAudio();
+                playCurrent();
+              } else {
+                stopAudio();
+              }
               setAutoplay(next);
             }}
             style={({ pressed }) => [styles.autoplayBtn, { backgroundColor: autoplay ? colors.primary : colors.surface, borderColor: colors.primary }, pressed && { opacity: 0.7 }]}
@@ -304,7 +340,7 @@ export default function CategoryScreen() {
           </Pressable>
         </View>
         <View style={styles.recorderRow}>
-          <VoiceRecorder word={word} lang={lang} />
+          <VoiceRecorder word={word} lang={lang} onRecordStart={pauseAutoplay} />
         </View>
       </View>
     </View>

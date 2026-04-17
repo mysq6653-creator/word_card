@@ -14,6 +14,7 @@ import { useCardStore } from '../store/useCardStore';
 type Props = {
   word: Word;
   lang: Lang;
+  onRecordStart?: () => void;
 };
 
 type RecState =
@@ -30,7 +31,7 @@ function showMessage(message: string) {
   }
 }
 
-export function VoiceRecorder({ word, lang }: Props) {
+export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
   const [state, setState] = useState<RecState>({ kind: 'idle' });
   const [hasRec, setHasRec] = useState(false);
   const bumpRecordingVersion = useCardStore((s) => s.bumpRecordingVersion);
@@ -65,6 +66,8 @@ export function VoiceRecorder({ word, lang }: Props) {
     }
 
     if (state.kind === 'idle') {
+      onRecordStart?.();
+
       const granted = await requestPermission();
       if (!granted) {
         showMessage(
