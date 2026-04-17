@@ -40,11 +40,33 @@ const swRegister = `
   </script>
 `;
 
+const errorReporter = `
+  <script>
+    window.onerror = function(msg, src, line, col, err) {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:16px;background:red;color:#fff;font:14px monospace;z-index:99999;white-space:pre-wrap;';
+      d.textContent = 'ERROR: ' + msg + '\\nFile: ' + src + '\\nLine: ' + line + ':' + col + '\\n' + (err && err.stack ? err.stack : '');
+      document.body.appendChild(d);
+    };
+    window.addEventListener('unhandledrejection', function(e) {
+      var d = document.createElement('div');
+      d.style.cssText = 'position:fixed;top:0;left:0;right:0;padding:16px;background:red;color:#fff;font:14px monospace;z-index:99999;white-space:pre-wrap;';
+      d.textContent = 'REJECTION: ' + (e.reason && e.reason.stack ? e.reason.stack : e.reason);
+      document.body.appendChild(d);
+    });
+  </script>
+`;
+
 if (html.includes('rel="manifest"')) {
   console.log('postbuild: manifest tag already present, skipping injection.');
 } else {
   html = html.replace('</head>', `${tags}</head>`);
   console.log('postbuild: injected PWA manifest + Apple meta tags into index.html');
+}
+
+if (!html.includes('window.onerror')) {
+  html = html.replace('<div id="root">', `${errorReporter}<div id="root">`);
+  console.log('postbuild: injected error reporter');
 }
 
 if (!html.includes('serviceWorker.register')) {

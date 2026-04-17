@@ -1,10 +1,7 @@
-const CACHE_NAME = 'word-card-v2';
+const CACHE_NAME = 'word-card-v3';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(['/']))
-  );
 });
 
 self.addEventListener('activate', (event) => {
@@ -19,17 +16,27 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   if (request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(request).then((cached) => {
-      const fetched = fetch(request).then((response) => {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-        }
+  // For navigation requests (HTML pages), use network-first and
+  // always serve index.html (SPA with client-side routing).
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch('/').then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put('/', clone));
         return response;
-      }).catch(() => cached);
+      }).catch(() => caches.match('/'))
+    );
+    return;
+  }
 
-      return cached || fetched;
-    })
+  // For static assets (JS, CSS, images): network-first with cache fallback.
+  event.respondWith(
+    fetch(request).then((response) => {
+      if (response && response.status === 200) {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(request))
   );
 });
