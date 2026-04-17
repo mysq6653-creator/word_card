@@ -5,6 +5,8 @@ export type Word = {
   ko: string;
   en: string;
   emoji: string;
+  imageUri?: string;
+  isCustom?: boolean;
 };
 
 export type Category = {
@@ -14,6 +16,7 @@ export type Category = {
   emoji: string;
   color: string;
   words: Word[];
+  isCustom?: boolean;
 };
 
 export const categories: Category[] = [
@@ -252,6 +255,63 @@ export const getCategoryById = (id: string): Category | undefined =>
 
 export function getAllWords(): Word[] {
   return categories.flatMap((c) => c.words);
+}
+
+// --- Helpers that merge built-in + custom data ---
+
+import type { CustomCategory, CustomWord } from '../store/useCustomCardStore';
+
+export function getAllCategories(
+  customCategories: CustomCategory[],
+  customWords: CustomWord[],
+): Category[] {
+  const customCats: Category[] = customCategories.map((cc) => ({
+    ...cc,
+    isCustom: true,
+    words: customWords
+      .filter((w) => w.categoryId === cc.id)
+      .map((w) => ({ ...w, isCustom: true })),
+  }));
+
+  const builtInWithCustomWords = categories.map((cat) => {
+    const extra = customWords
+      .filter((w) => w.categoryId === cat.id)
+      .map((w) => ({ ...w, isCustom: true as const }));
+    if (extra.length === 0) return cat;
+    return { ...cat, words: [...cat.words, ...extra] };
+  });
+
+  return [...builtInWithCustomWords, ...customCats];
+}
+
+export function getCategoryByIdMerged(
+  id: string,
+  customCategories: CustomCategory[],
+  customWords: CustomWord[],
+): Category | undefined {
+  const builtin = categories.find((c) => c.id === id);
+  if (builtin) {
+    const extra = customWords
+      .filter((w) => w.categoryId === id)
+      .map((w) => ({ ...w, isCustom: true as const }));
+    if (extra.length === 0) return builtin;
+    return { ...builtin, words: [...builtin.words, ...extra] };
+  }
+  const custom = customCategories.find((c) => c.id === id);
+  if (!custom) return undefined;
+  return {
+    ...custom,
+    isCustom: true,
+    words: customWords
+      .filter((w) => w.categoryId === id)
+      .map((w) => ({ ...w, isCustom: true })),
+  };
+}
+
+export function getAllWordsMerged(customWords: CustomWord[]): Word[] {
+  const builtin = categories.flatMap((c) => c.words);
+  const custom = customWords.map((w) => ({ ...w, isCustom: true as const }));
+  return [...builtin, ...custom];
 }
 
 export function shuffleWords(words: Word[]): Word[] {

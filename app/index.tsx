@@ -1,5 +1,7 @@
 import { useRouter } from 'expo-router';
 import {
+  Alert,
+  Platform,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -11,6 +13,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { categories } from '../src/data/words';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
+import { useCustomCardStore } from '../src/store/useCustomCardStore';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -19,6 +22,31 @@ export default function HomeScreen() {
   const toggleLang = useCardStore((s) => s.toggleLang);
   const colors = useThemeColors();
   const isDark = useIsDark();
+
+  const customCategories = useCustomCardStore((s) => s.customCategories);
+  const removeCategory = useCustomCardStore((s) => s.removeCategory);
+  const bump = useCustomCardStore((s) => s.bump);
+
+  const handleDeleteCategory = (catId: string, catName: string) => {
+    const doDelete = () => {
+      removeCategory(catId);
+      bump();
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm(lang === 'ko' ? `"${catName}" 카테고리와 모든 카드를 삭제할까요?` : `Delete "${catName}" and all its cards?`)) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        lang === 'ko' ? '카테고리 삭제' : 'Delete Category',
+        lang === 'ko' ? `"${catName}" 카테고리와 모든 카드를 삭제할까요?` : `Delete "${catName}" and all its cards?`,
+        [
+          { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
+          { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: doDelete },
+        ],
+      );
+    }
+  };
 
   return (
     <ScrollView
@@ -109,6 +137,7 @@ export default function HomeScreen() {
         </Pressable>
       </View>
 
+      {/* Built-in categories */}
       <View style={styles.grid}>
         {categories.map((cat) => (
           <Pressable
@@ -127,10 +156,49 @@ export default function HomeScreen() {
             </Text>
           </Pressable>
         ))}
+
+        {/* Custom categories */}
+        {customCategories.map((cat) => (
+          <Pressable
+            key={cat.id}
+            onPress={() => router.push(`/category/${cat.id}`)}
+            onLongPress={() => handleDeleteCategory(cat.id, lang === 'ko' ? cat.ko : cat.en)}
+            style={({ pressed }) => [
+              styles.tile,
+              { backgroundColor: dimCategoryColor(cat.color, isDark) },
+              pressed && { transform: [{ scale: 0.97 }] },
+            ]}
+            accessibilityLabel={`${cat.ko} 카테고리`}
+          >
+            <Text style={styles.tileEmoji}>{cat.emoji}</Text>
+            <Text style={[styles.tileLabel, { color: colors.text }]}>
+              {lang === 'ko' ? cat.ko : cat.en}
+            </Text>
+            <View style={styles.customBadge}>
+              <Text style={styles.customBadgeText}>MY</Text>
+            </View>
+          </Pressable>
+        ))}
+
+        {/* Add card tile */}
+        <Pressable
+          onPress={() => router.push('/add-card')}
+          style={({ pressed }) => [
+            styles.tile,
+            { backgroundColor: isDark ? '#2D2D44' : '#F0F0F0', borderWidth: 2, borderColor: colors.primary, borderStyle: 'dashed' },
+            pressed && { transform: [{ scale: 0.97 }] },
+          ]}
+          accessibilityLabel="카드 만들기"
+        >
+          <Text style={styles.tileEmoji}>✏️</Text>
+          <Text style={[styles.tileLabel, { color: colors.primary }]}>
+            {lang === 'ko' ? '만들기' : 'Create'}
+          </Text>
+        </Pressable>
       </View>
 
       <Text style={[styles.footer, { color: colors.textMuted }]}>
-        👶 9개월 아기를 위한 낱말 카드
+        👶 {lang === 'ko' ? '우리 아이를 위한 낱말 카드' : 'Word cards for my baby'}
       </Text>
     </ScrollView>
   );
@@ -219,6 +287,20 @@ const styles = StyleSheet.create({
     fontSize: 26,
     fontWeight: '800',
     marginTop: 8,
+  },
+  customBadge: {
+    position: 'absolute',
+    top: 12,
+    right: 12,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  customBadgeText: {
+    fontSize: 11,
+    fontWeight: '800',
+    color: '#fff',
   },
   footer: {
     textAlign: 'center',

@@ -1,7 +1,10 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
+  Alert,
   Dimensions,
+  Image,
   Platform,
   Pressable,
   StyleSheet,
@@ -21,14 +24,20 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 
-import { getAllWords, getCategoryById, shuffleWords } from '../../src/data/words';
+import {
+  getAllWordsMerged,
+  getCategoryByIdMerged,
+  shuffleWords,
+} from '../../src/data/words';
 import type { Word } from '../../src/data/words';
 import { loadRecordingUri } from '../../src/lib/audioStorage';
+import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
 import { speak, stopSpeaking, unlockAudio, warmUpTTS } from '../../src/lib/tts';
 import { VoiceRecorder } from '../../src/components/VoiceRecorder';
 import { useCardStore } from '../../src/store/useCardStore';
+import { useCustomCardStore } from '../../src/store/useCustomCardStore';
 
 const SWIPE_THRESHOLD = 80;
 
@@ -40,13 +49,31 @@ export default function CategoryScreen() {
   const isDark = useIsDark();
 
   const isAll = id === '_all';
-  const category = isAll ? null : getCategoryById(id ?? '');
+  const customCategories = useCustomCardStore((s) => s.customCategories);
+  const customWords = useCustomCardStore((s) => s.customWords);
+  const imageOverrides = useCustomCardStore((s) => s.imageOverrides);
+  const addImageOverride = useCustomCardStore((s) => s.addImageOverride);
+  const removeImageOverride = useCustomCardStore((s) => s.removeImageOverride);
+  const removeWord = useCustomCardStore((s) => s.removeWord);
+  const customVersion = useCustomCardStore((s) => s.version);
+  const bump = useCustomCardStore((s) => s.bump);
+
+  const category = useMemo(
+    () => (isAll ? null : getCategoryByIdMerged(id ?? '', customCategories, customWords)),
+    [isAll, id, customCategories, customWords],
+  );
 
   const [words, setWords] = useState<Word[]>(() => {
-    if (isAll) return getAllWords();
+    if (isAll) return getAllWordsMerged(customWords);
     return category?.words ?? [];
   });
   const [shuffled, setShuffled] = useState(false);
+
+  useEffect(() => {
+    if (shuffled) return;
+    if (isAll) setWords(getAllWordsMerged(customWords));
+    else if (category) setWords(category.words);
+  }, [customVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const lang = useCardStore((s) => s.lang);
   const toggleLang = useCardStore((s) => s.toggleLang);
@@ -58,6 +85,7 @@ export default function CategoryScreen() {
 
   const [index, setIndex] = useState(0);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
+  const [cardImageUri, setCardImageUri] = useState<string | null>(null);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
@@ -79,12 +107,12 @@ export default function CategoryScreen() {
     pauseAutoplay();
     setShuffled((prev) => {
       const next = !prev;
-      const base = isAll ? getAllWords() : category?.words ?? [];
+      const base = isAll ? getAllWordsMerged(customWords) : category?.words ?? [];
       setWords(next ? shuffleWords(base) : base);
       setIndex(0);
       return next;
     });
-  }, [isAll, category, pauseAutoplay]);
+  }, [isAll, category, customWords, pauseAutoplay]);
 
   useEffect(() => {
     warmUpTTS();
@@ -93,8 +121,11 @@ export default function CategoryScreen() {
   useEffect(() => {
     setIndex(0);
     setShuffled(false);
-    if (isAll) setWords(getAllWords());
-    else if (category) setWords(category.words);
+    if (isAll) setWords(getAllWordsMerged(customWords));
+    else {
+      const cat = getCategoryByIdMerged(id ?? '', customCategories, customWords);
+      if (cat) setWords(cat.words);
+    }
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const word = words[index];
@@ -112,6 +143,27 @@ export default function CategoryScreen() {
       cancelled = true;
     };
   }, [word?.id, lang, recordingVersion]);
+
+  // Load card image (custom card image or image override)
+  useEffect(() => {
+    if (!word) {
+      setCardImageUri(null);
+      return;
+    }
+    let cancelled = false;
+    const hasOverride = imageOverrides.includes(word.id);
+    const isCustomWithImage = word.isCustom && customWords.find((w) => w.id === word.id)?.hasImage;
+    if (hasOverride || isCustomWithImage) {
+      loadImageUri(word.id).then((uri) => {
+        if (!cancelled) setCardImageUri(uri);
+      });
+    } else {
+      setCardImageUri(null);
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, [word?.id, imageOverrides, customWords, customVersion]);
 
   const playCurrent = useCallback(() => {
     if (!word) return;
@@ -159,6 +211,61 @@ export default function CategoryScreen() {
       speak(lang === 'ko' ? prevWord.ko : prevWord.en, lang, ttsRate);
     }
   }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
+
+  const handleReplaceImage = useCallback(async () => {
+    if (!word) return;
+    pauseAutoplay();
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ['images'],
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.7,
+    });
+    if (!result.canceled && result.assets[0]) {
+      await saveImage(word.id, result.assets[0].uri);
+      if (!word.isCustom) {
+        addImageOverride(word.id);
+      }
+      bump();
+    }
+  }, [word, pauseAutoplay, addImageOverride, bump]);
+
+  const handleRemoveImage = useCallback(async () => {
+    if (!word) return;
+    await deleteImage(word.id);
+    if (!word.isCustom) {
+      removeImageOverride(word.id);
+    }
+    bump();
+  }, [word, removeImageOverride, bump]);
+
+  const handleDeleteCard = useCallback(() => {
+    if (!word?.isCustom) return;
+    const doDelete = () => {
+      removeWord(word.id);
+      deleteImage(word.id).catch(() => {});
+      bump();
+      if (words.length <= 1) {
+        router.back();
+      } else {
+        setIndex((i) => Math.min(i, words.length - 2));
+      }
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm(lang === 'ko' ? '이 카드를 삭제할까요?' : 'Delete this card?')) {
+        doDelete();
+      }
+    } else {
+      Alert.alert(
+        lang === 'ko' ? '카드 삭제' : 'Delete Card',
+        lang === 'ko' ? '이 카드를 삭제할까요?' : 'Delete this card?',
+        [
+          { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
+          { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: doDelete },
+        ],
+      );
+    }
+  }, [word, words.length, lang, removeWord, bump, router]);
 
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
   useEffect(() => {
@@ -235,9 +342,11 @@ export default function CategoryScreen() {
   if ((!isAll && !category) || !word) {
     return (
       <View style={[styles.center, { backgroundColor: colors.bg }]}>
-        <Text style={[styles.errorText, { color: colors.text }]}>카테고리를 찾을 수 없어요</Text>
+        <Text style={[styles.errorText, { color: colors.text }]}>
+          {lang === 'ko' ? '카테고리를 찾을 수 없어요' : 'Category not found'}
+        </Text>
         <Pressable onPress={() => router.back()} style={[styles.backBtnError, { backgroundColor: colors.primary }]}>
-          <Text style={styles.backBtnErrorText}>돌아가기</Text>
+          <Text style={styles.backBtnErrorText}>{lang === 'ko' ? '돌아가기' : 'Back'}</Text>
         </Pressable>
       </View>
     );
@@ -258,17 +367,26 @@ export default function CategoryScreen() {
           <Text style={[styles.iconBtnText, { color: colors.text }]}>←</Text>
         </Pressable>
         <Text style={[styles.categoryLabel, { color: colors.text }]}>{headerLabel}</Text>
-        <Pressable
-          onPress={() => {
-            pauseAutoplay();
-            unlockAudio();
-            toggleLang();
-          }}
-          style={({ pressed }) => [styles.iconBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
-          accessibilityLabel="언어 전환"
-        >
-          <Text style={styles.langBtnText}>{lang === 'ko' ? '🇰🇷' : '🇺🇸'}</Text>
-        </Pressable>
+        <View style={styles.topRight}>
+          <Pressable
+            onPress={handleReplaceImage}
+            style={({ pressed }) => [styles.smallBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
+            accessibilityLabel={lang === 'ko' ? '사진 변경' : 'Change photo'}
+          >
+            <Text style={styles.smallBtnText}>📷</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => {
+              pauseAutoplay();
+              unlockAudio();
+              toggleLang();
+            }}
+            style={({ pressed }) => [styles.iconBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
+            accessibilityLabel="언어 전환"
+          >
+            <Text style={styles.langBtnText}>{lang === 'ko' ? '🇰🇷' : '🇺🇸'}</Text>
+          </Pressable>
+        </View>
       </View>
 
       <GestureDetector gesture={pan}>
@@ -284,7 +402,11 @@ export default function CategoryScreen() {
             style={styles.cardPressable}
             accessibilityLabel={`${word.ko} 발음 듣기`}
           >
-            <Text style={styles.emoji}>{word.emoji}</Text>
+            {cardImageUri ? (
+              <Image source={{ uri: cardImageUri }} style={styles.cardImage} />
+            ) : (
+              <Text style={styles.emoji}>{word.emoji}</Text>
+            )}
             <Text style={[styles.word, { color: colors.text }]}>{lang === 'ko' ? word.ko : word.en}</Text>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               {autoplay
@@ -296,19 +418,40 @@ export default function CategoryScreen() {
       </GestureDetector>
 
       <View style={styles.pager}>
-        <Pressable
-          onPress={toggleShuffle}
-          style={({ pressed }) => [styles.shuffleBtn, { backgroundColor: shuffled ? colors.primary : pillBg }, pressed && { opacity: 0.7 }]}
-        >
-          <Text style={[styles.shuffleText, { color: colors.text }]}>
-            🔀 {shuffled ? (lang === 'ko' ? '순서대로' : 'Order') : (lang === 'ko' ? '섞기' : 'Shuffle')}
+        {/* Image actions */}
+        {cardImageUri && (
+          <Pressable
+            onPress={handleRemoveImage}
+            style={({ pressed }) => [styles.removeImageBtn, { backgroundColor: pillBg }, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={[styles.removeImageText, { color: colors.textMuted }]}>
+              🔄 {lang === 'ko' ? '이모지로 되돌리기' : 'Restore emoji'}
+            </Text>
+          </Pressable>
+        )}
+        <View style={styles.pagerRow}>
+          <Pressable
+            onPress={toggleShuffle}
+            style={({ pressed }) => [styles.shuffleBtn, { backgroundColor: shuffled ? colors.primary : pillBg }, pressed && { opacity: 0.7 }]}
+          >
+            <Text style={[styles.shuffleText, { color: colors.text }]}>
+              🔀 {shuffled ? (lang === 'ko' ? '순서대로' : 'Order') : (lang === 'ko' ? '섞기' : 'Shuffle')}
+            </Text>
+          </Pressable>
+          <Text style={[styles.pagerText, { backgroundColor: pillBg }]}>
+            <Text style={[styles.pagerCurrent, { color: colors.text }]}>{index + 1}</Text>
+            <Text style={[styles.pagerDivider, { color: colors.textMuted }]}> / </Text>
+            <Text style={[styles.pagerTotal, { color: colors.textMuted }]}>{words.length}</Text>
           </Text>
-        </Pressable>
-        <Text style={[styles.pagerText, { backgroundColor: pillBg }]}>
-          <Text style={[styles.pagerCurrent, { color: colors.text }]}>{index + 1}</Text>
-          <Text style={[styles.pagerDivider, { color: colors.textMuted }]}> / </Text>
-          <Text style={[styles.pagerTotal, { color: colors.textMuted }]}>{words.length}</Text>
-        </Text>
+          {word.isCustom && (
+            <Pressable
+              onPress={handleDeleteCard}
+              style={({ pressed }) => [styles.shuffleBtn, { backgroundColor: pillBg }, pressed && { opacity: 0.7 }]}
+            >
+              <Text style={[styles.shuffleText, { color: colors.danger }]}>🗑️</Text>
+            </Pressable>
+          )}
+        </View>
       </View>
 
       <View style={[styles.bottomBar, { paddingBottom: insets.bottom + 16, backgroundColor: barBg }]}>
@@ -350,16 +493,23 @@ export default function CategoryScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1 },
   topBar: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingBottom: 8 },
+  topRight: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   iconBtn: { width: 52, height: 52, borderRadius: 26, alignItems: 'center', justifyContent: 'center' },
   iconBtnText: { fontSize: 28, fontWeight: '800' },
+  smallBtn: { width: 44, height: 44, borderRadius: 22, alignItems: 'center', justifyContent: 'center' },
+  smallBtnText: { fontSize: 20 },
   langBtnText: { fontSize: 24 },
-  categoryLabel: { fontSize: 22, fontWeight: '800' },
+  categoryLabel: { fontSize: 22, fontWeight: '800', flex: 1, textAlign: 'center' },
   cardArea: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   cardPressable: { alignItems: 'center', justifyContent: 'center', padding: 24 },
+  cardImage: { width: 220, height: 220, borderRadius: 24 },
   emoji: { fontSize: 220, textAlign: 'center', lineHeight: 260 },
   word: { fontSize: 72, fontWeight: '900', textAlign: 'center', marginTop: 16 },
   hint: { fontSize: 16, marginTop: 12 },
   pager: { alignItems: 'center', justifyContent: 'center', paddingVertical: 8, gap: 8 },
+  pagerRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  removeImageBtn: { paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999 },
+  removeImageText: { fontSize: 13, fontWeight: '600' },
   shuffleBtn: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 999 },
   shuffleText: { fontSize: 15, fontWeight: '700' },
   pagerText: { paddingHorizontal: 16, paddingVertical: 6, borderRadius: 999, overflow: 'hidden' },
