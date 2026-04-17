@@ -1,4 +1,4 @@
-const CACHE_NAME = 'word-card-v1';
+const CACHE_NAME = 'word-card-v2';
 
 self.addEventListener('install', (event) => {
   self.skipWaiting();
