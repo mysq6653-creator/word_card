@@ -295,6 +295,20 @@ export default function ManageScreen() {
               );
             });
           })()}
+
+          {/* Add card button */}
+          <Pressable
+            onPress={() => router.push('/add-card')}
+            style={({ pressed }) => [
+              styles.addBtnWide,
+              { backgroundColor: colors.primary },
+              pressed && { opacity: 0.7 },
+            ]}
+          >
+            <Text style={styles.addBtnText}>
+              ➕ {lang === 'ko' ? '카드 만들기' : 'Create Card'}
+            </Text>
+          </Pressable>
         </View>
       )}
 
@@ -388,6 +402,7 @@ const styles = StyleSheet.create({
   emptyBox: { borderRadius: radius.md, padding: 24, alignItems: 'center', gap: 16 },
   emptyText: { fontSize: 16, fontWeight: '600' },
   addBtn: { paddingHorizontal: 20, paddingVertical: 12, borderRadius: radius.md },
+  addBtnWide: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center', marginTop: 8 },
   addBtnText: { fontSize: 16, fontWeight: '700', color: '#fff' },
   categoryList: { gap: 12 },
   catSection: { borderRadius: radius.md, padding: 16, gap: 4 },
