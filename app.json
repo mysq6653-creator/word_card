@@ -6,17 +6,34 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "wordcard",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "wordcard",
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.wordcard.app",
+      "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
-        "NSMicrophoneUsageDescription": "부모님의 목소리로 낱말 발음을 녹음하기 위해 마이크 접근이 필요해요."
+        "NSMicrophoneUsageDescription": "부모님의 목소리로 낱말 발음을 녹음하기 위해 마이크 접근이 필요해요.",
+        "NSPhotoLibraryUsageDescription": "나만의 낱말 카드에 사진을 추가하기 위해 사진 접근이 필요해요.",
+        "ITSAppUsesNonExemptEncryption": false,
+        "CFBundleDevelopmentRegion": "ko"
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": []
       }
     },
     "android": {
       "package": "com.wordcard.app",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#FFF9F4",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
@@ -25,7 +42,10 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "permissions": ["RECORD_AUDIO"]
+      "permissions": [
+        "RECORD_AUDIO",
+        "com.android.vending.BILLING"
+      ]
     },
     "web": {
       "output": "single",
@@ -37,7 +57,7 @@
       "display": "standalone",
       "orientation": "portrait",
       "lang": "ko-KR",
-      "description": "9개월 아기를 위한 낱말 카드 앱"
+      "description": "아이를 위한 한국어/영어 낱말 카드 — 138개 카드, TTS 발음, 부모 녹음, 퀴즈"
     },
     "plugins": [
       "expo-router",
@@ -49,11 +69,20 @@
           "resizeMode": "contain",
           "backgroundColor": "#FFF9F4"
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "나만의 낱말 카드에 사진을 추가하기 위해 사진 접근이 필요해요."
+        }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "locales": {
+      "ko": "./assets/locales/ko.json"
     }
   }
 }

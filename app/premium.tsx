@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { purchaseProduct, restorePurchases, PRODUCT_IDS } from '../src/lib/iap';
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import { usePremiumStore } from '../src/store/usePremiumStore';
@@ -28,9 +30,44 @@ export default function PremiumScreen() {
   const colors = useThemeColors();
   const lang = useCardStore((s) => s.lang);
   const isPremium = usePremiumStore((s) => s.isPremium);
-  const setPremium = usePremiumStore((s) => s.setPremium);
+  const [purchasing, setPurchasing] = useState(false);
 
   const benefits = lang === 'ko' ? BENEFITS_KO : BENEFITS_EN;
+
+  const handlePurchase = async (productId: string) => {
+    if (purchasing) return;
+    setPurchasing(true);
+    try {
+      const ok = await purchaseProduct(productId);
+      if (ok) {
+        if (Platform.OS === 'web') {
+          window.alert(lang === 'ko' ? '프리미엄이 활성화되었습니다!' : 'Premium activated!');
+        } else {
+          Alert.alert(lang === 'ko' ? '감사합니다!' : 'Thank you!', lang === 'ko' ? '프리미엄이 활성화되었습니다.' : 'Premium has been activated.');
+        }
+      }
+    } finally {
+      setPurchasing(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (purchasing) return;
+    setPurchasing(true);
+    try {
+      const restored = await restorePurchases();
+      const msg = restored
+        ? (lang === 'ko' ? '구매가 복원되었습니다!' : 'Purchase restored!')
+        : (lang === 'ko' ? '복원할 구매가 없습니다.' : 'No purchases to restore.');
+      if (Platform.OS === 'web') {
+        window.alert(msg);
+      } else {
+        Alert.alert(msg);
+      }
+    } finally {
+      setPurchasing(false);
+    }
+  };
 
   return (
     <ScrollView
@@ -82,13 +119,11 @@ export default function PremiumScreen() {
           </Text>
         </View>
       ) : (
-        <View style={styles.purchaseArea}>
+        <View style={[styles.purchaseArea, purchasing && { opacity: 0.5 }]}>
           {/* Yearly subscription */}
           <Pressable
-            onPress={() => {
-              // TODO: IAP 연동
-              setPremium(true);
-            }}
+            onPress={() => handlePurchase(PRODUCT_IDS.YEARLY)}
+            disabled={purchasing}
             style={({ pressed }) => [
               styles.purchaseBtn,
               { backgroundColor: colors.primary },
@@ -108,10 +143,8 @@ export default function PremiumScreen() {
 
           {/* Monthly subscription */}
           <Pressable
-            onPress={() => {
-              // TODO: IAP 연동
-              setPremium(true);
-            }}
+            onPress={() => handlePurchase(PRODUCT_IDS.MONTHLY)}
+            disabled={purchasing}
             style={({ pressed }) => [
               styles.purchaseBtn,
               { backgroundColor: colors.surface },
@@ -128,10 +161,8 @@ export default function PremiumScreen() {
 
           {/* Permanent purchase */}
           <Pressable
-            onPress={() => {
-              // TODO: IAP 연동
-              setPremium(true);
-            }}
+            onPress={() => handlePurchase(PRODUCT_IDS.LIFETIME)}
+            disabled={purchasing}
             style={({ pressed }) => [
               styles.purchaseBtn,
               { backgroundColor: colors.surface },
@@ -150,9 +181,8 @@ export default function PremiumScreen() {
 
       {/* Restore */}
       <Pressable
-        onPress={() => {
-          // TODO: IAP 복원
-        }}
+        onPress={handleRestore}
+        disabled={purchasing}
         style={({ pressed }) => [
           styles.restoreBtn,
           pressed && { opacity: 0.6 },

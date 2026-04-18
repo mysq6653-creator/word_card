@@ -1,4 +1,5 @@
 import { useRouter } from 'expo-router';
+import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -80,6 +81,13 @@ export default function SettingsScreen() {
   const ttsRate = useCardStore((s) => s.ttsRate);
   const setTtsRate = useCardStore((s) => s.setTtsRate);
   const isPremium = usePremiumStore((s) => s.isPremium);
+  const setPremium = usePremiumStore((s) => s.setPremium);
+  const adCardCredits = usePremiumStore((s) => s.adCardCredits);
+  const adRecordCredits = usePremiumStore((s) => s.adRecordCredits);
+  const quizCountToday = usePremiumStore((s) => s.quizCountToday);
+
+  const [debugTaps, setDebugTaps] = useState(0);
+  const showDebug = debugTaps >= 5;
 
   return (
     <ScrollView
@@ -213,9 +221,49 @@ export default function SettingsScreen() {
         </Text>
       </Pressable>
 
-      <Text style={[styles.versionText, { color: colors.textMuted }]}>
-        낱말 카드 v1.0.0
-      </Text>
+      <Pressable onPress={() => setDebugTaps((t) => t + 1)}>
+        <Text style={[styles.versionText, { color: colors.textMuted }]}>
+          낱말 카드 v1.0.0
+        </Text>
+      </Pressable>
+
+      {showDebug && (
+        <View style={[styles.debugBox, { backgroundColor: colors.surface }]}>
+          <Text style={[styles.debugTitle, { color: colors.text }]}>
+            🛠 {lang === 'ko' ? '테스트 모드' : 'Test Mode'}
+          </Text>
+
+          <View style={styles.debugRow}>
+            <Text style={[styles.debugLabel, { color: colors.text }]}>
+              {lang === 'ko' ? '프리미엄' : 'Premium'}: {isPremium ? 'ON' : 'OFF'}
+            </Text>
+            <Pressable
+              onPress={() => setPremium(!isPremium)}
+              style={[styles.debugToggle, { backgroundColor: isPremium ? colors.danger : colors.primary }]}
+            >
+              <Text style={styles.debugToggleText}>
+                {isPremium ? (lang === 'ko' ? '해제' : 'OFF') : (lang === 'ko' ? '활성화' : 'ON')}
+              </Text>
+            </Pressable>
+          </View>
+
+          <View style={styles.debugRow}>
+            <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
+              {lang === 'ko' ? '카드 광고 크레딧' : 'Card ad credits'}: {adCardCredits}
+            </Text>
+          </View>
+          <View style={styles.debugRow}>
+            <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
+              {lang === 'ko' ? '녹음 광고 크레딧' : 'Record ad credits'}: {adRecordCredits}
+            </Text>
+          </View>
+          <View style={styles.debugRow}>
+            <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
+              {lang === 'ko' ? '오늘 퀴즈 횟수' : 'Quiz today'}: {quizCountToday}
+            </Text>
+          </View>
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -235,4 +283,10 @@ const styles = StyleSheet.create({
   linkBtn: { paddingVertical: 14, alignItems: 'center' },
   linkText: { fontSize: 17, fontWeight: '600' },
   versionText: { textAlign: 'center', marginTop: 40, fontSize: 13 },
+  debugBox: { borderRadius: 16, padding: 16, marginTop: 16, gap: 12 },
+  debugTitle: { fontSize: 16, fontWeight: '800' },
+  debugRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  debugLabel: { fontSize: 15, fontWeight: '600' },
+  debugToggle: { paddingHorizontal: 16, paddingVertical: 8, borderRadius: 999 },
+  debugToggleText: { fontSize: 14, fontWeight: '700', color: '#fff' },
 });

@@ -1,0 +1,6 @@
+{
+  "CFBundleDisplayName": "낱말 카드",
+  "CFBundleName": "낱말 카드",
+  "NSMicrophoneUsageDescription": "부모님의 목소리로 낱말 발음을 녹음하기 위해 마이크 접근이 필요해요.",
+  "NSPhotoLibraryUsageDescription": "나만의 낱말 카드에 사진을 추가하기 위해 사진 접근이 필요해요."
+}
