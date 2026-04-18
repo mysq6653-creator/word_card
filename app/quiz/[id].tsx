@@ -16,9 +16,11 @@ import {
   shuffleWords,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
+import { QuizLimitBlock } from '../../src/components/LimitGate';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
 import { speak, unlockAudio } from '../../src/lib/tts';
 import { useCardStore } from '../../src/store/useCardStore';
+import { usePremiumStore } from '../../src/store/usePremiumStore';
 
 const TOTAL_QUESTIONS = 10;
 
@@ -38,6 +40,14 @@ export default function QuizScreen() {
 
   const lang = useCardStore((s) => s.lang);
   const ttsRate = useCardStore((s) => s.ttsRate);
+
+  const canPlayQuiz = usePremiumStore((s) => s.canPlayQuiz);
+  const useQuizAction = usePremiumStore((s) => s.useQuiz);
+  const [quizAllowed] = useState(() => {
+    const allowed = canPlayQuiz();
+    if (allowed) useQuizAction();
+    return allowed;
+  });
 
   const [queue, setQueue] = useState<Word[]>(() =>
     shuffleWords(pool).slice(0, TOTAL_QUESTIONS),
@@ -112,6 +122,10 @@ export default function QuizScreen() {
   const headerLabel = isAll
     ? lang === 'ko' ? '전체 퀴즈' : 'All Quiz'
     : lang === 'ko' ? `${category?.ko} 퀴즈` : `${category?.en} Quiz`;
+
+  if (!quizAllowed) {
+    return <QuizLimitBlock onUpgrade={() => router.push('/premium')} />;
+  }
 
   if (pool.length < 3) {
     return (

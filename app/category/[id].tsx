@@ -179,13 +179,21 @@ export default function CategoryScreen() {
 
   const goNext = useCallback(() => {
     if (words.length === 0) return;
-    setIndex((i) => (i + 1) % words.length);
-  }, [words]);
+    stopAudio();
+    const next = (index + 1) % words.length;
+    setIndex(next);
+    const w = words[next];
+    if (w) speak(lang === 'ko' ? w.ko : w.en, lang, ttsRate);
+  }, [words, index, lang, ttsRate, stopAudio]);
 
   const goPrev = useCallback(() => {
     if (words.length === 0) return;
-    setIndex((i) => (i - 1 + words.length) % words.length);
-  }, [words]);
+    stopAudio();
+    const prev = (index - 1 + words.length) % words.length;
+    setIndex(prev);
+    const w = words[prev];
+    if (w) speak(lang === 'ko' ? w.ko : w.en, lang, ttsRate);
+  }, [words, index, lang, ttsRate, stopAudio]);
 
   const handleNext = useCallback(() => {
     if (words.length === 0) return;

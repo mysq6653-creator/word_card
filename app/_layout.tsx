@@ -28,6 +28,7 @@ export default function RootLayout() {
           <Stack.Screen name="manage" />
           <Stack.Screen name="quiz/[id]" />
           <Stack.Screen name="listen/[id]" />
+          <Stack.Screen name="premium" />
         </Stack>
         <StatusBar style={isDark ? 'light' : 'dark'} />
       </SafeAreaProvider>

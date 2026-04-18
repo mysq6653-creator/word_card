@@ -63,6 +63,14 @@ export async function hasRecording(
   return (await loadRecordingUri(wordId, lang)) !== null;
 }
 
+export async function getRecordingCount(): Promise<number> {
+  const dir = `${FileSystem.documentDirectory}recordings`;
+  const info = await FileSystem.getInfoAsync(dir);
+  if (!info.exists) return 0;
+  const files = await FileSystem.readDirectoryAsync(dir);
+  return files.length;
+}
+
 export async function deleteAllRecordings(): Promise<void> {
   const dir = `${FileSystem.documentDirectory}recordings`;
   try {

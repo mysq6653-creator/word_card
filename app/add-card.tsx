@@ -22,6 +22,9 @@ import {
   useCustomCardStore,
   type CustomCategory,
 } from '../src/store/useCustomCardStore';
+import { usePremiumStore } from '../src/store/usePremiumStore';
+import { LimitBanner } from '../src/components/LimitGate';
+import { AdRewardModal } from '../src/components/AdRewardModal';
 
 const CATEGORY_COLORS = [
   '#FFD6A5', '#FFADAD', '#FDCBB6', '#BDE0FE', '#CAFFBF',
@@ -42,9 +45,15 @@ export default function AddCardScreen() {
   const { categoryId: preselectedCatId } = useLocalSearchParams<{ categoryId?: string }>();
 
   const customCategories = useCustomCardStore((s) => s.customCategories);
+  const customWords = useCustomCardStore((s) => s.customWords);
   const addWord = useCustomCardStore((s) => s.addWord);
   const addCategory = useCustomCardStore((s) => s.addCategory);
   const bump = useCustomCardStore((s) => s.bump);
+
+  const getCardLimit = usePremiumStore((s) => s.getCardLimit);
+  const addAdCardCredit = usePremiumStore((s) => s.addAdCardCredit);
+  const cardLimit = getCardLimit(customWords.length);
+  const [showAdModal, setShowAdModal] = useState(false);
 
   const [imageUri, setImageUri] = useState<string | null>(null);
   const [ko, setKo] = useState('');
@@ -76,7 +85,7 @@ export default function AddCardScreen() {
     }
   }, []);
 
-  const canSave = ko.trim() && en.trim() && (selectedCatId || (isNewCategory && newCatKo.trim() && newCatEn.trim()));
+  const canSave = ko.trim() && en.trim() && (selectedCatId || (isNewCategory && newCatKo.trim() && newCatEn.trim())) && !cardLimit.needAd;
 
   const handleSave = useCallback(async () => {
     if (!canSave || saving) return;
@@ -314,6 +323,17 @@ export default function AddCardScreen() {
         </View>
       )}
 
+      {/* Card limit banner */}
+      {cardLimit.needAd && (
+        <LimitBanner
+          used={cardLimit.used}
+          limit={cardLimit.limit}
+          featureLabel={lang === 'ko' ? '카드 만들기' : 'Card Creation'}
+          onWatchAd={() => setShowAdModal(true)}
+          onUpgrade={() => router.push('/premium')}
+        />
+      )}
+
       {/* Save button */}
       <Pressable
         onPress={handleSave}
@@ -330,6 +350,12 @@ export default function AddCardScreen() {
             : (lang === 'ko' ? '카드 저장' : 'Save Card')}
         </Text>
       </Pressable>
+
+      <AdRewardModal
+        visible={showAdModal}
+        onReward={addAdCardCredit}
+        onClose={() => setShowAdModal(false)}
+      />
     </ScrollView>
   );
 }

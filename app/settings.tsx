@@ -4,6 +4,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore, type ColorMode } from '../src/store/useCardStore';
+import { usePremiumStore } from '../src/store/usePremiumStore';
 import type { Lang } from '../src/data/words';
 
 type SegmentOption<T> = { label: string; value: T };
@@ -78,6 +79,7 @@ export default function SettingsScreen() {
   const setAutoplaySpeed = useCardStore((s) => s.setAutoplaySpeed);
   const ttsRate = useCardStore((s) => s.ttsRate);
   const setTtsRate = useCardStore((s) => s.setTtsRate);
+  const isPremium = usePremiumStore((s) => s.isPremium);
 
   return (
     <ScrollView
@@ -163,6 +165,23 @@ export default function SettingsScreen() {
         colors={colors}
       />
 
+      {/* Premium */}
+      <Pressable
+        onPress={() => router.push('/premium')}
+        style={({ pressed }) => [
+          styles.premiumBtn,
+          { backgroundColor: isPremium ? '#d4edda' : '#FFF3CD' },
+          pressed && { opacity: 0.7 },
+        ]}
+      >
+        <Text style={styles.premiumBtnText}>
+          {isPremium
+            ? (lang === 'ko' ? '✅ 프리미엄 활성화됨' : '✅ Premium Active')
+            : (lang === 'ko' ? '⭐ 프리미엄으로 업그레이드' : '⭐ Upgrade to Premium')}
+        </Text>
+        <Text style={[styles.manageArrow, { color: '#666' }]}>→</Text>
+      </Pressable>
+
       {/* Data management */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
         {lang === 'ko' ? '데이터 관리' : 'Data'}
@@ -208,6 +227,8 @@ const styles = StyleSheet.create({
   backText: { fontSize: 18, fontWeight: '700' },
   title: { fontSize: 32, fontWeight: '800', marginBottom: 24 },
   sectionLabel: { fontSize: 15, fontWeight: '600', marginTop: 16, marginBottom: 8, marginLeft: 4 },
+  premiumBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md, marginTop: 24 },
+  premiumBtnText: { fontSize: 17, fontWeight: '800', color: '#333' },
   manageBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md },
   manageBtnText: { fontSize: 17, fontWeight: '700' },
   manageArrow: { fontSize: 20, fontWeight: '700' },
