@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { showRewardedAd, isRewardedAdReady, loadRewardedAd } from '../lib/admob';
 import { useThemeColors } from '../lib/theme';
 import { useCardStore } from '../store/useCardStore';
 
@@ -17,13 +18,35 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
   const lang = useCardStore((s) => s.lang);
   const [countdown, setCountdown] = useState(AD_DURATION);
   const [done, setDone] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const isNative = Platform.OS !== 'web';
+
+  useEffect(() => {
+    if (isNative) loadRewardedAd();
+  }, [isNative]);
 
   useEffect(() => {
     if (!visible) {
       setCountdown(AD_DURATION);
       setDone(false);
+      setLoading(false);
       return;
     }
+
+    if (isNative && isRewardedAdReady()) {
+      setLoading(true);
+      showRewardedAd().then((rewarded) => {
+        setLoading(false);
+        if (rewarded) {
+          onReward();
+        }
+        onClose();
+      });
+      return;
+    }
+
+    // Web: simulated countdown ad
     const timer = setInterval(() => {
       setCountdown((c) => {
         if (c <= 1) {
@@ -35,7 +58,7 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
       });
     }, 1000);
     return () => clearInterval(timer);
-  }, [visible]);
+  }, [visible]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleCollect = useCallback(() => {
     onReward();
@@ -44,6 +67,41 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
 
   if (!visible) return null;
 
+  if (isNative && loading) {
+    return (
+      <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+        <View style={styles.overlay}>
+          <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            <Text style={[styles.countdownText, { color: colors.text }]}>
+              {lang === 'ko' ? '광고 로딩 중...' : 'Loading ad...'}
+            </Text>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
+  if (isNative && !isRewardedAdReady()) {
+    return (
+      <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
+        <View style={styles.overlay}>
+          <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            <Text style={styles.adEmoji}>📺</Text>
+            <Text style={[styles.countdownText, { color: colors.text }]}>
+              {lang === 'ko' ? '광고를 불러올 수 없어요\n잠시 후 다시 시도해주세요' : 'Ad not available\nPlease try again later'}
+            </Text>
+            <Pressable onPress={onClose} style={styles.closeBtn}>
+              <Text style={[styles.closeBtnText, { color: colors.primary }]}>
+                {lang === 'ko' ? '닫기' : 'Close'}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    );
+  }
+
+  // Web fallback: simulated ad with countdown
   return (
     <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
@@ -53,7 +111,7 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
           <View style={styles.adBox}>
             <Text style={styles.adEmoji}>📺</Text>
             <Text style={[styles.adText, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '광고 영역' : 'Ad Space'}
+              {lang === 'ko' ? '광고 영역 (테스트)' : 'Ad Space (Test)'}
             </Text>
           </View>
 
@@ -136,6 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     paddingVertical: 16,
+    textAlign: 'center',
   },
   closeBtn: { paddingVertical: 8 },
   closeBtnText: { fontSize: 14, fontWeight: '600' },

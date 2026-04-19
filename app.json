@@ -75,7 +75,16 @@
         {
           "photosPermission": "나만의 낱말 카드에 사진을 추가하기 위해 사진 접근이 필요해요."
         }
-      ]
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "userTrackingUsageDescription": "맞춤형 광고를 제공하기 위해 추적 권한이 필요합니다."
+        }
+      ],
+      "react-native-iap"
     ],
     "experiments": {
       "typedRoutes": true,
