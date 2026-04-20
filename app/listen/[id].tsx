@@ -49,8 +49,9 @@ export default function ListenQuizScreen() {
     return allowed;
   });
 
+  const questionCount = Math.min(TOTAL_QUESTIONS, pool.length);
   const [queue, setQueue] = useState<Word[]>(() =>
-    shuffleWords(pool).slice(0, TOTAL_QUESTIONS),
+    shuffleWords(pool).slice(0, questionCount),
   );
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -122,13 +123,13 @@ export default function ListenQuizScreen() {
   );
 
   const restart = useCallback(() => {
-    setQueue(shuffleWords(pool).slice(0, TOTAL_QUESTIONS));
+    setQueue(shuffleWords(pool).slice(0, questionCount));
     setQIndex(0);
     setScore(0);
     setAnswered(null);
     setFinished(false);
     setRevealed(false);
-  }, [pool]);
+  }, [pool, questionCount]);
 
   const rawBg = isAll ? '#E8F5E9' : category?.color ?? '#E8F5E9';
   const bgColor = dimCategoryColor(rawBg, isDark);

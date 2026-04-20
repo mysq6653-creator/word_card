@@ -24,6 +24,12 @@ import { usePremiumStore } from '../../src/store/usePremiumStore';
 
 const TOTAL_QUESTIONS = 10;
 
+function getParticle(word: string): string {
+  const code = word.charCodeAt(word.length - 1);
+  if (code < 0xAC00 || code > 0xD7A3) return '는';
+  return (code - 0xAC00) % 28 !== 0 ? '은' : '는';
+}
+
 export default function QuizScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
@@ -49,8 +55,9 @@ export default function QuizScreen() {
     return allowed;
   });
 
+  const questionCount = Math.min(TOTAL_QUESTIONS, pool.length);
   const [queue, setQueue] = useState<Word[]>(() =>
-    shuffleWords(pool).slice(0, TOTAL_QUESTIONS),
+    shuffleWords(pool).slice(0, questionCount),
   );
   const [qIndex, setQIndex] = useState(0);
   const [score, setScore] = useState(0);
@@ -110,12 +117,12 @@ export default function QuizScreen() {
   );
 
   const restart = useCallback(() => {
-    setQueue(shuffleWords(pool).slice(0, TOTAL_QUESTIONS));
+    setQueue(shuffleWords(pool).slice(0, questionCount));
     setQIndex(0);
     setScore(0);
     setAnswered(null);
     setFinished(false);
-  }, [pool]);
+  }, [pool, questionCount]);
 
   const rawBg = isAll ? '#FCE4EC' : category?.color ?? '#FCE4EC';
   const bgColor = dimCategoryColor(rawBg, isDark);
@@ -165,7 +172,7 @@ export default function QuizScreen() {
   if (!current) return null;
 
   const questionText = lang === 'ko'
-    ? `${current.ko}${['는', '은'].includes(current.ko.slice(-1)) ? '' : '는'} 어디있을까요?`
+    ? `${current.ko}${getParticle(current.ko)} 어디있을까요?`
     : `Where is ${current.en}?`;
 
   return (

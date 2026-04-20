@@ -16,6 +16,7 @@ import { categories as builtinCategories } from '../src/data/words';
 import { deleteAllRecordings } from '../src/lib/audioStorage';
 import { deleteImage, deleteAllImages } from '../src/lib/imageStorage';
 import { radius, useIsDark, useThemeColors } from '../src/lib/theme';
+import { showToast } from '../src/components/Toast';
 import { useCardStore } from '../src/store/useCardStore';
 import { useCustomCardStore } from '../src/store/useCustomCardStore';
 
@@ -80,6 +81,7 @@ export default function ManageScreen() {
         }
         removeCategory(catId);
         bump();
+        showToast(lang === 'ko' ? '카테고리가 삭제되었어요' : 'Category deleted');
       },
     );
   }, [lang, customWords, removeCategory, bump]);
@@ -91,6 +93,7 @@ export default function ManageScreen() {
         deleteImage(wordId).catch(() => {});
         removeWord(wordId);
         bump();
+        showToast(lang === 'ko' ? '카드가 삭제되었어요' : 'Card deleted');
       },
     );
   }, [lang, removeWord, bump]);
@@ -109,6 +112,7 @@ export default function ManageScreen() {
         try {
           await deleteAllRecordings();
           bumpRecording();
+          showToast(lang === 'ko' ? '모든 녹음이 삭제되었어요' : 'All recordings deleted');
         } finally {
           setDeletingRecordings(false);
         }
@@ -130,6 +134,7 @@ export default function ManageScreen() {
           }
           await deleteAllImages();
           bump();
+          showToast(lang === 'ko' ? '모든 데이터가 삭제되었어요' : 'All data deleted');
         } finally {
           setDeletingImages(false);
         }

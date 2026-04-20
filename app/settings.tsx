@@ -223,7 +223,7 @@ export default function SettingsScreen() {
 
       <Pressable onPress={() => setDebugTaps((t) => t + 1)}>
         <Text style={[styles.versionText, { color: colors.textMuted }]}>
-          낱말 카드 v1.0.0
+          {lang === 'ko' ? '낱말 카드' : 'Word Card'} v1.0.0
         </Text>
       </Pressable>
 

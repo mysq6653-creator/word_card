@@ -6,6 +6,7 @@ import { StyleSheet } from 'react-native';
 import 'react-native-reanimated';
 
 import { useIsDark, useThemeColors } from '../src/lib/theme';
+import { ToastProvider } from '../src/components/Toast';
 
 export default function RootLayout() {
   const colors = useThemeColors();
@@ -30,6 +31,7 @@ export default function RootLayout() {
           <Stack.Screen name="listen/[id]" />
           <Stack.Screen name="premium" />
         </Stack>
+        <ToastProvider />
         <StatusBar style={isDark ? 'light' : 'dark'} />
       </SafeAreaProvider>
     </GestureHandlerRootView>

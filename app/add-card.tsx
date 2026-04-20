@@ -17,6 +17,7 @@ import { categories } from '../src/data/words';
 import { saveImage } from '../src/lib/imageStorage';
 import { resizeImage } from '../src/lib/imageResize';
 import { radius, useThemeColors } from '../src/lib/theme';
+import { showToast } from '../src/components/Toast';
 import { useCardStore } from '../src/store/useCardStore';
 import {
   useCustomCardStore,
@@ -122,6 +123,7 @@ export default function AddCardScreen() {
       });
 
       bump();
+      showToast(lang === 'ko' ? '카드가 저장되었어요!' : 'Card saved!');
       router.back();
     } finally {
       setSaving(false);

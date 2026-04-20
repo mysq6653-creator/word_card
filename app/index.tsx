@@ -71,7 +71,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.surface },
               pressed && { opacity: 0.7 },
             ]}
-            accessibilityLabel="설정"
+            accessibilityLabel={lang === 'ko' ? '설정' : 'Settings'}
           >
             <Text style={{ fontSize: 22 }}>⚙️</Text>
           </Pressable>
@@ -82,7 +82,7 @@ export default function HomeScreen() {
               { backgroundColor: colors.surface, borderColor: colors.primary },
               pressed && { opacity: 0.7 },
             ]}
-            accessibilityLabel="언어 전환"
+            accessibilityLabel={lang === 'ko' ? '언어 전환' : 'Switch language'}
           >
             <Text style={[styles.langBtnText, { color: colors.text }]}>
               {lang === 'ko' ? '🇰🇷 한' : '🇺🇸 EN'}
@@ -100,7 +100,7 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2A2A4A' : '#E0E7FF' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel="전체 낱말카드 보기"
+          accessibilityLabel={lang === 'ko' ? '전체 낱말카드 보기' : 'View all cards'}
         >
           <Text style={styles.specialEmoji}>📚</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
@@ -114,7 +114,7 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#3A2A3A' : '#FCE4EC' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel="퀴즈 모드"
+          accessibilityLabel={lang === 'ko' ? '퀴즈 모드' : 'Quiz mode'}
         >
           <Text style={styles.specialEmoji}>🧩</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
@@ -128,7 +128,7 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2A3A2A' : '#E8F5E9' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel="듣기 퀴즈"
+          accessibilityLabel={lang === 'ko' ? '듣기 퀴즈' : 'Listening quiz'}
         >
           <Text style={styles.specialEmoji}>🔊</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
@@ -148,7 +148,7 @@ export default function HomeScreen() {
               { backgroundColor: dimCategoryColor(cat.color, isDark) },
               pressed && { transform: [{ scale: 0.97 }] },
             ]}
-            accessibilityLabel={`${cat.ko} 카테고리`}
+            accessibilityLabel={lang === 'ko' ? `${cat.ko} 카테고리` : `${cat.en} category`}
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
@@ -168,7 +168,7 @@ export default function HomeScreen() {
               { backgroundColor: dimCategoryColor(cat.color, isDark) },
               pressed && { transform: [{ scale: 0.97 }] },
             ]}
-            accessibilityLabel={`${cat.ko} 카테고리`}
+            accessibilityLabel={lang === 'ko' ? `${cat.ko} 카테고리` : `${cat.en} category`}
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
@@ -188,7 +188,7 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2D2D44' : '#F0F0F0', borderWidth: 2, borderColor: colors.primary, borderStyle: 'dashed' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel="카드 만들기"
+          accessibilityLabel={lang === 'ko' ? '카드 만들기' : 'Create card'}
         >
           <Text style={styles.tileEmoji}>✏️</Text>
           <Text style={[styles.tileLabel, { color: colors.primary }]}>
