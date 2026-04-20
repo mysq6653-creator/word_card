@@ -1,5 +1,5 @@
 import { useRouter, useLocalSearchParams } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
@@ -81,6 +81,13 @@ export default function ListenQuizScreen() {
     unlockAudio();
     speak(lang === 'ko' ? current.ko : current.en, lang, ttsRate);
   }, [current, lang, ttsRate]);
+
+  useEffect(() => {
+    if (current && !finished) {
+      const timer = setTimeout(() => speakCurrent(), 400);
+      return () => clearTimeout(timer);
+    }
+  }, [qIndex, finished, speakCurrent]);
 
   const handleChoice = useCallback(
     (choice: Word) => {
