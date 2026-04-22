@@ -221,13 +221,13 @@ export default function SettingsScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => setDebugTaps((t) => t + 1)}>
+      <Pressable onPress={() => { if (__DEV__) setDebugTaps((t) => t + 1); }}>
         <Text style={[styles.versionText, { color: colors.textMuted }]}>
           {lang === 'ko' ? '낱말 카드' : 'Word Card'} v1.0.0
         </Text>
       </Pressable>
 
-      {showDebug && (
+      {__DEV__ && showDebug && (
         <View style={[styles.debugBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.debugTitle, { color: colors.text }]}>
             🛠 {lang === 'ko' ? '테스트 모드' : 'Test Mode'}
