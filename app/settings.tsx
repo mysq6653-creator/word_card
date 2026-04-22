@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { radius, useThemeColors } from '../src/lib/theme';
@@ -221,13 +221,13 @@ export default function SettingsScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => { if (__DEV__) setDebugTaps((t) => t + 1); }}>
+      <Pressable onPress={() => { if (__DEV__ || Platform.OS === 'web') setDebugTaps((t) => t + 1); }}>
         <Text style={[styles.versionText, { color: colors.textMuted }]}>
           {lang === 'ko' ? '낱말 카드' : 'Word Card'} v1.0.0
         </Text>
       </Pressable>
 
-      {__DEV__ && showDebug && (
+      {(__DEV__ || Platform.OS === 'web') && showDebug && (
         <View style={[styles.debugBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.debugTitle, { color: colors.text }]}>
             🛠 {lang === 'ko' ? '테스트 모드' : 'Test Mode'}
