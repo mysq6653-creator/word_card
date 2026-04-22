@@ -145,7 +145,7 @@ export default function ListenQuizScreen() {
     : lang === 'ko' ? `${category?.ko} 듣기` : `${category?.en} Listen`;
 
   if (!quizAllowed) {
-    return <QuizLimitBlock onUpgrade={() => router.push('/premium')} />;
+    return <QuizLimitBlock onUpgrade={() => router.push('/premium')} onBack={() => router.back()} />;
   }
 
   if (pool.length < 3) {

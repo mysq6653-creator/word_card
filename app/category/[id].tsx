@@ -115,6 +115,8 @@ export default function CategoryScreen() {
     });
   }, [isAll, category, customWords, pauseAutoplay]);
 
+  const initialSpoken = useRef(false);
+
   useEffect(() => {
     warmUpTTS();
   }, []);
@@ -130,6 +132,17 @@ export default function CategoryScreen() {
   }, [id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const word = words[index];
+
+  useEffect(() => {
+    if (!initialSpoken.current && word) {
+      initialSpoken.current = true;
+      const timer = setTimeout(() => {
+        unlockAudio();
+        speak(lang === 'ko' ? word.ko : word.en, lang, ttsRate);
+      }, 400);
+      return () => clearTimeout(timer);
+    }
+  }, [word?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!word) {

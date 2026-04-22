@@ -55,7 +55,7 @@ export function LimitBanner({ used, limit, featureLabel, onWatchAd, onUpgrade }:
   );
 }
 
-export function QuizLimitBlock({ onUpgrade }: { onUpgrade: () => void }) {
+export function QuizLimitBlock({ onUpgrade, onBack }: { onUpgrade: () => void; onBack?: () => void }) {
   const colors = useThemeColors();
   const lang = useCardStore((s) => s.lang);
 
@@ -82,6 +82,20 @@ export function QuizLimitBlock({ onUpgrade }: { onUpgrade: () => void }) {
           ⭐ {lang === 'ko' ? '프리미엄으로 무제한 퀴즈' : 'Unlimited with Premium'}
         </Text>
       </Pressable>
+      {onBack && (
+        <Pressable
+          onPress={onBack}
+          style={({ pressed }) => [
+            styles.backBtn,
+            { backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Text style={[styles.backBtnText, { color: colors.text }]}>
+            ← {lang === 'ko' ? '돌아가기' : 'Go Back'}
+          </Text>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -111,4 +125,6 @@ const styles = StyleSheet.create({
   blockEmoji: { fontSize: 64 },
   blockTitle: { fontSize: 24, fontWeight: '800', textAlign: 'center' },
   blockDesc: { fontSize: 16, fontWeight: '600', textAlign: 'center' },
+  backBtn: { paddingHorizontal: 24, paddingVertical: 14, borderRadius: 999, marginTop: 4 },
+  backBtnText: { fontSize: 17, fontWeight: '700' },
 });

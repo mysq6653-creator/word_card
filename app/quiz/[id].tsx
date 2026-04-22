@@ -131,7 +131,7 @@ export default function QuizScreen() {
     : lang === 'ko' ? `${category?.ko} 퀴즈` : `${category?.en} Quiz`;
 
   if (!quizAllowed) {
-    return <QuizLimitBlock onUpgrade={() => router.push('/premium')} />;
+    return <QuizLimitBlock onUpgrade={() => router.push('/premium')} onBack={() => router.back()} />;
   }
 
   if (pool.length < 3) {
