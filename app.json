@@ -81,7 +81,9 @@
         {
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
-          "userTrackingUsageDescription": "맞춤형 광고를 제공하기 위해 추적 권한이 필요합니다."
+          "userTrackingUsageDescription": "맞춤형 광고를 제공하기 위해 추적 권한이 필요합니다.",
+          "tagForChildDirectedTreatment": true,
+          "tagForUnderAgeOfConsent": true
         }
       ],
       "react-native-iap"

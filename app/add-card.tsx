@@ -192,6 +192,7 @@ export default function AddCardScreen() {
         onChangeText={setKo}
         placeholder={lang === 'ko' ? '예: 강아지' : 'e.g. 강아지'}
         placeholderTextColor={colors.textMuted}
+        maxLength={20}
       />
 
       {/* English name */}
@@ -204,6 +205,7 @@ export default function AddCardScreen() {
         onChangeText={setEn}
         placeholder={lang === 'ko' ? '예: Dog' : 'e.g. Dog'}
         placeholderTextColor={colors.textMuted}
+        maxLength={30}
       />
 
       {/* Emoji fallback */}
@@ -216,6 +218,7 @@ export default function AddCardScreen() {
         onChangeText={(t) => setEmoji(t || '📷')}
         placeholder="📷"
         placeholderTextColor={colors.textMuted}
+        maxLength={2}
       />
 
       {/* Category selection */}
@@ -279,6 +282,7 @@ export default function AddCardScreen() {
             onChangeText={setNewCatKo}
             placeholder={lang === 'ko' ? '한국어 이름' : 'Korean name'}
             placeholderTextColor={colors.textMuted}
+            maxLength={20}
           />
           <TextInput
             style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.primary }]}
@@ -286,6 +290,7 @@ export default function AddCardScreen() {
             onChangeText={setNewCatEn}
             placeholder={lang === 'ko' ? '영어 이름' : 'English name'}
             placeholderTextColor={colors.textMuted}
+            maxLength={30}
           />
 
           <Text style={[styles.subLabel, { color: colors.textMuted }]}>
