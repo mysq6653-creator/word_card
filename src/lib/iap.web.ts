@@ -21,8 +21,8 @@ export async function purchaseProduct(_productId: string): Promise<boolean> {
   return true;
 }
 
-export async function restorePurchases(): Promise<boolean> {
-  return false;
+export async function restorePurchases(): Promise<'restored' | 'none' | 'error'> {
+  return 'none';
 }
 
 export function endIAP(): void {}

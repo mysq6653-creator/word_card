@@ -55,9 +55,11 @@ export default function PremiumScreen() {
     if (purchasing) return;
     setPurchasing(true);
     try {
-      const restored = await restorePurchases();
-      const msg = restored
+      const result = await restorePurchases();
+      const msg = result === 'restored'
         ? (lang === 'ko' ? '구매가 복원되었습니다!' : 'Purchase restored!')
+        : result === 'error'
+        ? (lang === 'ko' ? '네트워크 오류. 다시 시도해주세요.' : 'Network error. Please try again.')
         : (lang === 'ko' ? '복원할 구매가 없습니다.' : 'No purchases to restore.');
       if (Platform.OS === 'web') {
         window.alert(msg);

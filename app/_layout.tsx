@@ -19,8 +19,8 @@ function useIAPSync() {
     initIAP();
 
     if (Platform.OS !== 'web') {
-      restorePurchases().then((restored) => {
-        if (!restored && isPremium) {
+      restorePurchases().then((result) => {
+        if (result === 'none' && isPremium) {
           usePremiumStore.getState().setPremium(false);
         }
       });
@@ -34,8 +34,8 @@ function useIAPSync() {
 
     const sub = AppState.addEventListener('change', (next) => {
       if (appState.current.match(/inactive|background/) && next === 'active') {
-        restorePurchases().then((restored) => {
-          if (!restored && usePremiumStore.getState().isPremium) {
+        restorePurchases().then((result) => {
+          if (result === 'none' && usePremiumStore.getState().isPremium) {
             usePremiumStore.getState().setPremium(false);
           }
         });

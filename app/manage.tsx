@@ -13,7 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories as builtinCategories } from '../src/data/words';
-import { deleteAllRecordings } from '../src/lib/audioStorage';
+import { deleteAllRecordings, deleteRecording } from '../src/lib/audioStorage';
 import { deleteImage, deleteAllImages } from '../src/lib/imageStorage';
 import { radius, useIsDark, useThemeColors } from '../src/lib/theme';
 import { showToast } from '../src/components/Toast';
@@ -78,6 +78,8 @@ export default function ManageScreen() {
         const wordsInCat = customWords.filter((w) => w.categoryId === catId);
         for (const w of wordsInCat) {
           deleteImage(w.id).catch(() => {});
+          deleteRecording(w.id, 'ko').catch(() => {});
+          deleteRecording(w.id, 'en').catch(() => {});
         }
         removeCategory(catId);
         bump();
@@ -91,6 +93,8 @@ export default function ManageScreen() {
       lang === 'ko' ? `"${wordName}" 카드를 삭제할까요?` : `Delete "${wordName}"?`,
       () => {
         deleteImage(wordId).catch(() => {});
+        deleteRecording(wordId, 'ko').catch(() => {});
+        deleteRecording(wordId, 'en').catch(() => {});
         removeWord(wordId);
         bump();
         showToast(lang === 'ko' ? '카드가 삭제되었어요' : 'Card deleted');

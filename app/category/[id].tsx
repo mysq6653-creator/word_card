@@ -30,7 +30,7 @@ import {
   shuffleWords,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
-import { loadRecordingUri } from '../../src/lib/audioStorage';
+import { loadRecordingUri, deleteRecording } from '../../src/lib/audioStorage';
 import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
 import { resizeImage } from '../../src/lib/imageResize';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
@@ -267,6 +267,8 @@ export default function CategoryScreen() {
     const doDelete = () => {
       removeWord(word.id);
       deleteImage(word.id).catch(() => {});
+      deleteRecording(word.id, 'ko').catch(() => {});
+      deleteRecording(word.id, 'en').catch(() => {});
       bump();
       if (words.length <= 1) {
         router.back();

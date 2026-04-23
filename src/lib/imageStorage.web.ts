@@ -10,10 +10,20 @@ export async function saveImage(wordId: string, uri: string): Promise<void> {
   await set(imgKey(wordId), blob);
 }
 
+const activeBlobUrls = new Map<string, string>();
+
 export async function loadImageUri(wordId: string): Promise<string | null> {
+  const existing = activeBlobUrls.get(wordId);
+  if (existing) URL.revokeObjectURL(existing);
+
   const blob = await get<Blob>(imgKey(wordId));
-  if (!blob) return null;
-  return URL.createObjectURL(blob);
+  if (!blob) {
+    activeBlobUrls.delete(wordId);
+    return null;
+  }
+  const url = URL.createObjectURL(blob);
+  activeBlobUrls.set(wordId, url);
+  return url;
 }
 
 export async function deleteImage(wordId: string): Promise<void> {

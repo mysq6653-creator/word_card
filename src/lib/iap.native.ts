@@ -77,17 +77,17 @@ export async function purchaseProduct(productId: string): Promise<boolean> {
   }
 }
 
-export async function restorePurchases(): Promise<boolean> {
+export async function restorePurchases(): Promise<'restored' | 'none' | 'error'> {
   try {
     const purchases = await getAvailablePurchases();
     const hasPremium = purchases.some((p) => VALID_IDS.includes(p.productId));
     if (hasPremium) {
       usePremiumStore.getState().setPremium(true);
-      return true;
+      return 'restored';
     }
-    return false;
+    return 'none';
   } catch {
-    return false;
+    return 'error';
   }
 }
 

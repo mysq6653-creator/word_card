@@ -80,7 +80,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
           bumpRecordingVersion();
         }
       } catch {
-        showMessage('녹음 저장에 실패했어요');
+        showMessage(lang === 'ko' ? '녹음 저장에 실패했어요' : 'Failed to save recording');
       } finally {
         setState({ kind: 'idle' });
       }
@@ -107,7 +107,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
         const handle = await startRecording();
         setState({ kind: 'recording', handle });
       } catch {
-        showMessage('녹음을 시작할 수 없어요');
+        showMessage(lang === 'ko' ? '녹음을 시작할 수 없어요' : 'Cannot start recording');
       }
     }
   };
@@ -170,7 +170,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
           isRecording && { backgroundColor: colors.danger, borderColor: colors.danger },
           pressed && { opacity: 0.7 },
         ]}
-        accessibilityLabel={isRecording ? '녹음 중지' : '녹음 시작'}
+        accessibilityLabel={isRecording ? (lang === 'ko' ? '녹음 중지' : 'Stop recording') : (lang === 'ko' ? '녹음 시작' : 'Start recording')}
       >
         <Text style={styles.recIcon}>{isRecording ? '⏺' : '🎙️'}</Text>
         <Text style={[styles.recLabel, { color: colors.text }]}>
@@ -190,7 +190,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
             { backgroundColor: colors.surface, borderColor: colors.textMuted },
             pressed && { opacity: 0.7 },
           ]}
-          accessibilityLabel="녹음 삭제"
+          accessibilityLabel={lang === 'ko' ? '녹음 삭제' : 'Delete recording'}
         >
           <Text style={styles.deleteIcon}>🗑️</Text>
         </Pressable>

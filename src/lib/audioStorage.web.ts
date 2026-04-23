@@ -24,13 +24,24 @@ export async function saveRecording(
   await set(key(wordId, lang), blob);
 }
 
+const activeBlobUrls = new Map<string, string>();
+
 export async function loadRecordingUri(
   wordId: string,
   lang: Lang,
 ): Promise<string | null> {
-  const blob = await get<Blob>(key(wordId, lang));
-  if (!blob) return null;
-  return URL.createObjectURL(blob);
+  const k = key(wordId, lang);
+  const existing = activeBlobUrls.get(k);
+  if (existing) URL.revokeObjectURL(existing);
+
+  const blob = await get<Blob>(k);
+  if (!blob) {
+    activeBlobUrls.delete(k);
+    return null;
+  }
+  const url = URL.createObjectURL(blob);
+  activeBlobUrls.set(k, url);
+  return url;
 }
 
 export async function deleteRecording(
