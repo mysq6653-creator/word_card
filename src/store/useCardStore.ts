@@ -1,6 +1,15 @@
+import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
 import type { Lang } from '../data/words';
 import { storage } from './storage';
+
+function getDeviceLang(): Lang {
+  try {
+    const locales = getLocales();
+    if (locales[0]?.languageCode === 'ko') return 'ko';
+  } catch {}
+  return 'en';
+}
 
 export type ColorMode = 'auto' | 'light' | 'dark';
 
@@ -50,7 +59,7 @@ function persistState(s: State) {
 }
 
 export const useCardStore = create<State & Actions>((set, get) => ({
-  lang: 'ko',
+  lang: getDeviceLang(),
   autoplay: false,
   shuffle: false,
   recordingVersion: 0,
