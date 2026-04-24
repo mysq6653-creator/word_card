@@ -4,6 +4,8 @@ import { storage } from './storage';
 const FREE_CUSTOM_CARDS = 3;
 const FREE_RECORDINGS = 3;
 const FREE_QUIZ_PER_DAY = 1;
+const FREE_AI_CREDITS = 5;
+const LIFETIME_AI_CREDITS = 100;
 
 type State = {
   isPremium: boolean;
@@ -11,6 +13,7 @@ type State = {
   adRecordCredits: number;
   quizCountToday: number;
   quizDate: string;
+  aiCredits: number;
 };
 
 type Actions = {
@@ -23,6 +26,10 @@ type Actions = {
   canPlayQuiz: () => boolean;
   getCardLimit: (currentCustomCount: number) => { used: number; limit: number; needAd: boolean };
   getRecordLimit: (currentRecordingCount: number) => { used: number; limit: number; needAd: boolean };
+  addAiCredits: (amount: number) => void;
+  useAiCredit: () => boolean;
+  canUseAiCredit: () => boolean;
+  getAiCredits: () => number;
 };
 
 const STORAGE_KEY = 'word-card-premium';
@@ -33,6 +40,7 @@ type Persisted = {
   adRecordCredits: number;
   quizCountToday: number;
   quizDate: string;
+  aiCredits: number;
 };
 
 function today(): string {
@@ -47,6 +55,7 @@ function persistPremium(s: State) {
     adRecordCredits: s.adRecordCredits,
     quizCountToday: s.quizCountToday,
     quizDate: s.quizDate,
+    aiCredits: s.aiCredits,
   };
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
@@ -61,9 +70,14 @@ export const usePremiumStore = create<State & Actions>((set, get) => ({
   adRecordCredits: 0,
   quizCountToday: 0,
   quizDate: today(),
+  aiCredits: FREE_AI_CREDITS,
 
   setPremium: (v) => {
+    const prev = get().isPremium;
     set({ isPremium: v });
+    if (v && !prev) {
+      set((s) => ({ aiCredits: s.aiCredits + LIFETIME_AI_CREDITS }));
+    }
     persistPremium(get());
   },
 
@@ -119,9 +133,26 @@ export const usePremiumStore = create<State & Actions>((set, get) => ({
     const limit = FREE_RECORDINGS + s.adRecordCredits;
     return { used: currentRecordingCount, limit, needAd: !s.isPremium && currentRecordingCount >= limit };
   },
+
+  addAiCredits: (amount) => {
+    set((s) => ({ aiCredits: s.aiCredits + amount }));
+    persistPremium(get());
+  },
+
+  useAiCredit: () => {
+    const s = get();
+    if (s.aiCredits <= 0) return false;
+    set({ aiCredits: s.aiCredits - 1 });
+    persistPremium(get());
+    return true;
+  },
+
+  canUseAiCredit: () => get().aiCredits > 0,
+
+  getAiCredits: () => get().aiCredits,
 }));
 
-export { FREE_CUSTOM_CARDS, FREE_RECORDINGS, FREE_QUIZ_PER_DAY };
+export { FREE_CUSTOM_CARDS, FREE_RECORDINGS, FREE_QUIZ_PER_DAY, FREE_AI_CREDITS, LIFETIME_AI_CREDITS };
 
 // Hydrate
 try {
@@ -136,6 +167,7 @@ try {
         adRecordCredits: data.adRecordCredits ?? 0,
         quizCountToday: data.quizCountToday ?? 0,
         quizDate: data.quizDate ?? today(),
+        aiCredits: data.aiCredits ?? FREE_AI_CREDITS,
       });
     } catch {
       // ignore

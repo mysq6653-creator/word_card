@@ -5,6 +5,12 @@ import type { Lang } from '../data/words';
 const LANG_MAP: Record<Lang, string> = {
   ko: 'ko-KR',
   en: 'en-US',
+  ja: 'ja-JP',
+  es: 'es-ES',
+  zh: 'zh-CN',
+  fr: 'fr-FR',
+  de: 'de-DE',
+  pt: 'pt-BR',
 };
 
 const isWeb = Platform.OS === 'web';

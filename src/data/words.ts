@@ -1,4 +1,15 @@
-export type Lang = 'ko' | 'en';
+export type Lang = 'ko' | 'en' | 'ja' | 'es' | 'zh' | 'fr' | 'de' | 'pt';
+
+export const SUPPORTED_LANGS: { code: Lang; flag: string; label: string }[] = [
+  { code: 'ko', flag: '🇰🇷', label: '한국어' },
+  { code: 'en', flag: '🇺🇸', label: 'English' },
+  { code: 'ja', flag: '🇯🇵', label: '日本語' },
+  { code: 'es', flag: '🇪🇸', label: 'Español' },
+  { code: 'zh', flag: '🇨🇳', label: '中文' },
+  { code: 'fr', flag: '🇫🇷', label: 'Français' },
+  { code: 'de', flag: '🇩🇪', label: 'Deutsch' },
+  { code: 'pt', flag: '🇧🇷', label: 'Português' },
+];
 
 export type Word = {
   id: string;
@@ -18,6 +29,20 @@ export type Category = {
   words: Word[];
   isCustom?: boolean;
 };
+
+import { wordTranslations, categoryTranslations } from './translations';
+
+export function wordText(word: Word, lang: Lang): string {
+  if (lang === 'ko') return word.ko;
+  if (lang === 'en') return word.en;
+  return wordTranslations[word.id]?.[lang] ?? word.en;
+}
+
+export function catText(cat: { id: string; ko: string; en: string }, lang: Lang): string {
+  if (lang === 'ko') return cat.ko;
+  if (lang === 'en') return cat.en;
+  return categoryTranslations[cat.id]?.[lang] ?? cat.en;
+}
 
 export const categories: Category[] = [
   {

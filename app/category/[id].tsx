@@ -28,9 +28,12 @@ import {
   getAllWordsMerged,
   getCategoryByIdMerged,
   shuffleWords,
+  wordText,
+  catText,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
 import { loadRecordingUri, deleteRecording } from '../../src/lib/audioStorage';
+import { loadAiAudioUri } from '../../src/lib/aiAudioStorage';
 import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
 import { resizeImage } from '../../src/lib/imageResize';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
@@ -86,6 +89,7 @@ export default function CategoryScreen() {
 
   const [index, setIndex] = useState(0);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
+  const [aiAudioUri, setAiAudioUri] = useState<string | null>(null);
   const [cardImageUri, setCardImageUri] = useState<string | null>(null);
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
@@ -138,7 +142,7 @@ export default function CategoryScreen() {
       initialSpoken.current = true;
       const timer = setTimeout(() => {
         unlockAudio();
-        speak(lang === 'ko' ? word.ko : word.en, lang, ttsRate);
+        speak(wordText(word, lang), lang, ttsRate);
       }, 400);
       return () => clearTimeout(timer);
     }
@@ -147,11 +151,15 @@ export default function CategoryScreen() {
   useEffect(() => {
     if (!word) {
       setRecordingUri(null);
+      setAiAudioUri(null);
       return;
     }
     let cancelled = false;
     loadRecordingUri(word.id, lang).then((uri) => {
       if (!cancelled) setRecordingUri(uri);
+    });
+    loadAiAudioUri(word.id, lang).then((uri) => {
+      if (!cancelled) setAiAudioUri(uri);
     });
     return () => {
       cancelled = true;
@@ -185,10 +193,12 @@ export default function CategoryScreen() {
     stopAudio();
     if (recordingUri) {
       playUri(recordingUri).catch(() => {});
+    } else if (aiAudioUri) {
+      playUri(aiAudioUri).catch(() => {});
     } else {
-      speak(lang === 'ko' ? word.ko : word.en, lang, ttsRate);
+      speak(wordText(word, lang), lang, ttsRate);
     }
-  }, [word, lang, recordingUri, ttsRate, stopAudio]);
+  }, [word, lang, recordingUri, aiAudioUri, ttsRate, stopAudio]);
 
   const goNext = useCallback(() => {
     if (words.length === 0) return;
@@ -196,7 +206,7 @@ export default function CategoryScreen() {
     const next = (index + 1) % words.length;
     setIndex(next);
     const w = words[next];
-    if (w) speak(lang === 'ko' ? w.ko : w.en, lang, ttsRate);
+    if (w) speak(wordText(w, lang), lang, ttsRate);
   }, [words, index, lang, ttsRate, stopAudio]);
 
   const goPrev = useCallback(() => {
@@ -205,7 +215,7 @@ export default function CategoryScreen() {
     const prev = (index - 1 + words.length) % words.length;
     setIndex(prev);
     const w = words[prev];
-    if (w) speak(lang === 'ko' ? w.ko : w.en, lang, ttsRate);
+    if (w) speak(wordText(w, lang), lang, ttsRate);
   }, [words, index, lang, ttsRate, stopAudio]);
 
   const handleNext = useCallback(() => {
@@ -217,7 +227,7 @@ export default function CategoryScreen() {
     const nextWord = words[next];
     setIndex(next);
     if (nextWord) {
-      speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang, ttsRate);
+      speak(wordText(nextWord, lang), lang, ttsRate);
     }
   }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
 
@@ -230,7 +240,7 @@ export default function CategoryScreen() {
     const prevWord = words[prev];
     setIndex(prev);
     if (prevWord) {
-      speak(lang === 'ko' ? prevWord.ko : prevWord.en, lang, ttsRate);
+      speak(wordText(prevWord, lang), lang, ttsRate);
     }
   }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
 
@@ -310,7 +320,7 @@ export default function CategoryScreen() {
         const nextWord = words[next];
         if (nextWord) {
           stopSpeaking();
-          speak(lang === 'ko' ? nextWord.ko : nextWord.en, lang, ttsRate);
+          speak(wordText(nextWord, lang), lang, ttsRate);
         }
         return next;
       });
@@ -358,8 +368,8 @@ export default function CategoryScreen() {
     });
 
   const headerLabel = isAll
-    ? lang === 'ko' ? '전체보기' : 'All Cards'
-    : lang === 'ko' ? category?.ko ?? '' : category?.en ?? '';
+    ? (lang === 'ko' ? '전체보기' : 'All Cards')
+    : category ? catText(category, lang) : '';
 
   const rawBg = isAll ? '#E0E7FF' : category?.color ?? '#fff';
   const bgColor = dimCategoryColor(rawBg, isDark);
@@ -425,14 +435,14 @@ export default function CategoryScreen() {
               playCurrent();
             }}
             style={styles.cardPressable}
-            accessibilityLabel={`${word.ko} 발음 듣기`}
+            accessibilityLabel={`${wordText(word, lang)}`}
           >
             {cardImageUri ? (
               <Image source={{ uri: cardImageUri }} style={styles.cardImage} />
             ) : (
               <Text style={styles.emoji}>{word.emoji}</Text>
             )}
-            <Text style={[styles.word, { color: colors.text }]}>{lang === 'ko' ? word.ko : word.en}</Text>
+            <Text style={[styles.word, { color: colors.text }]}>{wordText(word, lang)}</Text>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
               {autoplay
                 ? (lang === 'ko' ? '탭하여 멈추기' : 'Tap to stop')

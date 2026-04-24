@@ -7,22 +7,7 @@ import { purchaseProduct, restorePurchases, PRODUCT_IDS } from '../src/lib/iap';
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import { usePremiumStore } from '../src/store/usePremiumStore';
-
-const BENEFITS_KO = [
-  { icon: '✏️', text: '무제한 카드 만들기' },
-  { icon: '🎙️', text: '무제한 음성 녹음' },
-  { icon: '🧩', text: '무제한 퀴즈' },
-  { icon: '🚫', text: '광고 없음' },
-  { icon: '💖', text: '앱 개발 응원하기' },
-];
-
-const BENEFITS_EN = [
-  { icon: '✏️', text: 'Unlimited card creation' },
-  { icon: '🎙️', text: 'Unlimited voice recordings' },
-  { icon: '🧩', text: 'Unlimited quizzes' },
-  { icon: '🚫', text: 'No ads' },
-  { icon: '💖', text: 'Support development' },
-];
+import { ui } from '../src/data/ui';
 
 export default function PremiumScreen() {
   const router = useRouter();
@@ -30,9 +15,25 @@ export default function PremiumScreen() {
   const colors = useThemeColors();
   const lang = useCardStore((s) => s.lang);
   const isPremium = usePremiumStore((s) => s.isPremium);
+  const aiCredits = usePremiumStore((s) => s.aiCredits);
   const [purchasing, setPurchasing] = useState(false);
 
-  const benefits = lang === 'ko' ? BENEFITS_KO : BENEFITS_EN;
+  const benefits = [
+    { icon: '✏️', text: ui('unlimitedCards', lang) },
+    { icon: '🎙️', text: ui('unlimitedRecordings', lang) },
+    { icon: '🧩', text: ui('unlimitedQuiz', lang) },
+    { icon: '🚫', text: ui('noAds', lang) },
+    { icon: '🤖', text: `100 ${ui('aiCredits', lang)}` },
+    { icon: '💖', text: ui('supportDev', lang) },
+  ];
+
+  const notify = (msg: string) => {
+    if (Platform.OS === 'web') {
+      window.alert(msg);
+    } else {
+      Alert.alert(msg);
+    }
+  };
 
   const handlePurchase = async (productId: string) => {
     if (purchasing) return;
@@ -40,11 +41,8 @@ export default function PremiumScreen() {
     try {
       const ok = await purchaseProduct(productId);
       if (ok) {
-        if (Platform.OS === 'web') {
-          window.alert(lang === 'ko' ? '프리미엄이 활성화되었습니다!' : 'Premium activated!');
-        } else {
-          Alert.alert(lang === 'ko' ? '감사합니다!' : 'Thank you!', lang === 'ko' ? '프리미엄이 활성화되었습니다.' : 'Premium has been activated.');
-        }
+        const isCredit = [PRODUCT_IDS.CREDITS_50, PRODUCT_IDS.CREDITS_150, PRODUCT_IDS.CREDITS_500].includes(productId as any);
+        notify(isCredit ? ui('aiCredits', lang) + ' +' : ui('premiumActivated', lang));
       }
     } finally {
       setPurchasing(false);
@@ -57,15 +55,11 @@ export default function PremiumScreen() {
     try {
       const result = await restorePurchases();
       const msg = result === 'restored'
-        ? (lang === 'ko' ? '구매가 복원되었습니다!' : 'Purchase restored!')
+        ? ui('purchaseRestored', lang)
         : result === 'error'
-        ? (lang === 'ko' ? '네트워크 오류. 다시 시도해주세요.' : 'Network error. Please try again.')
-        : (lang === 'ko' ? '복원할 구매가 없습니다.' : 'No purchases to restore.');
-      if (Platform.OS === 'web') {
-        window.alert(msg);
-      } else {
-        Alert.alert(msg);
-      }
+        ? ui('networkError', lang)
+        : ui('noPurchase', lang);
+      notify(msg);
     } finally {
       setPurchasing(false);
     }
@@ -89,19 +83,17 @@ export default function PremiumScreen() {
           ]}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
-            ← {lang === 'ko' ? '돌아가기' : 'Back'}
+            {`← ${ui('back', lang)}`}
           </Text>
         </Pressable>
       </View>
 
-      <Text style={styles.starEmoji}>⭐</Text>
+      <Text style={styles.starEmoji}>{'⭐'}</Text>
       <Text style={[styles.title, { color: colors.text }]}>
-        {lang === 'ko' ? '낱말 카드 프리미엄' : 'Word Card Premium'}
+        {ui('wordCardPremium', lang)}
       </Text>
       <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-        {lang === 'ko'
-          ? '모든 기능을 제한 없이 사용하세요'
-          : 'Unlock all features without limits'}
+        {ui('unlockAll', lang)}
       </Text>
 
       <View style={[styles.benefitCard, { backgroundColor: colors.surface }]}>
@@ -115,16 +107,15 @@ export default function PremiumScreen() {
 
       {isPremium ? (
         <View style={[styles.activeCard, { backgroundColor: '#d4edda' }]}>
-          <Text style={styles.activeEmoji}>✅</Text>
+          <Text style={styles.activeEmoji}>{'✅'}</Text>
           <Text style={styles.activeText}>
-            {lang === 'ko' ? '프리미엄 활성화됨' : 'Premium Active'}
+            {ui('premiumActive', lang)}
           </Text>
         </View>
       ) : (
         <View style={[styles.purchaseArea, purchasing && { opacity: 0.5 }]}>
-          {/* Yearly subscription */}
           <Pressable
-            onPress={() => handlePurchase(PRODUCT_IDS.YEARLY)}
+            onPress={() => handlePurchase(PRODUCT_IDS.LIFETIME)}
             disabled={purchasing}
             style={({ pressed }) => [
               styles.purchaseBtn,
@@ -133,53 +124,73 @@ export default function PremiumScreen() {
             ]}
           >
             <Text style={styles.purchaseBtnTitle}>
-              {lang === 'ko' ? '연간 구독' : 'Yearly'}
+              {ui('lifetime', lang)}
             </Text>
-            <Text style={styles.purchaseBtnPrice}>
-              {lang === 'ko' ? '₩9,900 / 년' : '$6.99 / year'}
-            </Text>
+            <Text style={styles.purchaseBtnPrice}>$14.99</Text>
             <View style={styles.bestBadge}>
               <Text style={styles.bestBadgeText}>BEST</Text>
             </View>
           </Pressable>
-
-          {/* Monthly subscription */}
-          <Pressable
-            onPress={() => handlePurchase(PRODUCT_IDS.MONTHLY)}
-            disabled={purchasing}
-            style={({ pressed }) => [
-              styles.purchaseBtn,
-              { backgroundColor: colors.surface },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Text style={[styles.purchaseBtnTitle, { color: colors.text }]}>
-              {lang === 'ko' ? '월간 구독' : 'Monthly'}
-            </Text>
-            <Text style={[styles.purchaseBtnPrice, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '₩1,900 / 월' : '$1.49 / month'}
-            </Text>
-          </Pressable>
-
-          {/* Permanent purchase */}
-          <Pressable
-            onPress={() => handlePurchase(PRODUCT_IDS.LIFETIME)}
-            disabled={purchasing}
-            style={({ pressed }) => [
-              styles.purchaseBtn,
-              { backgroundColor: colors.surface },
-              pressed && { opacity: 0.7 },
-            ]}
-          >
-            <Text style={[styles.purchaseBtnTitle, { color: colors.text }]}>
-              {lang === 'ko' ? '영구 구매' : 'Lifetime'}
-            </Text>
-            <Text style={[styles.purchaseBtnPrice, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '₩19,900' : '$14.99'}
-            </Text>
-          </Pressable>
         </View>
       )}
+
+      {/* AI Credit Packs */}
+      <Text style={[styles.creditSectionTitle, { color: colors.text }]}>
+        {`🤖 ${ui('aiCredits', lang)}`}
+      </Text>
+      <Text style={[styles.creditBalance, { color: colors.textMuted }]}>
+        {ui('aiCredits', lang)}: {aiCredits}
+      </Text>
+
+      <View style={[styles.creditGrid, purchasing && { opacity: 0.5 }]}>
+        <Pressable
+          onPress={() => handlePurchase(PRODUCT_IDS.CREDITS_50)}
+          disabled={purchasing}
+          style={({ pressed }) => [
+            styles.creditBtn,
+            { backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <Text style={[styles.creditAmount, { color: colors.text }]}>50</Text>
+          <Text style={[styles.creditLabel, { color: colors.textMuted }]}>{ui('aiCredits', lang)}</Text>
+          <Text style={[styles.creditPrice, { color: colors.primary }]}>$1.99</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => handlePurchase(PRODUCT_IDS.CREDITS_150)}
+          disabled={purchasing}
+          style={({ pressed }) => [
+            styles.creditBtn,
+            { backgroundColor: colors.surface, borderWidth: 2, borderColor: colors.primary },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <View style={styles.saveBadge}>
+            <Text style={styles.saveBadgeText}>SAVE 11%</Text>
+          </View>
+          <Text style={[styles.creditAmount, { color: colors.text }]}>150</Text>
+          <Text style={[styles.creditLabel, { color: colors.textMuted }]}>{ui('aiCredits', lang)}</Text>
+          <Text style={[styles.creditPrice, { color: colors.primary }]}>$3.99</Text>
+        </Pressable>
+
+        <Pressable
+          onPress={() => handlePurchase(PRODUCT_IDS.CREDITS_500)}
+          disabled={purchasing}
+          style={({ pressed }) => [
+            styles.creditBtn,
+            { backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+        >
+          <View style={styles.saveBadge}>
+            <Text style={styles.saveBadgeText}>SAVE 50%</Text>
+          </View>
+          <Text style={[styles.creditAmount, { color: colors.text }]}>500</Text>
+          <Text style={[styles.creditLabel, { color: colors.textMuted }]}>{ui('aiCredits', lang)}</Text>
+          <Text style={[styles.creditPrice, { color: colors.primary }]}>$9.99</Text>
+        </Pressable>
+      </View>
 
       {/* Restore */}
       <Pressable
@@ -191,15 +202,9 @@ export default function PremiumScreen() {
         ]}
       >
         <Text style={[styles.restoreText, { color: colors.primary }]}>
-          {lang === 'ko' ? '구매 복원' : 'Restore Purchase'}
+          {ui('purchaseRestore', lang)}
         </Text>
       </Pressable>
-
-      <Text style={[styles.terms, { color: colors.textMuted }]}>
-        {lang === 'ko'
-          ? '구독은 기간 종료 전 취소하지 않으면 자동 갱신됩니다.\n구매 후 설정에서 관리할 수 있습니다.'
-          : 'Subscriptions auto-renew unless cancelled before the end of the period.\nManage subscriptions in device settings.'}
-      </Text>
     </ScrollView>
   );
 }
@@ -222,10 +227,18 @@ const styles = StyleSheet.create({
   purchaseArea: { gap: 12, marginTop: 24 },
   purchaseBtn: { borderRadius: 20, padding: 20, alignItems: 'center', position: 'relative' as const },
   purchaseBtnTitle: { fontSize: 18, fontWeight: '800', color: '#fff' },
-  purchaseBtnPrice: { fontSize: 16, fontWeight: '700', color: 'rgba(255,255,255,0.85)', marginTop: 4 },
+  purchaseBtnPrice: { fontSize: 22, fontWeight: '900', color: '#fff', marginTop: 4 },
   bestBadge: { position: 'absolute' as const, top: -8, right: 16, backgroundColor: '#FF6B6B', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 999 },
   bestBadgeText: { fontSize: 12, fontWeight: '900', color: '#fff', letterSpacing: 1 },
-  restoreBtn: { paddingVertical: 16, alignItems: 'center', marginTop: 16 },
+  creditSectionTitle: { fontSize: 22, fontWeight: '800', marginTop: 32, marginBottom: 4 },
+  creditBalance: { fontSize: 15, fontWeight: '600', marginBottom: 12 },
+  creditGrid: { flexDirection: 'row', gap: 10 },
+  creditBtn: { flex: 1, borderRadius: 16, padding: 16, alignItems: 'center', gap: 4, position: 'relative' as const },
+  creditAmount: { fontSize: 28, fontWeight: '900' },
+  creditLabel: { fontSize: 11, fontWeight: '600' },
+  creditPrice: { fontSize: 16, fontWeight: '800', marginTop: 4 },
+  saveBadge: { position: 'absolute' as const, top: -8, right: -4, backgroundColor: '#FF6B6B', paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999 },
+  saveBadgeText: { fontSize: 9, fontWeight: '900', color: '#fff', letterSpacing: 0.5 },
+  restoreBtn: { paddingVertical: 16, alignItems: 'center', marginTop: 24 },
   restoreText: { fontSize: 16, fontWeight: '700' },
-  terms: { fontSize: 12, fontWeight: '500', textAlign: 'center', lineHeight: 18, marginTop: 8, paddingHorizontal: 16 },
 });

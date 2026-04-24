@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { categories as builtinCategories } from '../src/data/words';
+import { categories as builtinCategories, wordText, catText } from '../src/data/words';
 import { deleteAllRecordings, deleteRecording } from '../src/lib/audioStorage';
 import { deleteImage, deleteAllImages } from '../src/lib/imageStorage';
 import { radius, useIsDark, useThemeColors } from '../src/lib/theme';
@@ -150,7 +150,7 @@ export default function ManageScreen() {
     return imageOverrides.map((id) => {
       for (const cat of builtinCategories) {
         const found = cat.words.find((w) => w.id === id);
-        if (found) return { wordId: id, name: lang === 'ko' ? found.ko : found.en, emoji: found.emoji, catName: lang === 'ko' ? cat.ko : cat.en };
+        if (found) return { wordId: id, name: wordText(found, lang), emoji: found.emoji, catName: catText(cat, lang) };
       }
       return { wordId: id, name: id, emoji: '📷', catName: '' };
     });
@@ -219,10 +219,10 @@ export default function ManageScreen() {
               <View key={cat.id} style={[styles.catSection, { backgroundColor: colors.surface }]}>
                 <View style={styles.catHeader}>
                   <Text style={[styles.catName, { color: colors.text }]}>
-                    {cat.emoji} {lang === 'ko' ? cat.ko : cat.en}
+                    {cat.emoji} {catText(cat, lang)}
                   </Text>
                   <Pressable
-                    onPress={() => handleDeleteCategory(cat.id, lang === 'ko' ? cat.ko : cat.en)}
+                    onPress={() => handleDeleteCategory(cat.id, catText(cat, lang))}
                     style={({ pressed }) => [styles.deleteChip, { backgroundColor: colors.danger }, pressed && { opacity: 0.7 }]}
                   >
                     <Text style={styles.deleteChipText}>
@@ -279,7 +279,7 @@ export default function ManageScreen() {
                 <View key={catId} style={[styles.catSection, { backgroundColor: colors.surface }]}>
                   <View style={styles.catHeader}>
                     <Text style={[styles.catName, { color: colors.text }]}>
-                      {cat?.emoji ?? '📁'} {lang === 'ko' ? cat?.ko ?? catId : cat?.en ?? catId}
+                      {cat?.emoji ?? '📁'} {cat ? catText(cat, lang) : catId}
                     </Text>
                     <Text style={[styles.builtinBadge, { color: colors.textMuted }]}>
                       {lang === 'ko' ? '기본 카테고리' : 'Built-in'}

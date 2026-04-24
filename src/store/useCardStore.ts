@@ -3,10 +3,22 @@ import { create } from 'zustand';
 import type { Lang } from '../data/words';
 import { storage } from './storage';
 
+const LOCALE_TO_LANG: Record<string, Lang> = {
+  ko: 'ko',
+  en: 'en',
+  ja: 'ja',
+  es: 'es',
+  zh: 'zh',
+  fr: 'fr',
+  de: 'de',
+  pt: 'pt',
+};
+
 function getDeviceLang(): Lang {
   try {
     const locales = getLocales();
-    if (locales[0]?.languageCode === 'ko') return 'ko';
+    const code = locales[0]?.languageCode ?? '';
+    return LOCALE_TO_LANG[code] ?? 'en';
   } catch {}
   return 'en';
 }

@@ -14,6 +14,8 @@ import {
   getCategoryById,
   getQuizChoices,
   shuffleWords,
+  wordText,
+  catText,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
 import { QuizLimitBlock } from '../../src/components/LimitGate';
@@ -89,7 +91,7 @@ export default function QuizScreen() {
 
       if (choice.id === current.id) {
         setScore((s) => s + 1);
-        speak(lang === 'ko' ? current.ko : current.en, lang, ttsRate);
+        speak(wordText(current, lang), lang, ttsRate);
         bounceScale.value = withSequence(
           withTiming(1.3, { duration: 150 }),
           withTiming(1, { duration: 200 }),
@@ -128,7 +130,7 @@ export default function QuizScreen() {
   const bgColor = dimCategoryColor(rawBg, isDark);
   const headerLabel = isAll
     ? lang === 'ko' ? '전체 퀴즈' : 'All Quiz'
-    : lang === 'ko' ? `${category?.ko} 퀴즈` : `${category?.en} Quiz`;
+    : category ? `${catText(category, lang)} ${lang === 'ko' ? '퀴즈' : 'Quiz'}` : '';
 
   if (!quizAllowed) {
     return <QuizLimitBlock onUpgrade={() => router.push('/premium')} onBack={() => router.back()} />;
@@ -171,9 +173,10 @@ export default function QuizScreen() {
 
   if (!current) return null;
 
+  const currentText = wordText(current, lang);
   const questionText = lang === 'ko'
-    ? `${current.ko}${getParticle(current.ko)} 어디있을까요?`
-    : `Where is ${current.en}?`;
+    ? `${currentText}${getParticle(currentText)} 어디있을까요?`
+    : `Where is ${currentText}?`;
 
   return (
     <View style={[styles.root, { backgroundColor: bgColor }]}>
@@ -198,7 +201,7 @@ export default function QuizScreen() {
         <Animated.View style={bounceStyle}>
           <Text style={[styles.questionText, { color: colors.text }]}>{questionText}</Text>
           <Pressable
-            onPress={() => { unlockAudio(); speak(lang === 'ko' ? current.ko : current.en, lang, ttsRate); }}
+            onPress={() => { unlockAudio(); speak(wordText(current, lang), lang, ttsRate); }}
           >
             <Text style={[styles.tapHint, { color: colors.textMuted }]}>
               🔊 {lang === 'ko' ? '탭하여 듣기' : 'Tap to hear'}

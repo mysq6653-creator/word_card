@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { categories } from '../src/data/words';
+import { categories, catText } from '../src/data/words';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import { useCustomCardStore } from '../src/store/useCustomCardStore';
@@ -152,7 +152,7 @@ export default function HomeScreen() {
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
-              {lang === 'ko' ? cat.ko : cat.en}
+              {catText(cat, lang)}
             </Text>
           </Pressable>
         ))}
@@ -162,7 +162,7 @@ export default function HomeScreen() {
           <Pressable
             key={cat.id}
             onPress={() => router.push(`/category/${cat.id}`)}
-            onLongPress={() => handleDeleteCategory(cat.id, lang === 'ko' ? cat.ko : cat.en)}
+            onLongPress={() => handleDeleteCategory(cat.id, catText(cat, lang))}
             style={({ pressed }) => [
               styles.tile,
               { backgroundColor: dimCategoryColor(cat.color, isDark) },
@@ -172,7 +172,7 @@ export default function HomeScreen() {
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
-              {lang === 'ko' ? cat.ko : cat.en}
+              {catText(cat, lang)}
             </Text>
             <View style={styles.customBadge}>
               <Text style={styles.customBadgeText}>MY</Text>

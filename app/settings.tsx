@@ -6,7 +6,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore, type ColorMode } from '../src/store/useCardStore';
 import { usePremiumStore } from '../src/store/usePremiumStore';
+import { SUPPORTED_LANGS } from '../src/data/words';
 import type { Lang } from '../src/data/words';
+import { ui } from '../src/data/ui';
 
 type SegmentOption<T> = { label: string; value: T };
 
@@ -116,17 +118,28 @@ export default function SettingsScreen() {
 
       {/* Language */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '기본 언어' : 'Language'}
+        {ui('language', lang)}
       </Text>
-      <Segment<Lang>
-        options={[
-          { label: '🇰🇷 한국어', value: 'ko' },
-          { label: '🇺🇸 English', value: 'en' },
-        ]}
-        value={lang}
-        onChange={setLang}
-        colors={colors}
-      />
+      <View style={styles.langGrid}>
+        {SUPPORTED_LANGS.map((l) => {
+          const active = lang === l.code;
+          return (
+            <Pressable
+              key={l.code}
+              onPress={() => setLang(l.code)}
+              style={[
+                styles.langChip,
+                { backgroundColor: active ? colors.primary : colors.surface },
+              ]}
+            >
+              <Text style={styles.langFlag}>{l.flag}</Text>
+              <Text style={[styles.langLabel, { color: active ? '#fff' : colors.text }]} numberOfLines={1}>
+                {l.label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
 
       {/* Dark mode */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
@@ -190,9 +203,24 @@ export default function SettingsScreen() {
         <Text style={[styles.manageArrow, { color: '#666' }]}>→</Text>
       </Pressable>
 
+      {/* AI Voice setup */}
+      <Pressable
+        onPress={() => router.push('/voice-setup')}
+        style={({ pressed }) => [
+          styles.manageBtn,
+          { backgroundColor: colors.surface, marginTop: 12 },
+          pressed && { opacity: 0.7 },
+        ]}
+      >
+        <Text style={[styles.manageBtnText, { color: colors.text }]}>
+          🎙️ {ui('voiceSetup', lang)}
+        </Text>
+        <Text style={[styles.manageArrow, { color: colors.textMuted }]}>→</Text>
+      </Pressable>
+
       {/* Data management */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '데이터 관리' : 'Data'}
+        {ui('data', lang)}
       </Text>
       <Pressable
         onPress={() => router.push('/manage')}
@@ -275,6 +303,10 @@ const styles = StyleSheet.create({
   backText: { fontSize: 18, fontWeight: '700' },
   title: { fontSize: 32, fontWeight: '800', marginBottom: 24 },
   sectionLabel: { fontSize: 15, fontWeight: '600', marginTop: 16, marginBottom: 8, marginLeft: 4 },
+  langGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
+  langChip: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 12, paddingVertical: 10, borderRadius: 999, minWidth: '22%' as any },
+  langFlag: { fontSize: 18 },
+  langLabel: { fontSize: 13, fontWeight: '700' },
   premiumBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md, marginTop: 24 },
   premiumBtnText: { fontSize: 17, fontWeight: '800', color: '#333' },
   manageBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md },

@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { categories } from '../src/data/words';
+import { categories, catText } from '../src/data/words';
 import { saveImage } from '../src/lib/imageStorage';
 import { resizeImage } from '../src/lib/imageResize';
 import { radius, useThemeColors } from '../src/lib/theme';
@@ -246,7 +246,7 @@ export default function AddCardScreen() {
                 style={[styles.catChipLabel, { color: active ? '#fff' : colors.text }]}
                 numberOfLines={1}
               >
-                {lang === 'ko' ? cat.ko : cat.en}
+                {catText(cat, lang)}
               </Text>
             </Pressable>
           );

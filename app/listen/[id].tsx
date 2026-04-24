@@ -14,6 +14,8 @@ import {
   getCategoryById,
   getQuizChoices,
   shuffleWords,
+  wordText,
+  catText,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
 import { QuizLimitBlock } from '../../src/components/LimitGate';
@@ -79,7 +81,7 @@ export default function ListenQuizScreen() {
   const speakCurrent = useCallback(() => {
     if (!current) return;
     unlockAudio();
-    speak(lang === 'ko' ? current.ko : current.en, lang, ttsRate);
+    speak(wordText(current, lang), lang, ttsRate);
   }, [current, lang, ttsRate]);
 
   useEffect(() => {
@@ -98,7 +100,7 @@ export default function ListenQuizScreen() {
       if (choice.id === current.id) {
         setScore((s) => s + 1);
         setRevealed(true);
-        speak(lang === 'ko' ? current.ko : current.en, lang, ttsRate);
+        speak(wordText(current, lang), lang, ttsRate);
         bounceScale.value = withSequence(
           withTiming(1.3, { duration: 150 }),
           withTiming(1, { duration: 200 }),
@@ -212,7 +214,7 @@ export default function ListenQuizScreen() {
 
           {revealed && (
             <Text style={styles.revealedWord}>
-              {current.emoji} {lang === 'ko' ? current.ko : current.en}
+              {current.emoji} {wordText(current, lang)}
             </Text>
           )}
         </Animated.View>
