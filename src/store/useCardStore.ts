@@ -37,7 +37,6 @@ type State = {
 };
 
 type Actions = {
-  toggleLang: () => void;
   setLang: (lang: Lang) => void;
   setAutoplay: (autoplay: boolean) => void;
   setShuffle: (shuffle: boolean) => void;
@@ -79,10 +78,6 @@ export const useCardStore = create<State & Actions>((set, get) => ({
   autoplaySpeed: 4000,
   ttsRate: 0.9,
   _hydrated: false,
-  toggleLang: () => {
-    set((s) => ({ lang: s.lang === 'ko' ? 'en' : 'ko' }));
-    persistState(get());
-  },
   setLang: (lang) => {
     set({ lang });
     persistState(get());
