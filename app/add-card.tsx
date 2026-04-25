@@ -191,7 +191,7 @@ export default function AddCardScreen() {
         style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.primary }]}
         value={ko}
         onChangeText={setKo}
-        placeholder={lang === 'ko' ? '예: 강아지' : 'e.g. 강아지'}
+        placeholder={ui('egKorean', lang)}
         placeholderTextColor={colors.textMuted}
         maxLength={20}
       />
@@ -204,7 +204,7 @@ export default function AddCardScreen() {
         style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.primary }]}
         value={en}
         onChangeText={setEn}
-        placeholder={lang === 'ko' ? '예: Dog' : 'e.g. Dog'}
+        placeholder={ui('egEnglish', lang)}
         placeholderTextColor={colors.textMuted}
         maxLength={30}
       />
@@ -281,7 +281,7 @@ export default function AddCardScreen() {
             style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.primary }]}
             value={newCatKo}
             onChangeText={setNewCatKo}
-            placeholder={lang === 'ko' ? '한국어 이름' : 'Korean name'}
+            placeholder={ui('koreanNamePlaceholder', lang)}
             placeholderTextColor={colors.textMuted}
             maxLength={20}
           />
@@ -289,7 +289,7 @@ export default function AddCardScreen() {
             style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.primary }]}
             value={newCatEn}
             onChangeText={setNewCatEn}
-            placeholder={lang === 'ko' ? '영어 이름' : 'English name'}
+            placeholder={ui('englishNamePlaceholder', lang)}
             placeholderTextColor={colors.textMuted}
             maxLength={30}
           />

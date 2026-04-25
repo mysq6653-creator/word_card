@@ -8,6 +8,7 @@ import 'react-native-reanimated';
 
 import { useIsDark, useThemeColors } from '../src/lib/theme';
 import { ToastProvider } from '../src/components/Toast';
+import { ErrorBoundary } from '../src/components/ErrorBoundary';
 import { initIAP, restorePurchases, endIAP } from '../src/lib/iap';
 import { usePremiumStore } from '../src/store/usePremiumStore';
 
@@ -54,28 +55,30 @@ export default function RootLayout() {
   useIAPSync();
 
   return (
-    <GestureHandlerRootView style={[styles.root, { backgroundColor: colors.bg }]}>
-      <SafeAreaProvider>
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg },
-          }}
-        >
-          <Stack.Screen name="index" />
-          <Stack.Screen name="category/[id]" />
-          <Stack.Screen name="settings" />
-          <Stack.Screen name="privacy" />
-          <Stack.Screen name="add-card" />
-          <Stack.Screen name="manage" />
-          <Stack.Screen name="quiz/[id]" />
-          <Stack.Screen name="listen/[id]" />
-          <Stack.Screen name="premium" />
-        </Stack>
-        <ToastProvider />
-        <StatusBar style={isDark ? 'light' : 'dark'} />
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={[styles.root, { backgroundColor: colors.bg }]}>
+        <SafeAreaProvider>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              contentStyle: { backgroundColor: colors.bg },
+            }}
+          >
+            <Stack.Screen name="index" />
+            <Stack.Screen name="category/[id]" />
+            <Stack.Screen name="settings" />
+            <Stack.Screen name="privacy" />
+            <Stack.Screen name="add-card" />
+            <Stack.Screen name="manage" />
+            <Stack.Screen name="quiz/[id]" />
+            <Stack.Screen name="listen/[id]" />
+            <Stack.Screen name="premium" />
+          </Stack>
+          <ToastProvider />
+          <StatusBar style={isDark ? 'light' : 'dark'} />
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

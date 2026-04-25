@@ -11,6 +11,7 @@ import { isConfigured, cloneVoice, generateSpeech, deleteClonedVoice } from '../
 import { requestPermission, startRecording } from '../src/lib/recorder';
 import { saveAiAudio } from '../src/lib/aiAudioStorage';
 import { getAllWords, wordText } from '../src/data/words';
+import { ui, uiFmt } from '../src/data/ui';
 import type { Lang, Word } from '../src/data/words';
 import type { RecorderHandle } from '../src/lib/recorder';
 
@@ -22,21 +23,64 @@ function showAlert(message: string, title?: string) {
   }
 }
 
-const SAMPLE_SENTENCES_KO = [
-  '안녕하세요, 저는 우리 아기에게 단어를 알려줄 거예요.',
-  '사과는 빨갛고 맛있어요. 바나나는 노란색이에요.',
-  '강아지가 멍멍 짖어요. 고양이가 야옹 울어요.',
-  '하나, 둘, 셋, 넷, 다섯, 여섯, 일곱, 여덟, 아홉, 열.',
-  '엄마가 사랑해. 아빠가 사랑해. 우리 아기 최고야.',
-];
-
-const SAMPLE_SENTENCES_EN = [
-  'Hello, I will teach my baby some new words today.',
-  'The apple is red and delicious. The banana is yellow.',
-  'The dog goes woof. The cat goes meow.',
-  'One, two, three, four, five, six, seven, eight, nine, ten.',
-  'Mommy loves you. Daddy loves you. You are the best baby.',
-];
+const SAMPLE_SENTENCES: Record<Lang, string[]> = {
+  ko: [
+    '안녕하세요, 저는 우리 아기에게 단어를 알려줄 거예요.',
+    '사과는 빨갛고 맛있어요. 바나나는 노란색이에요.',
+    '강아지가 멍멍 짖어요. 고양이가 야옹 울어요.',
+    '하나, 둘, 셋, 넷, 다섯, 여섯, 일곱, 여덟, 아홉, 열.',
+    '엄마가 사랑해. 아빠가 사랑해. 우리 아기 최고야.',
+  ],
+  en: [
+    'Hello, I will teach my baby some new words today.',
+    'The apple is red and delicious. The banana is yellow.',
+    'The dog goes woof. The cat goes meow.',
+    'One, two, three, four, five, six, seven, eight, nine, ten.',
+    'Mommy loves you. Daddy loves you. You are the best baby.',
+  ],
+  ja: [
+    'こんにちは、赤ちゃんに言葉を教えますよ。',
+    'りんごは赤くておいしいです。バナナは黄色です。',
+    '犬がワンワン吠えます。猫がニャーと鳴きます。',
+    'いち、に、さん、し、ご、ろく、なな、はち、きゅう、じゅう。',
+    'ママが大好き。パパが大好き。赤ちゃんが一番だよ。',
+  ],
+  es: [
+    'Hola, voy a enseñarle palabras nuevas a mi bebé.',
+    'La manzana es roja y deliciosa. El plátano es amarillo.',
+    'El perro hace guau. El gato hace miau.',
+    'Uno, dos, tres, cuatro, cinco, seis, siete, ocho, nueve, diez.',
+    'Mamá te quiere. Papá te quiere. Eres el mejor bebé.',
+  ],
+  zh: [
+    '你好，我要教宝宝一些新单词。',
+    '苹果是红色的，很好吃。香蕉是黄色的。',
+    '小狗汪汪叫。小猫喵喵叫。',
+    '一、二、三、四、五、六、七、八、九、十。',
+    '妈妈爱你。爸爸爱你。你是最棒的宝宝。',
+  ],
+  fr: [
+    "Bonjour, je vais apprendre de nouveaux mots à mon bébé.",
+    "La pomme est rouge et délicieuse. La banane est jaune.",
+    "Le chien fait ouaf. Le chat fait miaou.",
+    "Un, deux, trois, quatre, cinq, six, sept, huit, neuf, dix.",
+    "Maman t'aime. Papa t'aime. Tu es le meilleur bébé.",
+  ],
+  de: [
+    'Hallo, ich werde meinem Baby neue Wörter beibringen.',
+    'Der Apfel ist rot und lecker. Die Banane ist gelb.',
+    'Der Hund bellt wau wau. Die Katze miaut.',
+    'Eins, zwei, drei, vier, fünf, sechs, sieben, acht, neun, zehn.',
+    'Mama hat dich lieb. Papa hat dich lieb. Du bist das beste Baby.',
+  ],
+  pt: [
+    'Olá, vou ensinar palavras novas ao meu bebê.',
+    'A maçã é vermelha e deliciosa. A banana é amarela.',
+    'O cachorro faz au au. O gato faz miau.',
+    'Um, dois, três, quatro, cinco, seis, sete, oito, nove, dez.',
+    'Mamãe te ama. Papai te ama. Você é o melhor bebê.',
+  ],
+};
 
 export default function VoiceSetupScreen() {
   const router = useRouter();
@@ -52,26 +96,22 @@ export default function VoiceSetupScreen() {
 
   const isPremium = usePremiumStore((s) => s.isPremium);
 
-  // Recording state
   const [isRecording, setIsRecording] = useState(false);
   const [recordingSeconds, setRecordingSeconds] = useState(0);
   const [recordedUri, setRecordedUri] = useState<string | null>(null);
   const recorderRef = useRef<RecorderHandle | null>(null);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  // Clone state
   const [voiceName, setVoiceName] = useState('');
   const [isCloning, setIsCloning] = useState(false);
 
-  // Generation state
   const [isGenerating, setIsGenerating] = useState(false);
   const [genProgress, setGenProgress] = useState(0);
   const [genTotal, setGenTotal] = useState(0);
   const cancelledRef = useRef(false);
 
-  const sampleSentences = lang === 'ko' ? SAMPLE_SENTENCES_KO : SAMPLE_SENTENCES_EN;
+  const sampleSentences = SAMPLE_SENTENCES[lang] ?? SAMPLE_SENTENCES.en;
 
-  // Cleanup timer on unmount
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
@@ -81,9 +121,7 @@ export default function VoiceSetupScreen() {
   const handleStartRecording = useCallback(async () => {
     const granted = await requestPermission();
     if (!granted) {
-      showAlert(
-        lang === 'ko' ? '마이크 권한이 필요합니다.' : 'Microphone permission is required.',
-      );
+      showAlert(ui('micPermission', lang));
       return;
     }
 
@@ -98,9 +136,7 @@ export default function VoiceSetupScreen() {
         setRecordingSeconds((s) => s + 1);
       }, 1000);
     } catch {
-      showAlert(
-        lang === 'ko' ? '녹음을 시작할 수 없습니다.' : 'Cannot start recording.',
-      );
+      showAlert(ui('cannotRecord', lang));
     }
   }, [lang]);
 
@@ -123,15 +159,11 @@ export default function VoiceSetupScreen() {
   const handleCloneVoice = useCallback(async () => {
     if (!recordedUri) return;
     if (voices.length >= MAX_VOICES) {
-      showAlert(
-        lang === 'ko'
-          ? `최대 ${MAX_VOICES}개의 목소리만 등록할 수 있습니다.`
-          : `Maximum ${MAX_VOICES} voice profiles allowed.`,
-      );
+      showAlert(uiFmt('maxVoicesReached', lang, { max: String(MAX_VOICES) }));
       return;
     }
 
-    const name = voiceName.trim() || (lang === 'ko' ? '내 목소리' : 'My Voice');
+    const name = voiceName.trim() || ui('myVoice', lang);
 
     setIsCloning(true);
     try {
@@ -147,16 +179,10 @@ export default function VoiceSetupScreen() {
       setRecordedUri(null);
       setVoiceName('');
       setRecordingSeconds(0);
-      showAlert(
-        lang === 'ko' ? '목소리가 등록되었습니다!' : 'Voice clone created!',
-      );
+      showAlert(ui('voiceCloneCreated', lang));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      showAlert(
-        lang === 'ko'
-          ? `목소리 복제에 실패했습니다: ${message}`
-          : `Voice cloning failed: ${message}`,
-      );
+      showAlert(uiFmt('voiceCloneFailed', lang, { error: message }));
     } finally {
       setIsCloning(false);
     }
@@ -176,9 +202,7 @@ export default function VoiceSetupScreen() {
 
   const handleGenerateAll = useCallback(async () => {
     if (!activeVoiceId) {
-      showAlert(
-        lang === 'ko' ? '먼저 목소리를 선택해주세요.' : 'Please select a voice first.',
-      );
+      showAlert(ui('selectVoiceFirst', lang));
       return;
     }
 
@@ -199,11 +223,7 @@ export default function VoiceSetupScreen() {
         await saveAiAudio(word.id, lang, audioUri);
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        showAlert(
-          lang === 'ko'
-            ? `"${text}" 생성 실패: ${message}`
-            : `Failed to generate "${text}": ${message}`,
-        );
+        showAlert(uiFmt('generateWordFailed', lang, { word: text, error: message }));
         break;
       }
 
@@ -213,11 +233,7 @@ export default function VoiceSetupScreen() {
 
     setIsGenerating(false);
     if (!cancelledRef.current) {
-      showAlert(
-        lang === 'ko'
-          ? `${completed}개 단어 음성 생성 완료!`
-          : `Generated audio for ${completed} words!`,
-      );
+      showAlert(uiFmt('generateComplete', lang, { count: String(completed) }));
     }
   }, [activeVoiceId, lang]);
 
@@ -227,13 +243,10 @@ export default function VoiceSetupScreen() {
 
   const handleGenerateCurrentCard = useCallback(async () => {
     if (!activeVoiceId) {
-      showAlert(
-        lang === 'ko' ? '먼저 목소리를 선택해주세요.' : 'Please select a voice first.',
-      );
+      showAlert(ui('selectVoiceFirst', lang));
       return;
     }
 
-    // Generate for a sample word to test
     const allWords = getAllWords();
     if (allWords.length === 0) return;
     const word = allWords[0];
@@ -246,18 +259,10 @@ export default function VoiceSetupScreen() {
       const audioUri = await generateSpeech(text, activeVoiceId);
       await saveAiAudio(word.id, lang, audioUri);
       setGenProgress(1);
-      showAlert(
-        lang === 'ko'
-          ? `"${text}" 음성이 생성되었습니다!`
-          : `Audio for "${text}" generated!`,
-      );
+      showAlert(uiFmt('sampleGenerated', lang, { word: text }));
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      showAlert(
-        lang === 'ko'
-          ? `음성 생성 실패: ${message}`
-          : `Speech generation failed: ${message}`,
-      );
+      showAlert(uiFmt('speechGenFailed', lang, { error: message }));
     } finally {
       setIsGenerating(false);
     }
@@ -278,7 +283,6 @@ export default function VoiceSetupScreen() {
         { paddingTop: insets.top + 16, paddingBottom: insets.bottom + 40 },
       ]}
     >
-      {/* Header */}
       <View style={styles.header}>
         <Pressable
           onPress={() => router.back()}
@@ -289,25 +293,25 @@ export default function VoiceSetupScreen() {
           ]}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
-            {lang === 'ko' ? '← 돌아가기' : '← Back'}
+            {`← ${ui('back', lang)}`}
           </Text>
         </Pressable>
       </View>
 
       <Text style={[styles.title, { color: colors.text }]}>
-        {lang === 'ko' ? '🎙️ AI 목소리 설정' : '🎙️ AI Voice Setup'}
+        {`🎙️ ${ui('voiceSetup', lang)}`}
       </Text>
 
       {/* Section 1: API Key Status */}
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {lang === 'ko' ? 'API 연결 상태' : 'API Connection'}
+          {ui('apiConnection', lang)}
         </Text>
         {apiReady ? (
           <View style={styles.statusRow}>
             <View style={[styles.statusDot, { backgroundColor: colors.success }]} />
             <Text style={[styles.statusText, { color: colors.success }]}>
-              {lang === 'ko' ? 'ElevenLabs 연결됨' : 'ElevenLabs Connected'}
+              {ui('apiConnected', lang)}
             </Text>
           </View>
         ) : (
@@ -315,11 +319,11 @@ export default function VoiceSetupScreen() {
             <View style={styles.statusRow}>
               <View style={[styles.statusDot, { backgroundColor: colors.danger }]} />
               <Text style={[styles.statusText, { color: colors.danger }]}>
-                {lang === 'ko' ? 'API 키 미설정' : 'API Key Not Set'}
+                {ui('apiKeyNotSet', lang)}
               </Text>
             </View>
             <Text style={[styles.helpText, { color: colors.textMuted }]}>
-              app.json {'>'} expo.extra.elevenLabsApiKey{lang === 'ko' ? '에 API 키를 설정하세요' : ' - set your API key'}
+              {`app.json > expo.extra.elevenLabsApiKey${ui('setApiKeyHint', lang)}`}
             </Text>
           </View>
         )}
@@ -328,12 +332,10 @@ export default function VoiceSetupScreen() {
       {/* Section 2: Voice Recording & Cloning */}
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {lang === 'ko' ? '목소리 녹음' : 'Voice Recording'}
+          {ui('voiceRecording', lang)}
         </Text>
         <Text style={[styles.instructions, { color: colors.textMuted }]}>
-          {lang === 'ko'
-            ? '30초 이상 아래 문장을 읽어주세요'
-            : 'Please read the sentences below for at least 30 seconds'}
+          {ui('readSentences', lang)}
         </Text>
 
         <View style={[styles.sampleBox, { backgroundColor: colors.bg }]}>
@@ -344,7 +346,6 @@ export default function VoiceSetupScreen() {
           ))}
         </View>
 
-        {/* Record button */}
         <Pressable
           onPress={isRecording ? handleStopRecording : handleStartRecording}
           disabled={!apiReady || isCloning}
@@ -358,41 +359,32 @@ export default function VoiceSetupScreen() {
         >
           <Text style={styles.recordBtnText}>
             {isRecording
-              ? lang === 'ko'
-                ? `⏺ 녹음 중지 (${recordingSeconds}초)`
-                : `⏺ Stop Recording (${recordingSeconds}s)`
-              : lang === 'ko'
-              ? '🎙️ 녹음 시작'
-              : '🎙️ Start Recording'}
+              ? uiFmt('stopRecordingTimer', lang, { seconds: String(recordingSeconds) })
+              : ui('startRecordingBtn', lang)}
           </Text>
         </Pressable>
 
         {isRecording && (
           <Text style={[styles.timerText, { color: colors.textMuted }]}>
-            {lang === 'ko'
-              ? `녹음 중... ${recordingSeconds}초`
-              : `Recording... ${recordingSeconds}s`}
+            {uiFmt('recordingTimer', lang, { seconds: String(recordingSeconds) })}
           </Text>
         )}
 
-        {/* Clone button */}
         {recordedUri && !isRecording && (
           <View style={styles.cloneArea}>
             <Text style={[styles.recordedLabel, { color: colors.success }]}>
-              {lang === 'ko'
-                ? `${recordingSeconds}초 녹음 완료`
-                : `${recordingSeconds}s recorded`}
+              {uiFmt('recordedSeconds', lang, { seconds: String(recordingSeconds) })}
             </Text>
 
             <View style={styles.nameInputRow}>
               <Text style={[styles.nameLabel, { color: colors.text }]}>
-                {lang === 'ko' ? '이름:' : 'Name:'}
+                {ui('nameLabel', lang)}
               </Text>
               <TextInput
                 style={[styles.nameInput, { backgroundColor: colors.bg, borderColor: colors.textMuted, color: colors.text }]}
                 value={voiceName}
                 onChangeText={setVoiceName}
-                placeholder={lang === 'ko' ? '내 목소리' : 'My Voice'}
+                placeholder={ui('myVoice', lang)}
                 placeholderTextColor={colors.textMuted}
                 maxLength={20}
               />
@@ -411,20 +403,14 @@ export default function VoiceSetupScreen() {
             >
               <Text style={styles.cloneBtnText}>
                 {isCloning
-                  ? lang === 'ko'
-                    ? '업로드 중...'
-                    : 'Uploading...'
-                  : lang === 'ko'
-                  ? '🔊 목소리 복제하기'
-                  : '🔊 Create Voice Clone'}
+                  ? ui('uploading', lang)
+                  : ui('createVoiceClone', lang)}
               </Text>
             </Pressable>
 
             {voices.length >= MAX_VOICES && (
               <Text style={[styles.limitText, { color: colors.danger }]}>
-                {lang === 'ko'
-                  ? `최대 ${MAX_VOICES}개까지 등록할 수 있습니다. 기존 목소리를 삭제해주세요.`
-                  : `Maximum ${MAX_VOICES} voices. Please delete an existing voice.`}
+                {uiFmt('maxVoicesDelete', lang, { max: String(MAX_VOICES) })}
               </Text>
             )}
           </View>
@@ -434,7 +420,7 @@ export default function VoiceSetupScreen() {
       {/* Section 3: My Voices */}
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {lang === 'ko' ? '내 목소리' : 'My Voices'}
+          {ui('myVoices', lang)}
         </Text>
         <Text style={[styles.voiceCount, { color: colors.textMuted }]}>
           {voices.length}/{MAX_VOICES}
@@ -442,9 +428,7 @@ export default function VoiceSetupScreen() {
 
         {voices.length === 0 ? (
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {lang === 'ko'
-              ? '등록된 목소리가 없습니다. 위에서 녹음해주세요.'
-              : 'No voices registered. Record above to get started.'}
+            {ui('noVoicesYet', lang)}
           </Text>
         ) : (
           voices.map((voice) => {
@@ -477,7 +461,7 @@ export default function VoiceSetupScreen() {
                       ]}
                     >
                       <Text style={styles.actionBtnText}>
-                        {lang === 'ko' ? '선택' : 'Select'}
+                        {ui('select', lang)}
                       </Text>
                     </Pressable>
                   )}
@@ -490,7 +474,7 @@ export default function VoiceSetupScreen() {
                     ]}
                   >
                     <Text style={styles.actionBtnText}>
-                      {lang === 'ko' ? '삭제' : 'Delete'}
+                      {ui('delete', lang)}
                     </Text>
                   </Pressable>
                 </View>
@@ -503,25 +487,22 @@ export default function VoiceSetupScreen() {
       {/* Section 4: Generate AI Voice */}
       <View style={[styles.section, { backgroundColor: colors.surface }]}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>
-          {lang === 'ko' ? 'AI 음성 생성' : 'Generate AI Voice'}
+          {ui('generateAiVoice', lang)}
         </Text>
 
         {!activeVoiceId ? (
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {lang === 'ko'
-              ? '먼저 위에서 목소리를 등록하고 선택해주세요.'
-              : 'Register and select a voice above first.'}
+            {ui('registerVoiceFirst', lang)}
           </Text>
         ) : (
           <View style={styles.generateArea}>
             <Text style={[styles.activeVoiceLabel, { color: colors.text }]}>
-              {lang === 'ko' ? '선택된 목소리: ' : 'Selected voice: '}
+              {`${ui('selectedVoice', lang)} `}
               <Text style={{ fontWeight: '800', color: colors.primary }}>
                 {voices.find((v) => v.voiceId === activeVoiceId)?.name ?? '—'}
               </Text>
             </Text>
 
-            {/* Generate for current card (first word as sample) */}
             <Pressable
               onPress={handleGenerateCurrentCard}
               disabled={isGenerating || !apiReady}
@@ -533,11 +514,10 @@ export default function VoiceSetupScreen() {
               ]}
             >
               <Text style={styles.generateBtnText}>
-                {lang === 'ko' ? '🔊 샘플 카드 생성' : '🔊 Generate Sample Card'}
+                {ui('generateSample', lang)}
               </Text>
             </Pressable>
 
-            {/* Generate for all cards */}
             <Pressable
               onPress={handleGenerateAll}
               disabled={isGenerating || !apiReady}
@@ -549,17 +529,14 @@ export default function VoiceSetupScreen() {
               ]}
             >
               <Text style={styles.generateBtnText}>
-                {lang === 'ko' ? '🔊 모든 카드 생성' : '🔊 Generate for All Cards'}
+                {ui('generateAllCards', lang)}
               </Text>
             </Pressable>
 
-            {/* Progress indicator */}
             {isGenerating && (
               <View style={styles.progressArea}>
                 <Text style={[styles.progressText, { color: colors.text }]}>
-                  {lang === 'ko'
-                    ? `생성 중... ${genProgress}/${genTotal}`
-                    : `Generating... ${genProgress}/${genTotal}`}
+                  {uiFmt('generatingProgress', lang, { done: String(genProgress), total: String(genTotal) })}
                 </Text>
 
                 <View style={[styles.progressBar, { backgroundColor: colors.bg }]}>
@@ -583,16 +560,14 @@ export default function VoiceSetupScreen() {
                   ]}
                 >
                   <Text style={styles.cancelBtnText}>
-                    {lang === 'ko' ? '취소' : 'Cancel'}
+                    {ui('cancel', lang)}
                   </Text>
                 </Pressable>
               </View>
             )}
 
             <Text style={[styles.noteText, { color: colors.textMuted }]}>
-              {lang === 'ko'
-                ? `전체 단어 수: ${getAllWords().length}개`
-                : `Total words: ${getAllWords().length}`}
+              {uiFmt('totalWordsCount', lang, { count: String(getAllWords().length) })}
             </Text>
           </View>
         )}
