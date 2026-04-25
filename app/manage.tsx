@@ -13,6 +13,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories as builtinCategories, wordText, catText } from '../src/data/words';
+import { ui, uiFmt } from '../src/data/ui';
 import { deleteAllRecordings, deleteRecording } from '../src/lib/audioStorage';
 import { deleteImage, deleteAllImages } from '../src/lib/imageStorage';
 import { radius, useIsDark, useThemeColors } from '../src/lib/theme';
@@ -22,20 +23,19 @@ import { useCustomCardStore } from '../src/store/useCustomCardStore';
 
 function confirmAction(
   lang: string,
+  title: string,
   message: string,
+  deleteLabel: string,
+  cancelLabel: string,
   onConfirm: () => void,
 ) {
   if (Platform.OS === 'web') {
     if (window.confirm(message)) onConfirm();
   } else {
-    Alert.alert(
-      lang === 'ko' ? '확인' : 'Confirm',
-      message,
-      [
-        { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
-        { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: onConfirm },
-      ],
-    );
+    Alert.alert(title, message, [
+      { text: cancelLabel, style: 'cancel' },
+      { text: deleteLabel, style: 'destructive', onPress: onConfirm },
+    ]);
   }
 }
 
@@ -71,9 +71,10 @@ export default function ManageScreen() {
 
   const handleDeleteCategory = useCallback((catId: string, catName: string) => {
     confirmAction(lang,
-      lang === 'ko'
-        ? `"${catName}" 카테고리와 모든 카드를 삭제할까요?`
-        : `Delete "${catName}" and all its cards?`,
+      ui('confirm', lang),
+      uiFmt('deleteCatConfirm', lang, { name: catName }),
+      ui('delete', lang),
+      ui('cancel', lang),
       () => {
         const wordsInCat = customWords.filter((w) => w.categoryId === catId);
         for (const w of wordsInCat) {
@@ -83,21 +84,24 @@ export default function ManageScreen() {
         }
         removeCategory(catId);
         bump();
-        showToast(lang === 'ko' ? '카테고리가 삭제되었어요' : 'Category deleted');
+        showToast(ui('categoryDeleted', lang));
       },
     );
   }, [lang, customWords, removeCategory, bump]);
 
   const handleDeleteWord = useCallback((wordId: string, wordName: string) => {
     confirmAction(lang,
-      lang === 'ko' ? `"${wordName}" 카드를 삭제할까요?` : `Delete "${wordName}"?`,
+      ui('confirm', lang),
+      uiFmt('deleteCardConfirmTpl', lang, { name: wordName }),
+      ui('delete', lang),
+      ui('cancel', lang),
       () => {
         deleteImage(wordId).catch(() => {});
         deleteRecording(wordId, 'ko').catch(() => {});
         deleteRecording(wordId, 'en').catch(() => {});
         removeWord(wordId);
         bump();
-        showToast(lang === 'ko' ? '카드가 삭제되었어요' : 'Card deleted');
+        showToast(ui('cardDeleted', lang));
       },
     );
   }, [lang, removeWord, bump]);
@@ -110,13 +114,16 @@ export default function ManageScreen() {
 
   const handleDeleteAllRecordings = useCallback(() => {
     confirmAction(lang,
-      lang === 'ko' ? '모든 녹음을 삭제할까요? 되돌릴 수 없어요.' : 'Delete all recordings? Cannot be undone.',
+      ui('confirm', lang),
+      ui('deleteAllRecordingsConfirm', lang),
+      ui('delete', lang),
+      ui('cancel', lang),
       async () => {
         setDeletingRecordings(true);
         try {
           await deleteAllRecordings();
           bumpRecording();
-          showToast(lang === 'ko' ? '모든 녹음이 삭제되었어요' : 'All recordings deleted');
+          showToast(ui('allRecordingsDeleted', lang));
         } finally {
           setDeletingRecordings(false);
         }
@@ -126,7 +133,10 @@ export default function ManageScreen() {
 
   const handleDeleteAllCustom = useCallback(() => {
     confirmAction(lang,
-      lang === 'ko' ? '모든 커스텀 카드, 카테고리, 사진을 삭제할까요?' : 'Delete all custom cards, categories, and photos?',
+      ui('confirm', lang),
+      ui('deleteAllCustomConfirm', lang),
+      ui('delete', lang),
+      ui('cancel', lang),
       async () => {
         setDeletingImages(true);
         try {
@@ -138,7 +148,7 @@ export default function ManageScreen() {
           }
           await deleteAllImages();
           bump();
-          showToast(lang === 'ko' ? '모든 데이터가 삭제되었어요' : 'All data deleted');
+          showToast(ui('allDataDeleted', lang));
         } finally {
           setDeletingImages(false);
         }
@@ -176,18 +186,18 @@ export default function ManageScreen() {
           ]}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
-            ← {lang === 'ko' ? '돌아가기' : 'Back'}
+            {`← ${ui('back', lang)}`}
           </Text>
         </Pressable>
       </View>
 
       <Text style={[styles.title, { color: colors.text }]}>
-        📂 {lang === 'ko' ? '데이터 관리' : 'Data Manager'}
+        {`📂 ${ui('dataManager', lang)}`}
       </Text>
 
       {/* Custom categories & words */}
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
-        ✏️ {lang === 'ko' ? '나만의 카드' : 'My Cards'}
+        {`✏️ ${ui('myCards', lang)}`}
         <Text style={[styles.sectionCount, { color: colors.textMuted }]}>
           {' '}({customWords.length})
         </Text>
@@ -196,7 +206,7 @@ export default function ManageScreen() {
       {customCategories.length === 0 && customWords.length === 0 ? (
         <View style={[styles.emptyBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.emptyText, { color: colors.textMuted }]}>
-            {lang === 'ko' ? '아직 만든 카드가 없어요' : 'No custom cards yet'}
+            {ui('noCustomCards', lang)}
           </Text>
           <Pressable
             onPress={() => router.push('/add-card')}
@@ -207,7 +217,7 @@ export default function ManageScreen() {
             ]}
           >
             <Text style={styles.addBtnText}>
-              ➕ {lang === 'ko' ? '카드 만들기' : 'Create Card'}
+              {`➕ ${ui('createCard', lang)}`}
             </Text>
           </Pressable>
         </View>
@@ -226,13 +236,13 @@ export default function ManageScreen() {
                     style={({ pressed }) => [styles.deleteChip, { backgroundColor: colors.danger }, pressed && { opacity: 0.7 }]}
                   >
                     <Text style={styles.deleteChipText}>
-                      {lang === 'ko' ? '삭제' : 'Delete'}
+                      {ui('delete', lang)}
                     </Text>
                   </Pressable>
                 </View>
                 {wordsInCat.length === 0 ? (
                   <Text style={[styles.emptyWordText, { color: colors.textMuted }]}>
-                    {lang === 'ko' ? '카드 없음' : 'No cards'}
+                    {ui('noCards', lang)}
                   </Text>
                 ) : (
                   wordsInCat.map((w) => (
@@ -250,7 +260,7 @@ export default function ManageScreen() {
                         onPress={() => handleDeleteWord(w.id, w.ko)}
                         style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
                       >
-                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>🗑️</Text>
+                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
                       </Pressable>
                     </View>
                   ))
@@ -282,7 +292,7 @@ export default function ManageScreen() {
                       {cat?.emoji ?? '📁'} {cat ? catText(cat, lang) : catId}
                     </Text>
                     <Text style={[styles.builtinBadge, { color: colors.textMuted }]}>
-                      {lang === 'ko' ? '기본 카테고리' : 'Built-in'}
+                      {ui('builtIn', lang)}
                     </Text>
                   </View>
                   {words.map((w) => (
@@ -296,7 +306,7 @@ export default function ManageScreen() {
                         onPress={() => handleDeleteWord(w.id, w.ko)}
                         style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
                       >
-                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>🗑️</Text>
+                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
                       </Pressable>
                     </View>
                   ))}
@@ -315,7 +325,7 @@ export default function ManageScreen() {
             ]}
           >
             <Text style={styles.addBtnText}>
-              ➕ {lang === 'ko' ? '카드 만들기' : 'Create Card'}
+              {`➕ ${ui('createCard', lang)}`}
             </Text>
           </Pressable>
         </View>
@@ -325,7 +335,7 @@ export default function ManageScreen() {
       {overrideInfo.length > 0 && (
         <>
           <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>
-            📷 {lang === 'ko' ? '사진으로 변경된 카드' : 'Photo Overrides'}
+            {`📷 ${ui('photoOverridesLabel', lang)}`}
             <Text style={[styles.sectionCount, { color: colors.textMuted }]}>
               {' '}({overrideInfo.length})
             </Text>
@@ -347,7 +357,7 @@ export default function ManageScreen() {
                   style={({ pressed }) => [styles.restoreBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }, pressed && { opacity: 0.5 }]}
                 >
                   <Text style={[styles.restoreBtnText, { color: colors.textMuted }]}>
-                    {lang === 'ko' ? '복원' : 'Restore'}
+                    {ui('restorePhoto', lang)}
                   </Text>
                 </Pressable>
               </View>
@@ -358,7 +368,7 @@ export default function ManageScreen() {
 
       {/* Danger zone */}
       <Text style={[styles.sectionTitle, { color: colors.danger, marginTop: 32 }]}>
-        ⚠️ {lang === 'ko' ? '일괄 삭제' : 'Bulk Delete'}
+        {`⚠️ ${ui('bulkDelete', lang)}`}
       </Text>
 
       <View style={styles.dangerZone}>
@@ -372,9 +382,7 @@ export default function ManageScreen() {
           ]}
         >
           <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
-            🎙️ {deletingRecordings
-              ? (lang === 'ko' ? '삭제 중...' : 'Deleting...')
-              : (lang === 'ko' ? '모든 녹음 삭제' : 'Delete All Recordings')}
+            {`🎙️ ${deletingRecordings ? ui('deleting', lang) : ui('deleteAllRecordings', lang)}`}
           </Text>
         </Pressable>
 
@@ -389,9 +397,7 @@ export default function ManageScreen() {
             ]}
           >
             <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
-              ✏️ {deletingImages
-                ? (lang === 'ko' ? '삭제 중...' : 'Deleting...')
-                : (lang === 'ko' ? '모든 커스텀 데이터 삭제' : 'Delete All Custom Data')}
+              {`✏️ ${deletingImages ? ui('deleting', lang) : ui('deleteAllCustom', lang)}`}
             </Text>
           </Pressable>
         )}

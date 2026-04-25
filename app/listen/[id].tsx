@@ -18,6 +18,7 @@ import {
   catText,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
+import { ui } from '../../src/data/ui';
 import { QuizLimitBlock } from '../../src/components/LimitGate';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
 import { speak, unlockAudio } from '../../src/lib/tts';
@@ -143,8 +144,8 @@ export default function ListenQuizScreen() {
   const rawBg = isAll ? '#E8F5E9' : category?.color ?? '#E8F5E9';
   const bgColor = dimCategoryColor(rawBg, isDark);
   const headerLabel = isAll
-    ? lang === 'ko' ? '듣기 퀴즈' : 'Listening Quiz'
-    : lang === 'ko' ? `${category?.ko} 듣기` : `${category?.en} Listen`;
+    ? ui('listeningQuiz', lang)
+    : category ? `${catText(category, lang)} ${ui('listen', lang)}` : '';
 
   if (!quizAllowed) {
     return <QuizLimitBlock onUpgrade={() => router.push('/premium')} onBack={() => router.back()} />;
@@ -154,10 +155,10 @@ export default function ListenQuizScreen() {
     return (
       <View style={[styles.center, { backgroundColor: colors.bg }]}>
         <Text style={[styles.msgText, { color: colors.text }]}>
-          {lang === 'ko' ? '퀴즈를 하려면 카드가 3개 이상 필요해요' : 'Need at least 3 cards'}
+          {ui('needCardsQuiz', lang)}
         </Text>
         <Pressable onPress={() => router.back()} style={[styles.mainBtn, { backgroundColor: colors.primary }]}>
-          <Text style={styles.mainBtnText}>{lang === 'ko' ? '돌아가기' : 'Back'}</Text>
+          <Text style={styles.mainBtnText}>{ui('back', lang)}</Text>
         </Pressable>
       </View>
     );
@@ -168,17 +169,17 @@ export default function ListenQuizScreen() {
       <View style={[styles.center, { backgroundColor: bgColor }]}>
         <Text style={styles.celebEmoji}>🎉</Text>
         <Text style={[styles.celebTitle, { color: colors.text }]}>
-          {lang === 'ko' ? '잘했어요!' : 'Great Job!'}
+          {ui('greatJob', lang)}
         </Text>
         <Text style={[styles.celebScore, { color: colors.text }]}>
           ⭐ {score} / {queue.length}
         </Text>
         <View style={styles.celebRow}>
           <Pressable onPress={restart} style={[styles.mainBtn, { backgroundColor: colors.primary }]}>
-            <Text style={styles.mainBtnText}>{lang === 'ko' ? '다시 하기' : 'Play Again'}</Text>
+            <Text style={styles.mainBtnText}>{ui('playAgain', lang)}</Text>
           </Pressable>
           <Pressable onPress={() => router.back()} style={[styles.mainBtn, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.mainBtnText, { color: colors.text }]}>{lang === 'ko' ? '돌아가기' : 'Back'}</Text>
+            <Text style={[styles.mainBtnText, { color: colors.text }]}>{ui('back', lang)}</Text>
           </Pressable>
         </View>
       </View>
@@ -209,7 +210,7 @@ export default function ListenQuizScreen() {
       <View style={styles.listenArea}>
         <Animated.View style={bounceStyle}>
           <Text style={[styles.listenPrompt, { color: colors.text }]}>
-            {lang === 'ko' ? '잘 듣고 골라보세요!' : 'Listen and pick!'}
+            {ui('listenAndPick', lang)}
           </Text>
 
           {revealed && (
@@ -227,7 +228,7 @@ export default function ListenQuizScreen() {
             pressed && { opacity: 0.7 },
           ]}
         >
-          <Text style={styles.speakBtnText}>🔊 {lang === 'ko' ? '다시 듣기' : 'Listen Again'}</Text>
+          <Text style={styles.speakBtnText}>{`🔊 ${ui('listenAgain', lang)}`}</Text>
         </Pressable>
       </View>
 

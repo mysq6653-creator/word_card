@@ -14,6 +14,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories, catText } from '../src/data/words';
+import { ui } from '../src/data/ui';
 import { saveImage } from '../src/lib/imageStorage';
 import { resizeImage } from '../src/lib/imageResize';
 import { radius, useThemeColors } from '../src/lib/theme';
@@ -123,7 +124,7 @@ export default function AddCardScreen() {
       });
 
       bump();
-      showToast(lang === 'ko' ? '카드가 저장되었어요!' : 'Card saved!');
+      showToast(ui('cardSaved', lang));
       router.back();
     } finally {
       setSaving(false);
@@ -149,18 +150,18 @@ export default function AddCardScreen() {
           ]}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
-            ← {lang === 'ko' ? '돌아가기' : 'Back'}
+            {`← ${ui('back', lang)}`}
           </Text>
         </Pressable>
       </View>
 
       <Text style={[styles.title, { color: colors.text }]}>
-        ✏️ {lang === 'ko' ? '카드 만들기' : 'Create Card'}
+        {`✏️ ${ui('createCard', lang)}`}
       </Text>
 
       {/* Image picker */}
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '사진 (선택)' : 'Photo (optional)'}
+        {ui('photoOptional', lang)}
       </Text>
       <Pressable
         onPress={pickImage}
@@ -176,7 +177,7 @@ export default function AddCardScreen() {
           <View style={styles.imagePlaceholder}>
             <Text style={styles.imagePlaceholderIcon}>📷</Text>
             <Text style={[styles.imagePlaceholderText, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '앨범에서 선택' : 'Pick from album'}
+              {ui('pickFromAlbum', lang)}
             </Text>
           </View>
         )}
@@ -184,7 +185,7 @@ export default function AddCardScreen() {
 
       {/* Korean name */}
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '한국어 이름 *' : 'Korean Name *'}
+        {ui('koreanName', lang)}
       </Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.primary }]}
@@ -197,7 +198,7 @@ export default function AddCardScreen() {
 
       {/* English name */}
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '영어 이름 *' : 'English Name *'}
+        {ui('englishName', lang)}
       </Text>
       <TextInput
         style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.primary }]}
@@ -210,7 +211,7 @@ export default function AddCardScreen() {
 
       {/* Emoji fallback */}
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '이모지 (사진 없을 때 표시)' : 'Emoji (shown without photo)'}
+        {ui('emojiLabel', lang)}
       </Text>
       <TextInput
         style={[styles.input, styles.emojiInput, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.primary }]}
@@ -223,7 +224,7 @@ export default function AddCardScreen() {
 
       {/* Category selection */}
       <Text style={[styles.label, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '카테고리 *' : 'Category *'}
+        {ui('category', lang)}
       </Text>
 
       <View style={styles.catGrid}>
@@ -265,7 +266,7 @@ export default function AddCardScreen() {
           <Text
             style={[styles.catChipLabel, { color: isNewCategory ? '#fff' : colors.text }]}
           >
-            {lang === 'ko' ? '새 카테고리' : 'New'}
+            {ui('newCategory', lang)}
           </Text>
         </Pressable>
       </View>
@@ -274,7 +275,7 @@ export default function AddCardScreen() {
       {isNewCategory && (
         <View style={[styles.newCatBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.newCatTitle, { color: colors.text }]}>
-            {lang === 'ko' ? '새 카테고리 만들기' : 'New Category'}
+            {ui('newCategoryTitle', lang)}
           </Text>
           <TextInput
             style={[styles.input, { backgroundColor: colors.bg, color: colors.text, borderColor: colors.primary }]}
@@ -294,7 +295,7 @@ export default function AddCardScreen() {
           />
 
           <Text style={[styles.subLabel, { color: colors.textMuted }]}>
-            {lang === 'ko' ? '아이콘' : 'Icon'}
+            {ui('icon', lang)}
           </Text>
           <View style={styles.emojiRow}>
             {CATEGORY_EMOJIS.map((e) => (
@@ -312,7 +313,7 @@ export default function AddCardScreen() {
           </View>
 
           <Text style={[styles.subLabel, { color: colors.textMuted }]}>
-            {lang === 'ko' ? '색상' : 'Color'}
+            {ui('color', lang)}
           </Text>
           <View style={styles.colorRow}>
             {CATEGORY_COLORS.map((c) => (
@@ -335,7 +336,7 @@ export default function AddCardScreen() {
         <LimitBanner
           used={cardLimit.used}
           limit={cardLimit.limit}
-          featureLabel={lang === 'ko' ? '카드 만들기' : 'Card Creation'}
+          featureLabel={ui('cardCreation', lang)}
           onWatchAd={() => setShowAdModal(true)}
           onUpgrade={() => router.push('/premium')}
         />
@@ -352,9 +353,7 @@ export default function AddCardScreen() {
         ]}
       >
         <Text style={[styles.saveBtnText, { color: canSave ? '#fff' : colors.textMuted }]}>
-          {saving
-            ? (lang === 'ko' ? '저장 중...' : 'Saving...')
-            : (lang === 'ko' ? '카드 저장' : 'Save Card')}
+          {saving ? ui('saving', lang) : ui('saveCard', lang)}
         </Text>
       </Pressable>
 

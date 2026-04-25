@@ -32,6 +32,7 @@ import {
   catText,
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
+import { ui } from '../../src/data/ui';
 import { loadRecordingUri, deleteRecording } from '../../src/lib/audioStorage';
 import { loadAiAudioUri } from '../../src/lib/aiAudioStorage';
 import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
@@ -80,7 +81,6 @@ export default function CategoryScreen() {
   }, [customVersion]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const lang = useCardStore((s) => s.lang);
-  const toggleLang = useCardStore((s) => s.toggleLang);
   const autoplay = useCardStore((s) => s.autoplay);
   const setAutoplay = useCardStore((s) => s.setAutoplay);
   const recordingVersion = useCardStore((s) => s.recordingVersion);
@@ -287,16 +287,14 @@ export default function CategoryScreen() {
       }
     };
     if (Platform.OS === 'web') {
-      if (window.confirm(lang === 'ko' ? '이 카드를 삭제할까요?' : 'Delete this card?')) {
-        doDelete();
-      }
+      if (window.confirm(ui('deleteConfirm', lang))) doDelete();
     } else {
       Alert.alert(
-        lang === 'ko' ? '카드 삭제' : 'Delete Card',
-        lang === 'ko' ? '이 카드를 삭제할까요?' : 'Delete this card?',
+        ui('deleteCard', lang),
+        ui('deleteConfirm', lang),
         [
-          { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
-          { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: doDelete },
+          { text: ui('cancel', lang), style: 'cancel' },
+          { text: ui('delete', lang), style: 'destructive', onPress: doDelete },
         ],
       );
     }
@@ -368,7 +366,7 @@ export default function CategoryScreen() {
     });
 
   const headerLabel = isAll
-    ? (lang === 'ko' ? '전체보기' : 'All Cards')
+    ? ui('allCards', lang)
     : category ? catText(category, lang) : '';
 
   const rawBg = isAll ? '#E0E7FF' : category?.color ?? '#fff';
@@ -378,10 +376,10 @@ export default function CategoryScreen() {
     return (
       <View style={[styles.center, { backgroundColor: colors.bg }]}>
         <Text style={[styles.errorText, { color: colors.text }]}>
-          {lang === 'ko' ? '카테고리를 찾을 수 없어요' : 'Category not found'}
+          {ui('categoryNotFound', lang)}
         </Text>
         <Pressable onPress={() => router.back()} style={[styles.backBtnError, { backgroundColor: colors.primary }]}>
-          <Text style={styles.backBtnErrorText}>{lang === 'ko' ? '돌아가기' : 'Back'}</Text>
+          <Text style={styles.backBtnErrorText}>{ui('back', lang)}</Text>
         </Pressable>
       </View>
     );
@@ -402,26 +400,13 @@ export default function CategoryScreen() {
           <Text style={[styles.iconBtnText, { color: colors.text }]}>←</Text>
         </Pressable>
         <Text style={[styles.categoryLabel, { color: colors.text }]}>{headerLabel}</Text>
-        <View style={styles.topRight}>
-          <Pressable
-            onPress={handleReplaceImage}
-            style={({ pressed }) => [styles.smallBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
-            accessibilityLabel={lang === 'ko' ? '사진 변경' : 'Change photo'}
-          >
-            <Text style={styles.smallBtnText}>📷</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => {
-              pauseAutoplay();
-              unlockAudio();
-              toggleLang();
-            }}
-            style={({ pressed }) => [styles.iconBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
-            accessibilityLabel="언어 전환"
-          >
-            <Text style={styles.langBtnText}>{lang === 'ko' ? '🇰🇷' : '🇺🇸'}</Text>
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={handleReplaceImage}
+          style={({ pressed }) => [styles.smallBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
+          accessibilityLabel={ui('changePhoto', lang)}
+        >
+          <Text style={styles.smallBtnText}>{'📷'}</Text>
+        </Pressable>
       </View>
 
       <GestureDetector gesture={pan}>
@@ -444,9 +429,7 @@ export default function CategoryScreen() {
             )}
             <Text style={[styles.word, { color: colors.text }]}>{wordText(word, lang)}</Text>
             <Text style={[styles.hint, { color: colors.textMuted }]}>
-              {autoplay
-                ? (lang === 'ko' ? '탭하여 멈추기' : 'Tap to stop')
-                : (lang === 'ko' ? '탭하여 듣기' : 'Tap to hear')}
+              {autoplay ? ui('tapToStop', lang) : ui('tapToHear', lang)}
             </Text>
           </Pressable>
         </Animated.View>
@@ -460,7 +443,7 @@ export default function CategoryScreen() {
             style={({ pressed }) => [styles.removeImageBtn, { backgroundColor: pillBg }, pressed && { opacity: 0.7 }]}
           >
             <Text style={[styles.removeImageText, { color: colors.textMuted }]}>
-              🔄 {lang === 'ko' ? '이모지로 되돌리기' : 'Restore emoji'}
+              {`🔄 ${ui('restoreEmoji', lang)}`}
             </Text>
           </Pressable>
         )}
@@ -470,7 +453,7 @@ export default function CategoryScreen() {
             style={({ pressed }) => [styles.shuffleBtn, { backgroundColor: shuffled ? colors.primary : pillBg }, pressed && { opacity: 0.7 }]}
           >
             <Text style={[styles.shuffleText, { color: colors.text }]}>
-              🔀 {shuffled ? (lang === 'ko' ? '순서대로' : 'Order') : (lang === 'ko' ? '섞기' : 'Shuffle')}
+              {`🔀 ${shuffled ? ui('order', lang) : ui('shuffle', lang)}`}
             </Text>
           </Pressable>
           <Text style={[styles.pagerText, { backgroundColor: pillBg }]}>
@@ -510,7 +493,7 @@ export default function CategoryScreen() {
           >
             <Text style={[styles.autoplayIcon, { color: colors.text }]}>{autoplay ? '⏸' : '▶'}</Text>
             <Text style={[styles.autoplayLabel, { color: colors.text }]}>
-              {autoplay ? (lang === 'ko' ? '정지' : 'Stop') : (lang === 'ko' ? '자동재생' : 'Autoplay')}
+              {autoplay ? ui('stop', lang) : ui('autoplay', lang)}
             </Text>
           </Pressable>
           <Pressable onPress={handleNext} style={({ pressed }) => [styles.navBtn, { backgroundColor: colors.surface, borderColor: colors.text }, pressed && { opacity: 0.7 }]}>

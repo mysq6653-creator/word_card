@@ -11,6 +11,7 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories, catText } from '../src/data/words';
+import { ui, uiFmt } from '../src/data/ui';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import { useCustomCardStore } from '../src/store/useCustomCardStore';
@@ -19,7 +20,6 @@ export default function HomeScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const lang = useCardStore((s) => s.lang);
-  const toggleLang = useCardStore((s) => s.toggleLang);
   const colors = useThemeColors();
   const isDark = useIsDark();
 
@@ -32,17 +32,16 @@ export default function HomeScreen() {
       removeCategory(catId);
       bump();
     };
+    const msg = uiFmt('deleteCatConfirm', lang, { name: catName });
     if (Platform.OS === 'web') {
-      if (window.confirm(lang === 'ko' ? `"${catName}" 카테고리와 모든 카드를 삭제할까요?` : `Delete "${catName}" and all its cards?`)) {
-        doDelete();
-      }
+      if (window.confirm(msg)) doDelete();
     } else {
       Alert.alert(
-        lang === 'ko' ? '카테고리 삭제' : 'Delete Category',
-        lang === 'ko' ? `"${catName}" 카테고리와 모든 카드를 삭제할까요?` : `Delete "${catName}" and all its cards?`,
+        ui('deleteCategory', lang),
+        msg,
         [
-          { text: lang === 'ko' ? '취소' : 'Cancel', style: 'cancel' },
-          { text: lang === 'ko' ? '삭제' : 'Delete', style: 'destructive', onPress: doDelete },
+          { text: ui('cancel', lang), style: 'cancel' },
+          { text: ui('delete', lang), style: 'destructive', onPress: doDelete },
         ],
       );
     }
@@ -58,37 +57,22 @@ export default function HomeScreen() {
     >
       <View style={styles.header}>
         <View>
-          <Text style={[styles.title, { color: colors.text }]}>낱말 카드</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{ui('wordCard', lang)}</Text>
           <Text style={[styles.subtitle, { color: colors.textMuted }]}>
-            {lang === 'ko' ? '카테고리를 골라보세요' : 'Pick a category'}
+            {ui('pickCategory', lang)}
           </Text>
         </View>
-        <View style={styles.headerRight}>
-          <Pressable
-            onPress={() => router.push('/settings')}
-            style={({ pressed }) => [
-              styles.iconBtn,
-              { backgroundColor: colors.surface },
-              pressed && { opacity: 0.7 },
-            ]}
-            accessibilityLabel={lang === 'ko' ? '설정' : 'Settings'}
-          >
-            <Text style={{ fontSize: 22 }}>⚙️</Text>
-          </Pressable>
-          <Pressable
-            onPress={toggleLang}
-            style={({ pressed }) => [
-              styles.langBtn,
-              { backgroundColor: colors.surface, borderColor: colors.primary },
-              pressed && { opacity: 0.7 },
-            ]}
-            accessibilityLabel={lang === 'ko' ? '언어 전환' : 'Switch language'}
-          >
-            <Text style={[styles.langBtnText, { color: colors.text }]}>
-              {lang === 'ko' ? '🇰🇷 한' : '🇺🇸 EN'}
-            </Text>
-          </Pressable>
-        </View>
+        <Pressable
+          onPress={() => router.push('/settings')}
+          style={({ pressed }) => [
+            styles.iconBtn,
+            { backgroundColor: colors.surface },
+            pressed && { opacity: 0.7 },
+          ]}
+          accessibilityLabel={ui('settings', lang)}
+        >
+          <Text style={{ fontSize: 22 }}>{'⚙️'}</Text>
+        </Pressable>
       </View>
 
       {/* Special tiles row */}
@@ -100,11 +84,11 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2A2A4A' : '#E0E7FF' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel={lang === 'ko' ? '전체 낱말카드 보기' : 'View all cards'}
+          accessibilityLabel={ui('allCards', lang)}
         >
-          <Text style={styles.specialEmoji}>📚</Text>
+          <Text style={styles.specialEmoji}>{'📚'}</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
-            {lang === 'ko' ? '전체보기' : 'All Cards'}
+            {ui('allCards', lang)}
           </Text>
         </Pressable>
         <Pressable
@@ -114,11 +98,11 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#3A2A3A' : '#FCE4EC' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel={lang === 'ko' ? '퀴즈 모드' : 'Quiz mode'}
+          accessibilityLabel={ui('quiz', lang)}
         >
-          <Text style={styles.specialEmoji}>🧩</Text>
+          <Text style={styles.specialEmoji}>{'🧩'}</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
-            {lang === 'ko' ? '퀴즈' : 'Quiz'}
+            {ui('quiz', lang)}
           </Text>
         </Pressable>
         <Pressable
@@ -128,11 +112,11 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2A3A2A' : '#E8F5E9' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel={lang === 'ko' ? '듣기 퀴즈' : 'Listening quiz'}
+          accessibilityLabel={ui('listen', lang)}
         >
-          <Text style={styles.specialEmoji}>🔊</Text>
+          <Text style={styles.specialEmoji}>{'🔊'}</Text>
           <Text style={[styles.specialLabel, { color: colors.text }]}>
-            {lang === 'ko' ? '듣기' : 'Listen'}
+            {ui('listen', lang)}
           </Text>
         </Pressable>
       </View>
@@ -148,7 +132,7 @@ export default function HomeScreen() {
               { backgroundColor: dimCategoryColor(cat.color, isDark) },
               pressed && { transform: [{ scale: 0.97 }] },
             ]}
-            accessibilityLabel={lang === 'ko' ? `${cat.ko} 카테고리` : `${cat.en} category`}
+            accessibilityLabel={catText(cat, lang)}
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
@@ -168,7 +152,7 @@ export default function HomeScreen() {
               { backgroundColor: dimCategoryColor(cat.color, isDark) },
               pressed && { transform: [{ scale: 0.97 }] },
             ]}
-            accessibilityLabel={lang === 'ko' ? `${cat.ko} 카테고리` : `${cat.en} category`}
+            accessibilityLabel={catText(cat, lang)}
           >
             <Text style={styles.tileEmoji}>{cat.emoji}</Text>
             <Text style={[styles.tileLabel, { color: colors.text }]}>
@@ -188,17 +172,17 @@ export default function HomeScreen() {
             { backgroundColor: isDark ? '#2D2D44' : '#F0F0F0', borderWidth: 2, borderColor: colors.primary, borderStyle: 'dashed' },
             pressed && { transform: [{ scale: 0.97 }] },
           ]}
-          accessibilityLabel={lang === 'ko' ? '카드 만들기' : 'Create card'}
+          accessibilityLabel={ui('createCard', lang)}
         >
-          <Text style={styles.tileEmoji}>✏️</Text>
+          <Text style={styles.tileEmoji}>{'✏️'}</Text>
           <Text style={[styles.tileLabel, { color: colors.primary }]}>
-            {lang === 'ko' ? '만들기' : 'Create'}
+            {ui('create', lang)}
           </Text>
         </Pressable>
       </View>
 
       <Text style={[styles.footer, { color: colors.textMuted }]}>
-        👶 {lang === 'ko' ? '우리 아이를 위한 낱말 카드' : 'Word cards for my baby'}
+        {`👶 ${ui('forMyBaby', lang)}`}
       </Text>
     </ScrollView>
   );
@@ -214,11 +198,6 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 24,
   },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   title: {
     fontSize: 36,
     fontWeight: '800',
@@ -233,16 +212,6 @@ const styles = StyleSheet.create({
     borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  langBtn: {
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: radius.md,
-    borderWidth: 2,
-  },
-  langBtnText: {
-    fontSize: 18,
-    fontWeight: '700',
   },
   specialRow: {
     flexDirection: 'row',

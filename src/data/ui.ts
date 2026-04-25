@@ -97,8 +97,49 @@ const s: Strings = {
   creditPack50: { ko: 'AI 크레딧 50개', en: '50 AI Credits', ja: 'AIクレジット50個', es: '50 créditos IA', zh: '50个AI积分', fr: '50 crédits IA', de: '50 KI-Guthaben', pt: '50 créditos IA' },
   creditPack150: { ko: 'AI 크레딧 150개', en: '150 AI Credits', ja: 'AIクレジット150個', es: '150 créditos IA', zh: '150个AI积分', fr: '150 crédits IA', de: '150 KI-Guthaben', pt: '150 créditos IA' },
   creditPack500: { ko: 'AI 크레딧 500개', en: '500 AI Credits', ja: 'AIクレジット500個', es: '500 créditos IA', zh: '500个AI积分', fr: '500 crédits IA', de: '500 KI-Guthaben', pt: '500 créditos IA' },
+  pickCategory: { ko: '카테고리를 골라보세요', en: 'Pick a category', ja: 'カテゴリを選んでね', es: 'Elige una categoría', zh: '选择一个分类', fr: 'Choisissez une catégorie', de: 'Wähle eine Kategorie', pt: 'Escolha uma categoria' },
+  listen: { ko: '듣기', en: 'Listen', ja: 'リスニング', es: 'Escuchar', zh: '听力', fr: 'Écouter', de: 'Hören', pt: 'Ouvir' },
+  create: { ko: '만들기', en: 'Create', ja: '作成', es: 'Crear', zh: '创建', fr: 'Créer', de: 'Erstellen', pt: 'Criar' },
+  forMyBaby: { ko: '우리 아이를 위한 낱말 카드', en: 'Word cards for my baby', ja: '赤ちゃんのための単語カード', es: 'Tarjetas de palabras para mi bebé', zh: '给宝宝的单词卡片', fr: 'Cartes de mots pour mon bébé', de: 'Wortkarten für mein Baby', pt: 'Cartões de palavras para meu bebê' },
+  greatJob: { ko: '잘했어요!', en: 'Great Job!', ja: 'よくできました！', es: '¡Bien hecho!', zh: '做得好！', fr: 'Bien joué !', de: 'Toll gemacht!', pt: 'Muito bem!' },
+  playAgain: { ko: '다시 하기', en: 'Play Again', ja: 'もう一度', es: 'Jugar de nuevo', zh: '再玩一次', fr: 'Rejouer', de: 'Nochmal', pt: 'Jogar novamente' },
+  needCardsQuiz: { ko: '퀴즈를 하려면 카드가 3개 이상 필요해요', en: 'Need at least 3 cards for quiz', ja: 'クイズには3枚以上のカードが必要です', es: 'Se necesitan al menos 3 tarjetas', zh: '测验需要至少3张卡片', fr: 'Il faut au moins 3 cartes', de: 'Mindestens 3 Karten nötig', pt: 'Precisa de pelo menos 3 cartões' },
+  allQuiz: { ko: '전체 퀴즈', en: 'All Quiz', ja: '全体クイズ', es: 'Quiz completo', zh: '全部测验', fr: 'Quiz complet', de: 'Alle Quiz', pt: 'Quiz completo' },
+  listenAndPick: { ko: '잘 듣고 골라보세요!', en: 'Listen and pick!', ja: '聞いて選んでね！', es: '¡Escucha y elige!', zh: '听一听，选一选！', fr: 'Écoute et choisis !', de: 'Hör zu und wähle!', pt: 'Ouça e escolha!' },
+  whereIs: { ko: '{word} 어디있을까요?', en: 'Where is {word}?', ja: '{word}はどこかな？', es: '¿Dónde está {word}?', zh: '{word}在哪里？', fr: 'Où est {word} ?', de: 'Wo ist {word}?', pt: 'Onde está {word}?' },
+  dataManager: { ko: '데이터 관리', en: 'Data Manager', ja: 'データ管理', es: 'Gestión de datos', zh: '数据管理', fr: 'Gestion des données', de: 'Datenverwaltung', pt: 'Gerenciador de dados' },
+  myCards: { ko: '나만의 카드', en: 'My Cards', ja: 'マイカード', es: 'Mis tarjetas', zh: '我的卡片', fr: 'Mes cartes', de: 'Meine Karten', pt: 'Meus cartões' },
+  noCustomCards: { ko: '아직 만든 카드가 없어요', en: 'No custom cards yet', ja: 'まだカードがありません', es: 'Aún no hay tarjetas', zh: '还没有自定义卡片', fr: 'Pas encore de cartes', de: 'Noch keine Karten', pt: 'Nenhum cartão ainda' },
+  noCards: { ko: '카드 없음', en: 'No cards', ja: 'カードなし', es: 'Sin tarjetas', zh: '没有卡片', fr: 'Aucune carte', de: 'Keine Karten', pt: 'Sem cartões' },
+  confirm: { ko: '확인', en: 'Confirm', ja: '確認', es: 'Confirmar', zh: '确认', fr: 'Confirmer', de: 'Bestätigen', pt: 'Confirmar' },
+  builtIn: { ko: '기본 카테고리', en: 'Built-in', ja: 'デフォルト', es: 'Predeterminado', zh: '内置', fr: 'Par défaut', de: 'Standard', pt: 'Padrão' },
+  photoOverridesLabel: { ko: '사진으로 변경된 카드', en: 'Photo Overrides', ja: '写真に変更したカード', es: 'Fotos personalizadas', zh: '照片覆盖', fr: 'Photos modifiées', de: 'Foto-Änderungen', pt: 'Fotos personalizadas' },
+  restorePhoto: { ko: '복원', en: 'Restore', ja: '復元', es: 'Restaurar', zh: '恢复', fr: 'Restaurer', de: 'Wiederherstellen', pt: 'Restaurar' },
+  bulkDelete: { ko: '일괄 삭제', en: 'Bulk Delete', ja: '一括削除', es: 'Eliminar todo', zh: '批量删除', fr: 'Suppression en masse', de: 'Alle löschen', pt: 'Exclusão em massa' },
+  deleteAllRecordings: { ko: '모든 녹음 삭제', en: 'Delete All Recordings', ja: 'すべての録音を削除', es: 'Eliminar grabaciones', zh: '删除所有录音', fr: 'Supprimer les enregistrements', de: 'Alle Aufnahmen löschen', pt: 'Excluir gravações' },
+  deleteAllCustom: { ko: '모든 커스텀 데이터 삭제', en: 'Delete All Custom Data', ja: 'カスタムデータを削除', es: 'Eliminar datos personalizados', zh: '删除自定义数据', fr: 'Supprimer données personnalisées', de: 'Benutzerdaten löschen', pt: 'Excluir dados personalizados' },
+  categoryDeleted: { ko: '카테고리가 삭제되었어요', en: 'Category deleted', ja: 'カテゴリを削除しました', es: 'Categoría eliminada', zh: '分类已删除', fr: 'Catégorie supprimée', de: 'Kategorie gelöscht', pt: 'Categoria excluída' },
+  cardDeleted: { ko: '카드가 삭제되었어요', en: 'Card deleted', ja: 'カードを削除しました', es: 'Tarjeta eliminada', zh: '卡片已删除', fr: 'Carte supprimée', de: 'Karte gelöscht', pt: 'Cartão excluído' },
+  allRecordingsDeleted: { ko: '모든 녹음이 삭제되었어요', en: 'All recordings deleted', ja: 'すべての録音を削除しました', es: 'Grabaciones eliminadas', zh: '所有录音已删除', fr: 'Enregistrements supprimés', de: 'Aufnahmen gelöscht', pt: 'Gravações excluídas' },
+  allDataDeleted: { ko: '모든 데이터가 삭제되었어요', en: 'All data deleted', ja: 'すべてのデータを削除しました', es: 'Datos eliminados', zh: '所有数据已删除', fr: 'Données supprimées', de: 'Daten gelöscht', pt: 'Dados excluídos' },
+  deleting: { ko: '삭제 중...', en: 'Deleting...', ja: '削除中...', es: 'Eliminando...', zh: '删除中...', fr: 'Suppression...', de: 'Löschen...', pt: 'Excluindo...' },
+  deleteCatConfirm: { ko: '"{name}" 카테고리와 모든 카드를 삭제할까요?', en: 'Delete "{name}" and all its cards?', ja: '「{name}」カテゴリとカードを削除しますか？', es: '¿Eliminar "{name}" y sus tarjetas?', zh: '删除"{name}"及所有卡片？', fr: 'Supprimer « {name} » et ses cartes ?', de: '„{name}" und alle Karten löschen?', pt: 'Excluir "{name}" e seus cartões?' },
+  deleteCardConfirmTpl: { ko: '"{name}" 카드를 삭제할까요?', en: 'Delete "{name}"?', ja: '「{name}」を削除しますか？', es: '¿Eliminar "{name}"?', zh: '删除"{name}"？', fr: 'Supprimer « {name} » ?', de: '„{name}" löschen?', pt: 'Excluir "{name}"?' },
+  deleteAllRecordingsConfirm: { ko: '모든 녹음을 삭제할까요? 되돌릴 수 없어요.', en: 'Delete all recordings? Cannot be undone.', ja: 'すべての録音を削除しますか？元に戻せません。', es: '¿Eliminar grabaciones? No se puede deshacer.', zh: '删除所有录音？无法撤销。', fr: 'Supprimer les enregistrements ? Irréversible.', de: 'Alle Aufnahmen löschen? Unwiderruflich.', pt: 'Excluir gravações? Não pode ser desfeito.' },
+  deleteAllCustomConfirm: { ko: '모든 커스텀 카드, 카테고리, 사진을 삭제할까요?', en: 'Delete all custom cards, categories, and photos?', ja: 'カスタムカード・カテゴリ・写真を削除しますか？', es: '¿Eliminar tarjetas, categorías y fotos?', zh: '删除所有自定义卡片、分类和照片？', fr: 'Supprimer cartes, catégories et photos ?', de: 'Alle Karten, Kategorien und Fotos löschen?', pt: 'Excluir cartões, categorias e fotos?' },
+  deleteCategory: { ko: '카테고리 삭제', en: 'Delete Category', ja: 'カテゴリ削除', es: 'Eliminar categoría', zh: '删除分类', fr: 'Supprimer la catégorie', de: 'Kategorie löschen', pt: 'Excluir categoria' },
+  cardCreation: { ko: '카드 만들기', en: 'Card Creation', ja: 'カード作成', es: 'Creación de tarjetas', zh: '创建卡片', fr: 'Création de cartes', de: 'Kartenerstellung', pt: 'Criação de cartões' },
+  select: { ko: '선택', en: 'Select', ja: '選択', es: 'Seleccionar', zh: '选择', fr: 'Sélectionner', de: 'Auswählen', pt: 'Selecionar' },
 };
 
 export function ui(key: string, lang: Lang): string {
   return s[key]?.[lang] ?? s[key]?.en ?? key;
+}
+
+export function uiFmt(key: string, lang: Lang, args: Record<string, string>): string {
+  let text = ui(key, lang);
+  for (const [k, v] of Object.entries(args)) {
+    text = text.replaceAll(`{${k}}`, v);
+  }
+  return text;
 }

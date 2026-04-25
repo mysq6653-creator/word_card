@@ -108,12 +108,12 @@ export default function SettingsScreen() {
             pressed && { opacity: 0.7 },
           ]}
         >
-          <Text style={[styles.backText, { color: colors.text }]}>← {lang === 'ko' ? '돌아가기' : 'Back'}</Text>
+          <Text style={[styles.backText, { color: colors.text }]}>{`← ${ui('back', lang)}`}</Text>
         </Pressable>
       </View>
 
       <Text style={[styles.title, { color: colors.text }]}>
-        ⚙️ {lang === 'ko' ? '설정' : 'Settings'}
+        {`⚙️ ${ui('settings', lang)}`}
       </Text>
 
       {/* Language */}
@@ -143,11 +143,11 @@ export default function SettingsScreen() {
 
       {/* Dark mode */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '화면 모드' : 'Appearance'}
+        {ui('appearance', lang)}
       </Text>
       <Segment<ColorMode>
         options={[
-          { label: lang === 'ko' ? '자동' : 'Auto', value: 'auto' },
+          { label: ui('auto', lang), value: 'auto' },
           { label: '☀️', value: 'light' },
           { label: '🌙', value: 'dark' },
         ]}
@@ -158,13 +158,13 @@ export default function SettingsScreen() {
 
       {/* Autoplay speed */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '자동재생 속도' : 'Autoplay Speed'}
+        {ui('autoplaySpeed', lang)}
       </Text>
       <Segment<number>
         options={[
-          { label: lang === 'ko' ? '느리게 (6초)' : 'Slow (6s)', value: 6000 },
-          { label: lang === 'ko' ? '보통 (4초)' : 'Normal (4s)', value: 4000 },
-          { label: lang === 'ko' ? '빠르게 (2초)' : 'Fast (2s)', value: 2000 },
+          { label: `${ui('slow', lang)} (6s)`, value: 6000 },
+          { label: `${ui('normal', lang)} (4s)`, value: 4000 },
+          { label: `${ui('fast', lang)} (2s)`, value: 2000 },
         ]}
         value={autoplaySpeed}
         onChange={setAutoplaySpeed}
@@ -173,13 +173,13 @@ export default function SettingsScreen() {
 
       {/* TTS speed */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
-        {lang === 'ko' ? '발음 속도' : 'Speech Speed'}
+        {ui('speechSpeed', lang)}
       </Text>
       <Segment<number>
         options={[
-          { label: lang === 'ko' ? '느리게' : 'Slow', value: 0.7 },
-          { label: lang === 'ko' ? '보통' : 'Normal', value: 0.9 },
-          { label: lang === 'ko' ? '빠르게' : 'Fast', value: 1.1 },
+          { label: ui('slow', lang), value: 0.7 },
+          { label: ui('normal', lang), value: 0.9 },
+          { label: ui('fast', lang), value: 1.1 },
         ]}
         value={ttsRate}
         onChange={setTtsRate}
@@ -197,8 +197,8 @@ export default function SettingsScreen() {
       >
         <Text style={styles.premiumBtnText}>
           {isPremium
-            ? (lang === 'ko' ? '✅ 프리미엄 활성화됨' : '✅ Premium Active')
-            : (lang === 'ko' ? '⭐ 프리미엄으로 업그레이드' : '⭐ Upgrade to Premium')}
+            ? `✅ ${ui('premiumActive', lang)}`
+            : `⭐ ${ui('upgradePremium', lang)}`}
         </Text>
         <Text style={[styles.manageArrow, { color: '#666' }]}>→</Text>
       </Pressable>
@@ -231,7 +231,7 @@ export default function SettingsScreen() {
         ]}
       >
         <Text style={[styles.manageBtnText, { color: colors.text }]}>
-          📂 {lang === 'ko' ? '카드 · 녹음 · 사진 관리' : 'Cards · Recordings · Photos'}
+          {`📂 ${ui('dataManage', lang)}`}
         </Text>
         <Text style={[styles.manageArrow, { color: colors.textMuted }]}>→</Text>
       </Pressable>
@@ -245,49 +245,49 @@ export default function SettingsScreen() {
         ]}
       >
         <Text style={[styles.linkText, { color: colors.primary }]}>
-          {lang === 'ko' ? '📋 개인정보 처리방침' : '📋 Privacy Policy'}
+          {`📋 ${ui('privacyPolicy', lang)}`}
         </Text>
       </Pressable>
 
       <Pressable onPress={() => { if (__DEV__ || Platform.OS === 'web') setDebugTaps((t) => t + 1); }}>
         <Text style={[styles.versionText, { color: colors.textMuted }]}>
-          {lang === 'ko' ? '낱말 카드' : 'Word Card'} v1.0.0
+          {ui('wordCard', lang)} v1.0.0
         </Text>
       </Pressable>
 
       {(__DEV__ || Platform.OS === 'web') && showDebug && (
         <View style={[styles.debugBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.debugTitle, { color: colors.text }]}>
-            🛠 {lang === 'ko' ? '테스트 모드' : 'Test Mode'}
+            {`🛠 ${ui('testMode', lang)}`}
           </Text>
 
           <View style={styles.debugRow}>
             <Text style={[styles.debugLabel, { color: colors.text }]}>
-              {lang === 'ko' ? '프리미엄' : 'Premium'}: {isPremium ? 'ON' : 'OFF'}
+              {ui('premium', lang)}: {isPremium ? 'ON' : 'OFF'}
             </Text>
             <Pressable
               onPress={() => setPremium(!isPremium)}
               style={[styles.debugToggle, { backgroundColor: isPremium ? colors.danger : colors.primary }]}
             >
               <Text style={styles.debugToggleText}>
-                {isPremium ? (lang === 'ko' ? '해제' : 'OFF') : (lang === 'ko' ? '활성화' : 'ON')}
+                {isPremium ? ui('off', lang) : ui('on', lang)}
               </Text>
             </Pressable>
           </View>
 
           <View style={styles.debugRow}>
             <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '카드 광고 크레딧' : 'Card ad credits'}: {adCardCredits}
+              {ui('cardAdCredits', lang)}: {adCardCredits}
             </Text>
           </View>
           <View style={styles.debugRow}>
             <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '녹음 광고 크레딧' : 'Record ad credits'}: {adRecordCredits}
+              {ui('recordAdCredits', lang)}: {adRecordCredits}
             </Text>
           </View>
           <View style={styles.debugRow}>
             <Text style={[styles.debugLabel, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '오늘 퀴즈 횟수' : 'Quiz today'}: {quizCountToday}
+              {ui('quizToday', lang)}: {quizCountToday}
             </Text>
           </View>
         </View>
