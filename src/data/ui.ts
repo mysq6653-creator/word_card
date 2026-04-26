@@ -184,6 +184,19 @@ const s: Strings = {
   hasAiAudio: { ko: 'AI', en: 'AI', ja: 'AI', es: 'IA', zh: 'AI', fr: 'IA', de: 'KI', pt: 'IA' },
   loading: { ko: '불러오는 중...', en: 'Loading...', ja: '読み込み中...', es: 'Cargando...', zh: '加载中...', fr: 'Chargement...', de: 'Laden...', pt: 'Carregando...' },
   noData: { ko: '저장된 데이터가 없어요', en: 'No stored data', ja: '保存データなし', es: 'Sin datos', zh: '没有存储数据', fr: 'Aucune donnée', de: 'Keine Daten', pt: 'Sem dados' },
+  editCard: { ko: '카드 편집', en: 'Edit Card', ja: 'カード編集', es: 'Editar tarjeta', zh: '编辑卡片', fr: 'Modifier la carte', de: 'Karte bearbeiten', pt: 'Editar cartão' },
+  photo: { ko: '사진', en: 'Photo', ja: '写真', es: 'Foto', zh: '照片', fr: 'Photo', de: 'Foto', pt: 'Foto' },
+  removePhoto: { ko: '사진 삭제', en: 'Remove Photo', ja: '写真を削除', es: 'Eliminar foto', zh: '删除照片', fr: 'Supprimer la photo', de: 'Foto entfernen', pt: 'Remover foto' },
+  voiceData: { ko: '음성 데이터', en: 'Voice Data', ja: '音声データ', es: 'Datos de voz', zh: '语音数据', fr: 'Données vocales', de: 'Sprachdaten', pt: 'Dados de voz' },
+  playRecording: { ko: '녹음 재생', en: 'Play Recording', ja: '録音を再生', es: 'Reproducir', zh: '播放录音', fr: 'Écouter', de: 'Aufnahme abspielen', pt: 'Reproduzir' },
+  playAiAudio: { ko: 'AI 음성 재생', en: 'Play AI Audio', ja: 'AI音声を再生', es: 'Reproducir IA', zh: '播放AI音频', fr: 'Écouter IA', de: 'KI-Audio abspielen', pt: 'Reproduzir IA' },
+  deleteAiAudio: { ko: 'AI 음성 삭제', en: 'Delete AI Audio', ja: 'AI音声を削除', es: 'Eliminar audio IA', zh: '删除AI音频', fr: "Supprimer l'audio IA", de: 'KI-Audio löschen', pt: 'Excluir áudio IA' },
+  saved: { ko: '저장됨', en: 'Saved', ja: '保存済み', es: 'Guardado', zh: '已保存', fr: 'Enregistré', de: 'Gespeichert', pt: 'Salvo' },
+  noRecording: { ko: '녹음 없음', en: 'No recording', ja: '録音なし', es: 'Sin grabación', zh: '无录音', fr: 'Pas d\'enregistrement', de: 'Keine Aufnahme', pt: 'Sem gravação' },
+  noAiAudio: { ko: 'AI 음성 없음', en: 'No AI audio', ja: 'AI音声なし', es: 'Sin audio IA', zh: '无AI音频', fr: 'Pas d\'audio IA', de: 'Kein KI-Audio', pt: 'Sem áudio IA' },
+  cardNotFound: { ko: '카드를 찾을 수 없어요', en: 'Card not found', ja: 'カードが見つかりません', es: 'Tarjeta no encontrada', zh: '未找到卡片', fr: 'Carte introuvable', de: 'Karte nicht gefunden', pt: 'Cartão não encontrado' },
+  saveChanges: { ko: '변경사항 저장', en: 'Save Changes', ja: '変更を保存', es: 'Guardar cambios', zh: '保存更改', fr: 'Enregistrer', de: 'Änderungen speichern', pt: 'Salvar alterações' },
+  changesSaved: { ko: '변경사항이 저장되었어요', en: 'Changes saved', ja: '変更を保存しました', es: 'Cambios guardados', zh: '更改已保存', fr: 'Modifications enregistrées', de: 'Änderungen gespeichert', pt: 'Alterações salvas' },
 };
 
 export function ui(key: string, lang: Lang): string {

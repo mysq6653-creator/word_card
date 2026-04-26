@@ -70,6 +70,7 @@ export default function RootLayout() {
             <Stack.Screen name="privacy" />
             <Stack.Screen name="add-card" />
             <Stack.Screen name="manage" />
+            <Stack.Screen name="edit-card" />
             <Stack.Screen name="quiz/[id]" />
             <Stack.Screen name="listen/[id]" />
             <Stack.Screen name="premium" />

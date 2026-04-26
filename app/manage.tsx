@@ -379,6 +379,7 @@ export default function ManageScreen() {
                       meta={cardMeta[w.id]}
                       colors={colors}
                       borderColor={borderColor}
+                      onPress={() => router.push(`/edit-card?id=${w.id}`)}
                       onDelete={() => handleDeleteWord(w.id, wordText(w as any, lang))}
                     />
                   ))
@@ -421,6 +422,7 @@ export default function ManageScreen() {
                       meta={cardMeta[w.id]}
                       colors={colors}
                       borderColor={borderColor}
+                      onPress={() => router.push(`/edit-card?id=${w.id}`)}
                       onDelete={() => handleDeleteWord(w.id, wordText(w as any, lang))}
                     />
                   ))}
@@ -455,7 +457,11 @@ export default function ManageScreen() {
           </Text>
           <View style={[styles.catSection, { backgroundColor: colors.surface }]}>
             {overrideInfo.map((item) => (
-              <View key={item.wordId} style={[styles.wordRow, { borderColor }]}>
+              <Pressable
+                key={item.wordId}
+                onPress={() => router.push(`/edit-card?id=${item.wordId}`)}
+                style={({ pressed }) => [styles.wordRow, { borderColor }, pressed && { opacity: 0.7 }]}
+              >
                 <Text style={styles.wordEmoji}>{item.emoji}</Text>
                 <View style={styles.wordInfo}>
                   <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>
@@ -465,15 +471,16 @@ export default function ManageScreen() {
                     {item.catName}
                   </Text>
                 </View>
+                <Text style={[styles.editHint, { color: colors.primary }]}>{'✏️'}</Text>
                 <Pressable
-                  onPress={() => handleRemoveOverride(item.wordId)}
+                  onPress={(e) => { e.stopPropagation(); handleRemoveOverride(item.wordId); }}
                   style={({ pressed }) => [styles.restoreBtn, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.06)' }, pressed && { opacity: 0.5 }]}
                 >
                   <Text style={[styles.restoreBtnText, { color: colors.textMuted }]}>
                     {ui('restorePhoto', lang)}
                   </Text>
                 </Pressable>
-              </View>
+              </Pressable>
             ))}
           </View>
         </>
@@ -577,6 +584,7 @@ function WordRow({
   meta,
   colors,
   borderColor,
+  onPress,
   onDelete,
 }: {
   word: { id: string; ko: string; en: string; emoji: string; hasImage: boolean };
@@ -584,13 +592,17 @@ function WordRow({
   meta?: CardMeta;
   colors: any;
   borderColor: string;
+  onPress: () => void;
   onDelete: () => void;
 }) {
   const displayName = lang === 'ko' ? word.ko : word.en;
   const subName = lang === 'ko' ? word.en : word.ko;
 
   return (
-    <View style={[styles.wordRow, { borderColor }]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.wordRow, { borderColor }, pressed && { opacity: 0.7 }]}
+    >
       <Text style={styles.wordEmoji}>{word.emoji}</Text>
       <View style={styles.wordInfo}>
         <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>
@@ -613,13 +625,16 @@ function WordRow({
           )}
         </View>
       </View>
-      <Pressable
-        onPress={onDelete}
-        style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
-      >
-        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
-      </Pressable>
-    </View>
+      <View style={styles.wordActions}>
+        <Text style={[styles.editHint, { color: colors.primary }]}>{'✏️'}</Text>
+        <Pressable
+          onPress={(e) => { e.stopPropagation(); onDelete(); }}
+          style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
+        >
+          <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
+        </Pressable>
+      </View>
+    </Pressable>
   );
 }
 
@@ -668,6 +683,8 @@ const styles = StyleSheet.create({
   metaBadge: { fontSize: 12 },
   metaTag: { paddingHorizontal: 4, paddingVertical: 1, borderRadius: 4 },
   metaTagText: { fontSize: 11, fontWeight: '700' },
+  wordActions: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  editHint: { fontSize: 16 },
   wordDeleteBtn: { padding: 8 },
   wordDeleteText: { fontSize: 20 },
 
