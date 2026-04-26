@@ -1,8 +1,7 @@
 import { useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
-  Image,
   Platform,
   Pressable,
   ScrollView,
@@ -14,15 +13,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { categories as builtinCategories, wordText, catText } from '../src/data/words';
 import { ui, uiFmt } from '../src/data/ui';
-import { deleteAllRecordings, deleteRecording } from '../src/lib/audioStorage';
+import { deleteAllRecordings, deleteRecording, getRecordingCount, hasRecording } from '../src/lib/audioStorage';
+import { deleteAllAiAudio, getAiAudioCount, hasAiAudio } from '../src/lib/aiAudioStorage';
 import { deleteImage, deleteAllImages } from '../src/lib/imageStorage';
+import { deleteWordData } from '../src/lib/dataCleanup';
 import { radius, useIsDark, useThemeColors } from '../src/lib/theme';
 import { showToast } from '../src/components/Toast';
 import { useCardStore } from '../src/store/useCardStore';
 import { useCustomCardStore } from '../src/store/useCustomCardStore';
 
 function confirmAction(
-  lang: string,
   title: string,
   message: string,
   deleteLabel: string,
@@ -37,6 +37,11 @@ function confirmAction(
       { text: deleteLabel, style: 'destructive', onPress: onConfirm },
     ]);
   }
+}
+
+interface CardMeta {
+  hasRec: boolean;
+  hasAi: boolean;
 }
 
 export default function ManageScreen() {
@@ -57,7 +62,51 @@ export default function ManageScreen() {
   const bump = useCustomCardStore((s) => s.bump);
 
   const [deletingRecordings, setDeletingRecordings] = useState(false);
-  const [deletingImages, setDeletingImages] = useState(false);
+  const [deletingAiAudio, setDeletingAiAudio] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
+
+  // Storage summary
+  const [recCount, setRecCount] = useState<number | null>(null);
+  const [aiCount, setAiCount] = useState<number | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      getRecordingCount().catch(() => 0),
+      getAiAudioCount().catch(() => 0),
+    ]).then(([r, a]) => {
+      if (!cancelled) {
+        setRecCount(r);
+        setAiCount(a);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [refreshKey]);
+
+  // Per-card metadata (recording / AI audio indicators)
+  const [cardMeta, setCardMeta] = useState<Record<string, CardMeta>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    const ids = customWords.map((w) => w.id);
+    if (ids.length === 0) {
+      setCardMeta({});
+      return;
+    }
+    Promise.all(
+      ids.map(async (id) => {
+        const [rec, ai] = await Promise.all([
+          hasRecording(id, lang).catch(() => false),
+          hasAiAudio(id, lang).catch(() => false),
+        ]);
+        return [id, { hasRec: rec, hasAi: ai }] as const;
+      }),
+    ).then((entries) => {
+      if (!cancelled) setCardMeta(Object.fromEntries(entries));
+    });
+    return () => { cancelled = true; };
+  }, [customWords, lang, refreshKey]);
 
   const wordsByCategory = useMemo(() => {
     const map = new Map<string, typeof customWords>();
@@ -70,50 +119,47 @@ export default function ManageScreen() {
   }, [customWords]);
 
   const handleDeleteCategory = useCallback((catId: string, catName: string) => {
-    confirmAction(lang,
+    confirmAction(
       ui('confirm', lang),
       uiFmt('deleteCatConfirm', lang, { name: catName }),
       ui('delete', lang),
       ui('cancel', lang),
-      () => {
+      async () => {
         const wordsInCat = customWords.filter((w) => w.categoryId === catId);
-        for (const w of wordsInCat) {
-          deleteImage(w.id).catch(() => {});
-          deleteRecording(w.id, 'ko').catch(() => {});
-          deleteRecording(w.id, 'en').catch(() => {});
-        }
+        await Promise.allSettled(wordsInCat.map((w) => deleteWordData(w.id)));
         removeCategory(catId);
         bump();
+        setRefreshKey((k) => k + 1);
         showToast(ui('categoryDeleted', lang));
       },
     );
   }, [lang, customWords, removeCategory, bump]);
 
   const handleDeleteWord = useCallback((wordId: string, wordName: string) => {
-    confirmAction(lang,
+    confirmAction(
       ui('confirm', lang),
       uiFmt('deleteCardConfirmTpl', lang, { name: wordName }),
       ui('delete', lang),
       ui('cancel', lang),
-      () => {
-        deleteImage(wordId).catch(() => {});
-        deleteRecording(wordId, 'ko').catch(() => {});
-        deleteRecording(wordId, 'en').catch(() => {});
+      async () => {
+        await deleteWordData(wordId);
         removeWord(wordId);
         bump();
+        setRefreshKey((k) => k + 1);
         showToast(ui('cardDeleted', lang));
       },
     );
   }, [lang, removeWord, bump]);
 
-  const handleRemoveOverride = useCallback((wordId: string) => {
-    deleteImage(wordId).catch(() => {});
+  const handleRemoveOverride = useCallback(async (wordId: string) => {
+    await deleteImage(wordId).catch(() => {});
     removeImageOverride(wordId);
     bump();
+    setRefreshKey((k) => k + 1);
   }, [removeImageOverride, bump]);
 
   const handleDeleteAllRecordings = useCallback(() => {
-    confirmAction(lang,
+    confirmAction(
       ui('confirm', lang),
       ui('deleteAllRecordingsConfirm', lang),
       ui('delete', lang),
@@ -123,6 +169,7 @@ export default function ManageScreen() {
         try {
           await deleteAllRecordings();
           bumpRecording();
+          setRefreshKey((k) => k + 1);
           showToast(ui('allRecordingsDeleted', lang));
         } finally {
           setDeletingRecordings(false);
@@ -131,14 +178,33 @@ export default function ManageScreen() {
     );
   }, [lang, bumpRecording]);
 
-  const handleDeleteAllCustom = useCallback(() => {
-    confirmAction(lang,
+  const handleDeleteAllAiAudio = useCallback(() => {
+    confirmAction(
       ui('confirm', lang),
-      ui('deleteAllCustomConfirm', lang),
+      ui('deleteAllAiAudioConfirm', lang),
       ui('delete', lang),
       ui('cancel', lang),
       async () => {
-        setDeletingImages(true);
+        setDeletingAiAudio(true);
+        try {
+          await deleteAllAiAudio();
+          setRefreshKey((k) => k + 1);
+          showToast(ui('allAiAudioDeleted', lang));
+        } finally {
+          setDeletingAiAudio(false);
+        }
+      },
+    );
+  }, [lang]);
+
+  const handleResetAll = useCallback(() => {
+    confirmAction(
+      ui('confirm', lang),
+      ui('resetAllConfirm', lang),
+      ui('delete', lang),
+      ui('cancel', lang),
+      async () => {
+        setDeletingAll(true);
         try {
           for (const cat of customCategories) {
             removeCategory(cat.id);
@@ -146,15 +212,21 @@ export default function ManageScreen() {
           for (const id of imageOverrides) {
             removeImageOverride(id);
           }
-          await deleteAllImages();
+          await Promise.allSettled([
+            deleteAllRecordings(),
+            deleteAllAiAudio(),
+            deleteAllImages(),
+          ]);
+          bumpRecording();
           bump();
-          showToast(ui('allDataDeleted', lang));
+          setRefreshKey((k) => k + 1);
+          showToast(ui('allDataReset', lang));
         } finally {
-          setDeletingImages(false);
+          setDeletingAll(false);
         }
       },
     );
-  }, [lang, customCategories, imageOverrides, removeCategory, removeImageOverride, bump]);
+  }, [lang, customCategories, imageOverrides, removeCategory, removeImageOverride, bumpRecording, bump]);
 
   const overrideInfo = useMemo(() => {
     return imageOverrides.map((id) => {
@@ -166,7 +238,10 @@ export default function ManageScreen() {
     });
   }, [imageOverrides, lang]);
 
-  const hasCustomData = customCategories.length > 0 || customWords.length > 0 || imageOverrides.length > 0;
+  const totalData = (recCount ?? 0) + (aiCount ?? 0) + customWords.length + imageOverrides.length;
+  const isLoading = recCount === null;
+
+  const borderColor = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
 
   return (
     <ScrollView
@@ -195,7 +270,58 @@ export default function ManageScreen() {
         {`📂 ${ui('dataManager', lang)}`}
       </Text>
 
-      {/* Custom categories & words */}
+      {/* ── Storage Overview ── */}
+      <View style={[styles.summaryCard, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.summaryTitle, { color: colors.text }]}>
+          {ui('storageOverview', lang)}
+        </Text>
+        {isLoading ? (
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+            {ui('loading', lang)}
+          </Text>
+        ) : totalData === 0 ? (
+          <Text style={[styles.loadingText, { color: colors.textMuted }]}>
+            {ui('noData', lang)}
+          </Text>
+        ) : (
+          <View style={styles.summaryGrid}>
+            <SummaryBadge
+              icon="🎙️"
+              label={ui('userRecordings', lang)}
+              count={recCount ?? 0}
+              unit={ui('files', lang)}
+              color="#FF6B6B"
+              bgColor={isDark ? '#3a2020' : '#FFF0F0'}
+            />
+            <SummaryBadge
+              icon="🤖"
+              label={ui('aiAudioFiles', lang)}
+              count={aiCount ?? 0}
+              unit={ui('files', lang)}
+              color="#4ECDC4"
+              bgColor={isDark ? '#1a3533' : '#F0FFFE'}
+            />
+            <SummaryBadge
+              icon="✏️"
+              label={ui('customCardsCount', lang)}
+              count={customWords.length}
+              unit={ui('cards', lang)}
+              color="#FFB347"
+              bgColor={isDark ? '#3a3020' : '#FFF8F0'}
+            />
+            <SummaryBadge
+              icon="📷"
+              label={ui('photosCount', lang)}
+              count={imageOverrides.length}
+              unit={ui('items', lang)}
+              color="#9B59B6"
+              bgColor={isDark ? '#2d1f3a' : '#F8F0FF'}
+            />
+          </View>
+        )}
+      </View>
+
+      {/* ── Custom Cards ── */}
       <Text style={[styles.sectionTitle, { color: colors.text }]}>
         {`✏️ ${ui('myCards', lang)}`}
         <Text style={[styles.sectionCount, { color: colors.textMuted }]}>
@@ -246,23 +372,15 @@ export default function ManageScreen() {
                   </Text>
                 ) : (
                   wordsInCat.map((w) => (
-                    <View key={w.id} style={[styles.wordRow, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}>
-                      <Text style={styles.wordEmoji}>{w.emoji}</Text>
-                      <View style={styles.wordInfo}>
-                        <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>
-                          {w.ko}
-                        </Text>
-                        <Text style={[styles.wordSub, { color: colors.textMuted }]} numberOfLines={1}>
-                          {w.en} {w.hasImage ? '📷' : ''}
-                        </Text>
-                      </View>
-                      <Pressable
-                        onPress={() => handleDeleteWord(w.id, w.ko)}
-                        style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
-                      >
-                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
-                      </Pressable>
-                    </View>
+                    <WordRow
+                      key={w.id}
+                      word={w}
+                      lang={lang}
+                      meta={cardMeta[w.id]}
+                      colors={colors}
+                      borderColor={borderColor}
+                      onDelete={() => handleDeleteWord(w.id, wordText(w as any, lang))}
+                    />
                   ))
                 )}
               </View>
@@ -296,26 +414,21 @@ export default function ManageScreen() {
                     </Text>
                   </View>
                   {words.map((w) => (
-                    <View key={w.id} style={[styles.wordRow, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}>
-                      <Text style={styles.wordEmoji}>{w.emoji}</Text>
-                      <View style={styles.wordInfo}>
-                        <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>{w.ko}</Text>
-                        <Text style={[styles.wordSub, { color: colors.textMuted }]} numberOfLines={1}>{w.en}</Text>
-                      </View>
-                      <Pressable
-                        onPress={() => handleDeleteWord(w.id, w.ko)}
-                        style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
-                      >
-                        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
-                      </Pressable>
-                    </View>
+                    <WordRow
+                      key={w.id}
+                      word={w}
+                      lang={lang}
+                      meta={cardMeta[w.id]}
+                      colors={colors}
+                      borderColor={borderColor}
+                      onDelete={() => handleDeleteWord(w.id, wordText(w as any, lang))}
+                    />
                   ))}
                 </View>
               );
             });
           })()}
 
-          {/* Add card button */}
           <Pressable
             onPress={() => router.push('/add-card')}
             style={({ pressed }) => [
@@ -331,7 +444,7 @@ export default function ManageScreen() {
         </View>
       )}
 
-      {/* Image overrides */}
+      {/* ── Image Overrides ── */}
       {overrideInfo.length > 0 && (
         <>
           <Text style={[styles.sectionTitle, { color: colors.text, marginTop: 24 }]}>
@@ -342,7 +455,7 @@ export default function ManageScreen() {
           </Text>
           <View style={[styles.catSection, { backgroundColor: colors.surface }]}>
             {overrideInfo.map((item) => (
-              <View key={item.wordId} style={[styles.wordRow, { borderColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)' }]}>
+              <View key={item.wordId} style={[styles.wordRow, { borderColor }]}>
                 <Text style={styles.wordEmoji}>{item.emoji}</Text>
                 <View style={styles.wordInfo}>
                   <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>
@@ -366,43 +479,147 @@ export default function ManageScreen() {
         </>
       )}
 
-      {/* Danger zone */}
+      {/* ── Danger Zone ── */}
       <Text style={[styles.sectionTitle, { color: colors.danger, marginTop: 32 }]}>
         {`⚠️ ${ui('bulkDelete', lang)}`}
       </Text>
 
       <View style={styles.dangerZone}>
-        <Pressable
-          onPress={handleDeleteAllRecordings}
-          disabled={deletingRecordings}
-          style={({ pressed }) => [
-            styles.dangerBtn,
-            { backgroundColor: colors.surface, borderColor: colors.danger },
-            (pressed || deletingRecordings) && { opacity: 0.6 },
-          ]}
-        >
-          <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
-            {`🎙️ ${deletingRecordings ? ui('deleting', lang) : ui('deleteAllRecordings', lang)}`}
-          </Text>
-        </Pressable>
-
-        {hasCustomData && (
+        {(recCount ?? 0) > 0 && (
           <Pressable
-            onPress={handleDeleteAllCustom}
-            disabled={deletingImages}
+            onPress={handleDeleteAllRecordings}
+            disabled={deletingRecordings}
             style={({ pressed }) => [
               styles.dangerBtn,
               { backgroundColor: colors.surface, borderColor: colors.danger },
-              (pressed || deletingImages) && { opacity: 0.6 },
+              (pressed || deletingRecordings) && { opacity: 0.6 },
             ]}
           >
             <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
-              {`✏️ ${deletingImages ? ui('deleting', lang) : ui('deleteAllCustom', lang)}`}
+              {`🎙️ ${deletingRecordings ? ui('deleting', lang) : ui('deleteAllRecordings', lang)}`}
+            </Text>
+            <Text style={[styles.dangerBtnSub, { color: colors.textMuted }]}>
+              {`${recCount} ${ui('files', lang)}`}
+            </Text>
+          </Pressable>
+        )}
+
+        {(aiCount ?? 0) > 0 && (
+          <Pressable
+            onPress={handleDeleteAllAiAudio}
+            disabled={deletingAiAudio}
+            style={({ pressed }) => [
+              styles.dangerBtn,
+              { backgroundColor: colors.surface, borderColor: colors.danger },
+              (pressed || deletingAiAudio) && { opacity: 0.6 },
+            ]}
+          >
+            <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
+              {`🤖 ${deletingAiAudio ? ui('deleting', lang) : ui('deleteAllAiAudio', lang)}`}
+            </Text>
+            <Text style={[styles.dangerBtnSub, { color: colors.textMuted }]}>
+              {`${aiCount} ${ui('files', lang)}`}
+            </Text>
+          </Pressable>
+        )}
+
+        {totalData > 0 && (
+          <Pressable
+            onPress={handleResetAll}
+            disabled={deletingAll}
+            style={({ pressed }) => [
+              styles.dangerBtnStrong,
+              { borderColor: colors.danger },
+              (pressed || deletingAll) && { opacity: 0.6 },
+            ]}
+          >
+            <Text style={styles.dangerBtnStrongText}>
+              {`🔄 ${deletingAll ? ui('deleting', lang) : ui('resetAll', lang)}`}
             </Text>
           </Pressable>
         )}
       </View>
     </ScrollView>
+  );
+}
+
+// ── Sub-components ──
+
+function SummaryBadge({
+  icon,
+  label,
+  count,
+  unit,
+  color,
+  bgColor,
+}: {
+  icon: string;
+  label: string;
+  count: number;
+  unit: string;
+  color: string;
+  bgColor: string;
+}) {
+  if (count === 0) return null;
+  return (
+    <View style={[styles.badge, { backgroundColor: bgColor }]}>
+      <Text style={styles.badgeIcon}>{icon}</Text>
+      <Text style={[styles.badgeCount, { color }]}>{count}</Text>
+      <Text style={[styles.badgeUnit, { color }]}>{unit}</Text>
+      <Text style={[styles.badgeLabel, { color }]} numberOfLines={1}>{label}</Text>
+    </View>
+  );
+}
+
+function WordRow({
+  word,
+  lang,
+  meta,
+  colors,
+  borderColor,
+  onDelete,
+}: {
+  word: { id: string; ko: string; en: string; emoji: string; hasImage: boolean };
+  lang: string;
+  meta?: CardMeta;
+  colors: any;
+  borderColor: string;
+  onDelete: () => void;
+}) {
+  const displayName = lang === 'ko' ? word.ko : word.en;
+  const subName = lang === 'ko' ? word.en : word.ko;
+
+  return (
+    <View style={[styles.wordRow, { borderColor }]}>
+      <Text style={styles.wordEmoji}>{word.emoji}</Text>
+      <View style={styles.wordInfo}>
+        <Text style={[styles.wordName, { color: colors.text }]} numberOfLines={1}>
+          {displayName}
+        </Text>
+        <View style={styles.wordSubRow}>
+          <Text style={[styles.wordSub, { color: colors.textMuted }]} numberOfLines={1}>
+            {subName}
+          </Text>
+          {word.hasImage && <Text style={styles.metaBadge}>{'📷'}</Text>}
+          {meta?.hasRec && (
+            <View style={[styles.metaTag, { backgroundColor: '#FF6B6B20' }]}>
+              <Text style={[styles.metaTagText, { color: '#FF6B6B' }]}>🎙️</Text>
+            </View>
+          )}
+          {meta?.hasAi && (
+            <View style={[styles.metaTag, { backgroundColor: '#4ECDC420' }]}>
+              <Text style={[styles.metaTagText, { color: '#4ECDC4' }]}>🤖</Text>
+            </View>
+          )}
+        </View>
+      </View>
+      <Pressable
+        onPress={onDelete}
+        style={({ pressed }) => [styles.wordDeleteBtn, pressed && { opacity: 0.5 }]}
+      >
+        <Text style={[styles.wordDeleteText, { color: colors.danger }]}>{'🗑️'}</Text>
+      </Pressable>
+    </View>
   );
 }
 
@@ -412,6 +629,19 @@ const styles = StyleSheet.create({
   backBtn: { alignSelf: 'flex-start', paddingHorizontal: 16, paddingVertical: 10, borderRadius: radius.md },
   backText: { fontSize: 18, fontWeight: '700' },
   title: { fontSize: 28, fontWeight: '800', marginBottom: 20 },
+
+  // Storage summary
+  summaryCard: { borderRadius: radius.md, padding: 20, marginBottom: 20 },
+  summaryTitle: { fontSize: 18, fontWeight: '800', marginBottom: 16 },
+  loadingText: { fontSize: 14, fontWeight: '500', textAlign: 'center', paddingVertical: 8 },
+  summaryGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10 },
+  badge: { flexBasis: '47%', flexGrow: 1, borderRadius: radius.sm, padding: 14, alignItems: 'center', gap: 2 },
+  badgeIcon: { fontSize: 24 },
+  badgeCount: { fontSize: 24, fontWeight: '900' },
+  badgeUnit: { fontSize: 11, fontWeight: '600' },
+  badgeLabel: { fontSize: 12, fontWeight: '600', marginTop: 2 },
+
+  // Sections
   sectionTitle: { fontSize: 20, fontWeight: '800', marginBottom: 12 },
   sectionCount: { fontSize: 16, fontWeight: '600' },
   emptyBox: { borderRadius: radius.md, padding: 24, alignItems: 'center', gap: 16 },
@@ -427,16 +657,29 @@ const styles = StyleSheet.create({
   deleteChip: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
   deleteChipText: { fontSize: 13, fontWeight: '700', color: '#fff' },
   emptyWordText: { fontSize: 14, fontWeight: '500', paddingVertical: 4 },
+
+  // Word rows
   wordRow: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 10, borderTopWidth: 1 },
   wordEmoji: { fontSize: 28 },
   wordInfo: { flex: 1 },
   wordName: { fontSize: 16, fontWeight: '700' },
+  wordSubRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginTop: 2 },
   wordSub: { fontSize: 13, fontWeight: '500' },
+  metaBadge: { fontSize: 12 },
+  metaTag: { paddingHorizontal: 4, paddingVertical: 1, borderRadius: 4 },
+  metaTagText: { fontSize: 11, fontWeight: '700' },
   wordDeleteBtn: { padding: 8 },
   wordDeleteText: { fontSize: 20 },
+
+  // Image overrides
   restoreBtn: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999 },
   restoreBtnText: { fontSize: 13, fontWeight: '600' },
+
+  // Danger zone
   dangerZone: { gap: 12 },
-  dangerBtn: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center', borderWidth: 2 },
+  dangerBtn: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center', borderWidth: 2, gap: 4 },
   dangerBtnText: { fontSize: 16, fontWeight: '700' },
+  dangerBtnSub: { fontSize: 12, fontWeight: '500' },
+  dangerBtnStrong: { paddingVertical: 16, borderRadius: radius.md, alignItems: 'center', borderWidth: 2, backgroundColor: '#DC354520' },
+  dangerBtnStrongText: { fontSize: 16, fontWeight: '800', color: '#DC3545' },
 });

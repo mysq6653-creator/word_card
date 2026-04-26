@@ -33,9 +33,10 @@ import {
 } from '../../src/data/words';
 import type { Word } from '../../src/data/words';
 import { ui } from '../../src/data/ui';
-import { loadRecordingUri, deleteRecording } from '../../src/lib/audioStorage';
+import { loadRecordingUri } from '../../src/lib/audioStorage';
 import { loadAiAudioUri } from '../../src/lib/aiAudioStorage';
 import { saveImage, loadImageUri, deleteImage } from '../../src/lib/imageStorage';
+import { deleteWordData } from '../../src/lib/dataCleanup';
 import { resizeImage } from '../../src/lib/imageResize';
 import { playUri, stopPlayback } from '../../src/lib/recorder';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
@@ -276,9 +277,7 @@ export default function CategoryScreen() {
     if (!word?.isCustom) return;
     const doDelete = () => {
       removeWord(word.id);
-      deleteImage(word.id).catch(() => {});
-      deleteRecording(word.id, 'ko').catch(() => {});
-      deleteRecording(word.id, 'en').catch(() => {});
+      deleteWordData(word.id).catch(() => {});
       bump();
       if (words.length <= 1) {
         router.back();
