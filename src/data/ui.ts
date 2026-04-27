@@ -197,6 +197,15 @@ const s: Strings = {
   cardNotFound: { ko: '카드를 찾을 수 없어요', en: 'Card not found', ja: 'カードが見つかりません', es: 'Tarjeta no encontrada', zh: '未找到卡片', fr: 'Carte introuvable', de: 'Karte nicht gefunden', pt: 'Cartão não encontrado' },
   saveChanges: { ko: '변경사항 저장', en: 'Save Changes', ja: '変更を保存', es: 'Guardar cambios', zh: '保存更改', fr: 'Enregistrer', de: 'Änderungen speichern', pt: 'Salvar alterações' },
   changesSaved: { ko: '변경사항이 저장되었어요', en: 'Changes saved', ja: '変更を保存しました', es: 'Cambios guardados', zh: '更改已保存', fr: 'Modifications enregistrées', de: 'Änderungen gespeichert', pt: 'Alterações salvas' },
+  errorOops: { ko: '이런!', en: 'Oops!', ja: 'おっと！', es: '¡Ups!', zh: '哎呀！', fr: 'Oups !', de: 'Hoppla!', pt: 'Ops!' },
+  errorMessage: { ko: '오류가 발생했어요.', en: 'Something went wrong.', ja: 'エラーが発生しました。', es: 'Algo salió mal.', zh: '出了点问题。', fr: 'Une erreur est survenue.', de: 'Etwas ist schiefgelaufen.', pt: 'Algo deu errado.' },
+  errorRetry: { ko: '다시 시도', en: 'Try Again', ja: 'もう一度', es: 'Reintentar', zh: '重试', fr: 'Réessayer', de: 'Erneut versuchen', pt: 'Tentar novamente' },
+  unsavedChanges: { ko: '저장하지 않은 변경사항이 있어요.\n나가시겠어요?', en: 'You have unsaved changes.\nLeave without saving?', ja: '保存されていない変更があります。\n終了しますか？', es: 'Tienes cambios sin guardar.\n¿Salir sin guardar?', zh: '有未保存的更改。\n确定离开？', fr: 'Modifications non enregistrées.\nQuitter sans enregistrer ?', de: 'Ungespeicherte Änderungen.\nOhne Speichern verlassen?', pt: 'Alterações não salvas.\nSair sem salvar?' },
+  leave: { ko: '나가기', en: 'Leave', ja: '終了', es: 'Salir', zh: '离开', fr: 'Quitter', de: 'Verlassen', pt: 'Sair' },
+  stay: { ko: '머물기', en: 'Stay', ja: '戻る', es: 'Quedarse', zh: '留下', fr: 'Rester', de: 'Bleiben', pt: 'Ficar' },
+  apiError: { ko: '서버 오류가 발생했어요. 잠시 후 다시 시도해주세요.', en: 'Server error occurred. Please try again later.', ja: 'サーバーエラーが発生しました。後でもう一度お試しください。', es: 'Error del servidor. Inténtalo más tarde.', zh: '服务器错误，请稍后重试。', fr: 'Erreur serveur. Réessayez plus tard.', de: 'Serverfehler. Bitte später erneut versuchen.', pt: 'Erro do servidor. Tente novamente mais tarde.' },
+  apiAuthError: { ko: 'API 인증에 실패했어요. 설정을 확인해주세요.', en: 'API authentication failed. Check your settings.', ja: 'API認証に失敗しました。設定を確認してください。', es: 'Error de autenticación API. Verifica tu configuración.', zh: 'API认证失败，请检查设置。', fr: "Échec d'authentification API. Vérifiez vos paramètres.", de: 'API-Authentifizierung fehlgeschlagen. Einstellungen prüfen.', pt: 'Falha na autenticação da API. Verifique as configurações.' },
+  apiRateLimit: { ko: '요청이 너무 많아요. 잠시 기다려주세요.', en: 'Too many requests. Please wait a moment.', ja: 'リクエストが多すぎます。しばらくお待ちください。', es: 'Demasiadas solicitudes. Espera un momento.', zh: '请求过多，请稍等。', fr: 'Trop de requêtes. Patientez un moment.', de: 'Zu viele Anfragen. Bitte kurz warten.', pt: 'Muitas solicitações. Aguarde um momento.' },
 };
 
 export function ui(key: string, lang: Lang): string {

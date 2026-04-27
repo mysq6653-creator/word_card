@@ -27,6 +27,11 @@ export async function loadImageUri(wordId: string): Promise<string | null> {
 }
 
 export async function deleteImage(wordId: string): Promise<void> {
+  const existing = activeBlobUrls.get(wordId);
+  if (existing) {
+    URL.revokeObjectURL(existing);
+    activeBlobUrls.delete(wordId);
+  }
   await del(imgKey(wordId));
 }
 
@@ -36,6 +41,10 @@ export async function hasImage(wordId: string): Promise<boolean> {
 }
 
 export async function deleteAllImages(): Promise<void> {
+  for (const [id, url] of activeBlobUrls) {
+    URL.revokeObjectURL(url);
+  }
+  activeBlobUrls.clear();
   const allKeys = await keys();
   for (const k of allKeys) {
     if (typeof k === 'string' && k.startsWith('img:')) {

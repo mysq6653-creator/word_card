@@ -52,8 +52,8 @@ function persistCustom(s: State) {
   };
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // ignore
+  } catch (e) {
+    if (__DEV__) console.warn('Custom card persist failed:', e);
   }
 }
 
@@ -114,13 +114,30 @@ try {
     if (!json) return;
     try {
       const data = JSON.parse(json) as Partial<PersistedCustom>;
-      useCustomCardStore.setState({
-        customCategories: data.customCategories ?? [],
-        customWords: data.customWords ?? [],
-        imageOverrides: data.imageOverrides ?? [],
-      });
+      const customCategories = Array.isArray(data.customCategories)
+        ? data.customCategories.filter(
+            (c): c is CustomCategory =>
+              typeof c === 'object' && c !== null &&
+              typeof c.id === 'string' && typeof c.ko === 'string' &&
+              typeof c.en === 'string' && typeof c.emoji === 'string' &&
+              typeof c.color === 'string',
+          )
+        : [];
+      const customWords = Array.isArray(data.customWords)
+        ? data.customWords.filter(
+            (w): w is CustomWord =>
+              typeof w === 'object' && w !== null &&
+              typeof w.id === 'string' && typeof w.ko === 'string' &&
+              typeof w.en === 'string' && typeof w.emoji === 'string' &&
+              typeof w.categoryId === 'string',
+          )
+        : [];
+      const imageOverrides = Array.isArray(data.imageOverrides)
+        ? data.imageOverrides.filter((v): v is string => typeof v === 'string')
+        : [];
+      useCustomCardStore.setState({ customCategories, customWords, imageOverrides });
     } catch {
-      // ignore
+      // corrupted data — keep defaults
     }
   };
   if (raw instanceof Promise) {

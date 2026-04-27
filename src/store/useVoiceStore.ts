@@ -35,8 +35,8 @@ function persistVoices(s: State) {
   };
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // ignore
+  } catch (e) {
+    if (__DEV__) console.warn('Voice persist failed:', e);
   }
 }
 
@@ -83,12 +83,21 @@ try {
     if (!json) return;
     try {
       const data = JSON.parse(json) as Partial<Persisted>;
-      useVoiceStore.setState({
-        voices: data.voices ?? [],
-        activeVoiceId: data.activeVoiceId ?? null,
-      });
+      const voices = Array.isArray(data.voices)
+        ? data.voices.filter(
+            (v): v is VoiceProfile =>
+              typeof v === 'object' && v !== null &&
+              typeof v.id === 'string' &&
+              typeof v.name === 'string' &&
+              typeof v.voiceId === 'string' &&
+              typeof v.createdAt === 'number',
+          )
+        : [];
+      const activeVoiceId =
+        typeof data.activeVoiceId === 'string' ? data.activeVoiceId : null;
+      useVoiceStore.setState({ voices, activeVoiceId });
     } catch {
-      // ignore
+      // corrupted data — keep defaults
     }
   };
   if (raw instanceof Promise) {

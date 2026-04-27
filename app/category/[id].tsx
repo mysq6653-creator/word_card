@@ -394,7 +394,7 @@ export default function CategoryScreen() {
         <Pressable
           onPress={() => router.back()}
           style={({ pressed }) => [styles.iconBtn, { backgroundColor: overlayBg }, pressed && { opacity: 0.7 }]}
-          accessibilityLabel="뒤로가기"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.iconBtnText, { color: colors.text }]}>←</Text>
         </Pressable>

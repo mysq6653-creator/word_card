@@ -1,8 +1,20 @@
 import React from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ui } from '../data/ui';
+import { useCardStore } from '../store/useCardStore';
+import type { Lang } from '../data/words';
+
 type Props = { children: React.ReactNode };
 type State = { hasError: boolean };
+
+function getLang(): Lang {
+  try {
+    return useCardStore.getState().lang;
+  } catch {
+    return 'en';
+  }
+}
 
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false };
@@ -17,16 +29,19 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      const lang = getLang();
       return (
         <View style={styles.container}>
           <Text style={styles.emoji}>😢</Text>
-          <Text style={styles.title}>Oops!</Text>
-          <Text style={styles.message}>Something went wrong.</Text>
+          <Text style={styles.title}>{ui('errorOops', lang)}</Text>
+          <Text style={styles.message}>{ui('errorMessage', lang)}</Text>
           <Pressable
             onPress={this.handleReset}
             style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}
+            accessibilityRole="button"
+            accessibilityLabel={ui('errorRetry', lang)}
           >
-            <Text style={styles.buttonText}>Try Again</Text>
+            <Text style={styles.buttonText}>{ui('errorRetry', lang)}</Text>
           </Pressable>
         </View>
       );

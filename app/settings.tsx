@@ -107,6 +107,8 @@ export default function SettingsScreen() {
             { backgroundColor: colors.surface },
             pressed && { opacity: 0.7 },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.backText, { color: colors.text }]}>{`← ${ui('back', lang)}`}</Text>
         </Pressable>

@@ -7,7 +7,7 @@ import { radius, useThemeColors } from '../src/lib/theme';
 import { useCardStore } from '../src/store/useCardStore';
 import { useVoiceStore, MAX_VOICES } from '../src/store/useVoiceStore';
 import { usePremiumStore } from '../src/store/usePremiumStore';
-import { isConfigured, cloneVoice, generateSpeech, deleteClonedVoice } from '../src/lib/elevenlabs';
+import { isConfigured, cloneVoice, generateSpeech, deleteClonedVoice, ElevenLabsError } from '../src/lib/elevenlabs';
 import { requestPermission, startRecording } from '../src/lib/recorder';
 import { saveAiAudio } from '../src/lib/aiAudioStorage';
 import { getAllWords, wordText } from '../src/data/words';
@@ -21,6 +21,18 @@ function showAlert(message: string, title?: string) {
   } else {
     Alert.alert(title ?? '', message);
   }
+}
+
+function friendlyErrorMsg(err: unknown, lang: Lang): string {
+  if (err instanceof ElevenLabsError) {
+    if (err.kind === 'auth') return ui('apiAuthError', lang);
+    if (err.kind === 'rate_limit') return ui('apiRateLimit', lang);
+    if (err.kind === 'server') return ui('apiError', lang);
+  }
+  if (err instanceof TypeError && (err.message.includes('fetch') || err.message.includes('network'))) {
+    return ui('networkError', lang);
+  }
+  return ui('apiError', lang);
 }
 
 const SAMPLE_SENTENCES: Record<Lang, string[]> = {
@@ -181,8 +193,7 @@ export default function VoiceSetupScreen() {
       setRecordingSeconds(0);
       showAlert(ui('voiceCloneCreated', lang));
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      showAlert(uiFmt('voiceCloneFailed', lang, { error: message }));
+      showAlert(uiFmt('voiceCloneFailed', lang, { error: friendlyErrorMsg(err, lang) }));
     } finally {
       setIsCloning(false);
     }
@@ -222,8 +233,7 @@ export default function VoiceSetupScreen() {
         const audioUri = await generateSpeech(text, activeVoiceId);
         await saveAiAudio(word.id, lang, audioUri);
       } catch (err) {
-        const message = err instanceof Error ? err.message : String(err);
-        showAlert(uiFmt('generateWordFailed', lang, { word: text, error: message }));
+        showAlert(uiFmt('generateWordFailed', lang, { word: text, error: friendlyErrorMsg(err, lang) }));
         break;
       }
 
@@ -261,8 +271,7 @@ export default function VoiceSetupScreen() {
       setGenProgress(1);
       showAlert(uiFmt('sampleGenerated', lang, { word: text }));
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      showAlert(uiFmt('speechGenFailed', lang, { error: message }));
+      showAlert(uiFmt('speechGenFailed', lang, { error: friendlyErrorMsg(err, lang) }));
     } finally {
       setIsGenerating(false);
     }
@@ -291,6 +300,8 @@ export default function VoiceSetupScreen() {
             { backgroundColor: colors.surface },
             pressed && { opacity: 0.7 },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
             {`← ${ui('back', lang)}`}

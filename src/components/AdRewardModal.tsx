@@ -36,13 +36,17 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
 
     if (isNative && isRewardedAdReady()) {
       setLoading(true);
-      showRewardedAd().then((rewarded) => {
-        setLoading(false);
-        if (rewarded) {
-          onReward();
-        }
-        onClose();
-      });
+      showRewardedAd()
+        .then((rewarded) => {
+          if (rewarded) {
+            onReward();
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          setLoading(false);
+          onClose();
+        });
       return;
     }
 

@@ -2,6 +2,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useMemo, useState } from 'react';
 import {
+  Alert,
   Image,
   Platform,
   Pressable,
@@ -68,6 +69,24 @@ export default function AddCardScreen() {
   const [newCatEmoji, setNewCatEmoji] = useState('📁');
   const [newCatColor, setNewCatColor] = useState(CATEGORY_COLORS[0]);
   const [saving, setSaving] = useState(false);
+
+  const isDirty = ko.trim() !== '' || en.trim() !== '' || imageUri !== null;
+
+  const confirmBack = useCallback(() => {
+    if (!isDirty) {
+      router.back();
+      return;
+    }
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-alert
+      if (window.confirm(ui('unsavedChanges', lang))) router.back();
+    } else {
+      Alert.alert('', ui('unsavedChanges', lang), [
+        { text: ui('stay', lang), style: 'cancel' },
+        { text: ui('leave', lang), style: 'destructive', onPress: () => router.back() },
+      ]);
+    }
+  }, [isDirty, lang, router]);
 
   const allCategories = useMemo(
     () => [...categories, ...customCategories],
@@ -142,12 +161,14 @@ export default function AddCardScreen() {
     >
       <View style={styles.header}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={confirmBack}
           style={({ pressed }) => [
             styles.backBtn,
             { backgroundColor: colors.surface },
             pressed && { opacity: 0.7 },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
             {`← ${ui('back', lang)}`}

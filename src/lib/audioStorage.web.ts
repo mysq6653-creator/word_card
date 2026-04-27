@@ -48,7 +48,13 @@ export async function deleteRecording(
   wordId: string,
   lang: Lang,
 ): Promise<void> {
-  await del(key(wordId, lang));
+  const k = key(wordId, lang);
+  const existing = activeBlobUrls.get(k);
+  if (existing) {
+    URL.revokeObjectURL(existing);
+    activeBlobUrls.delete(k);
+  }
+  await del(k);
 }
 
 export async function hasRecording(
@@ -68,6 +74,11 @@ export async function deleteAllRecordings(): Promise<void> {
   const allKeys = await keys();
   for (const k of allKeys) {
     if (typeof k === 'string' && k.startsWith('rec:')) {
+      const existing = activeBlobUrls.get(k);
+      if (existing) {
+        URL.revokeObjectURL(existing);
+        activeBlobUrls.delete(k);
+      }
       await del(k);
     }
   }

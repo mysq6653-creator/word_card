@@ -211,6 +211,22 @@ export default function EditCardScreen() {
     showToast(ui('changesSaved', lang));
   }, [word, isCustom, ko, en, emoji, updateWord, bump, lang]);
 
+  const confirmBack = useCallback(() => {
+    if (!hasChanges) {
+      router.back();
+      return;
+    }
+    if (Platform.OS === 'web') {
+      // eslint-disable-next-line no-alert
+      if (window.confirm(ui('unsavedChanges', lang))) router.back();
+    } else {
+      Alert.alert('', ui('unsavedChanges', lang), [
+        { text: ui('stay', lang), style: 'cancel' },
+        { text: ui('leave', lang), style: 'destructive', onPress: () => router.back() },
+      ]);
+    }
+  }, [hasChanges, lang, router]);
+
   if (!word) {
     return (
       <View style={[styles.center, { backgroundColor: colors.bg }]}>
@@ -238,12 +254,14 @@ export default function EditCardScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Pressable
-          onPress={() => router.back()}
+          onPress={confirmBack}
           style={({ pressed }) => [
             styles.backBtn,
             { backgroundColor: colors.surface },
             pressed && { opacity: 0.7 },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
             {`← ${ui('back', lang)}`}

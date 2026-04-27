@@ -4,6 +4,28 @@ import * as FileSystem from 'expo-file-system/legacy';
 
 const BASE_URL = 'https://api.elevenlabs.io/v1';
 
+export type ApiErrorKind = 'auth' | 'rate_limit' | 'server' | 'network' | 'unknown';
+
+function classifyError(status: number): ApiErrorKind {
+  if (status === 401 || status === 403) return 'auth';
+  if (status === 429) return 'rate_limit';
+  if (status >= 500) return 'server';
+  return 'unknown';
+}
+
+export class ElevenLabsError extends Error {
+  kind: ApiErrorKind;
+  constructor(kind: ApiErrorKind, message: string) {
+    super(message);
+    this.kind = kind;
+  }
+}
+
+function throwApiError(status: number, context: string): never {
+  const kind = classifyError(status);
+  throw new ElevenLabsError(kind, `${context} (${status})`);
+}
+
 function getApiKey(): string | null {
   const key = Constants.expoConfig?.extra?.elevenLabsApiKey;
   if (!key || typeof key !== 'string') return null;
@@ -66,10 +88,7 @@ export async function cloneVoice(name: string, audioUri: string): Promise<string
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to clone voice (${response.status}): ${errorText}`,
-    );
+    throwApiError(response.status, 'Voice cloning failed');
   }
 
   const data = await response.json();
@@ -116,10 +135,7 @@ export async function generateSpeech(text: string, voiceId: string): Promise<str
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to generate speech (${response.status}): ${errorText}`,
-    );
+    throwApiError(response.status, 'Speech generation failed');
   }
 
   if (Platform.OS !== 'web') {
@@ -176,10 +192,7 @@ export async function deleteClonedVoice(voiceId: string): Promise<void> {
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to delete voice (${response.status}): ${errorText}`,
-    );
+    throwApiError(response.status, 'Voice deletion failed');
   }
 }
 
@@ -197,10 +210,7 @@ export async function getVoices(): Promise<{ voice_id: string; name: string }[]>
   });
 
   if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(
-      `Failed to fetch voices (${response.status}): ${errorText}`,
-    );
+    throwApiError(response.status, 'Fetching voices failed');
   }
 
   const data = await response.json();

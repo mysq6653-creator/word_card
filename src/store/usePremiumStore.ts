@@ -59,8 +59,8 @@ function persistPremium(s: State) {
   };
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // ignore
+  } catch (e) {
+    if (__DEV__) console.warn('Premium persist failed:', e);
   }
 }
 
@@ -161,16 +161,20 @@ try {
     if (!json) return;
     try {
       const data = JSON.parse(json) as Partial<Persisted>;
+      const safeInt = (v: unknown, fallback: number): number =>
+        typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.floor(v) : fallback;
+      const safeDate = (v: unknown): string =>
+        typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : today();
       usePremiumStore.setState({
-        isPremium: data.isPremium ?? false,
-        adCardCredits: data.adCardCredits ?? 0,
-        adRecordCredits: data.adRecordCredits ?? 0,
-        quizCountToday: data.quizCountToday ?? 0,
-        quizDate: data.quizDate ?? today(),
-        aiCredits: data.aiCredits ?? FREE_AI_CREDITS,
+        isPremium: typeof data.isPremium === 'boolean' ? data.isPremium : false,
+        adCardCredits: safeInt(data.adCardCredits, 0),
+        adRecordCredits: safeInt(data.adRecordCredits, 0),
+        quizCountToday: safeInt(data.quizCountToday, 0),
+        quizDate: safeDate(data.quizDate),
+        aiCredits: safeInt(data.aiCredits, FREE_AI_CREDITS),
       });
     } catch {
-      // ignore
+      // corrupted data — keep defaults
     }
   };
   if (raw instanceof Promise) {

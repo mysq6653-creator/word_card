@@ -1,6 +1,6 @@
 import { getLocales } from 'expo-localization';
 import { create } from 'zustand';
-import type { Lang } from '../data/words';
+import { SUPPORTED_LANGS, type Lang } from '../data/words';
 import { storage } from './storage';
 
 const LOCALE_TO_LANG: Record<string, Lang> = {
@@ -55,6 +55,16 @@ type PersistedState = {
   ttsRate: number;
 };
 
+const VALID_COLOR_MODES: ColorMode[] = ['auto', 'light', 'dark'];
+
+function isValidLang(v: unknown): v is Lang {
+  return typeof v === 'string' && SUPPORTED_LANGS.some((l) => l.code === v);
+}
+
+function isValidColorMode(v: unknown): v is ColorMode {
+  return typeof v === 'string' && VALID_COLOR_MODES.includes(v as ColorMode);
+}
+
 function persistState(s: State) {
   const data: PersistedState = {
     lang: s.lang,
@@ -64,8 +74,8 @@ function persistState(s: State) {
   };
   try {
     storage.setItem(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    // ignore
+  } catch (e) {
+    if (__DEV__) console.warn('Settings persist failed:', e);
   }
 }
 
@@ -111,10 +121,10 @@ try {
     try {
       const data = JSON.parse(json) as Partial<PersistedState>;
       useCardStore.setState({
-        ...(data.lang && { lang: data.lang }),
-        ...(data.colorMode && { colorMode: data.colorMode }),
-        ...(data.autoplaySpeed && { autoplaySpeed: data.autoplaySpeed }),
-        ...(data.ttsRate && { ttsRate: data.ttsRate }),
+        ...(isValidLang(data.lang) && { lang: data.lang }),
+        ...(isValidColorMode(data.colorMode) && { colorMode: data.colorMode }),
+        ...(typeof data.autoplaySpeed === 'number' && data.autoplaySpeed > 0 && { autoplaySpeed: data.autoplaySpeed }),
+        ...(typeof data.ttsRate === 'number' && data.ttsRate > 0 && { ttsRate: data.ttsRate }),
         _hydrated: true,
       });
     } catch {

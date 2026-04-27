@@ -259,6 +259,8 @@ export default function ManageScreen() {
             { backgroundColor: colors.surface },
             pressed && { opacity: 0.7 },
           ]}
+          accessibilityRole="button"
+          accessibilityLabel={ui('back', lang)}
         >
           <Text style={[styles.backText, { color: colors.text }]}>
             {`← ${ui('back', lang)}`}
@@ -501,6 +503,8 @@ export default function ManageScreen() {
               { backgroundColor: colors.surface, borderColor: colors.danger },
               (pressed || deletingRecordings) && { opacity: 0.6 },
             ]}
+            accessibilityRole="button"
+            accessibilityLabel={ui('deleteAllRecordings', lang)}
           >
             <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
               {`🎙️ ${deletingRecordings ? ui('deleting', lang) : ui('deleteAllRecordings', lang)}`}
@@ -520,6 +524,8 @@ export default function ManageScreen() {
               { backgroundColor: colors.surface, borderColor: colors.danger },
               (pressed || deletingAiAudio) && { opacity: 0.6 },
             ]}
+            accessibilityRole="button"
+            accessibilityLabel={ui('deleteAllAiAudio', lang)}
           >
             <Text style={[styles.dangerBtnText, { color: colors.danger }]}>
               {`🤖 ${deletingAiAudio ? ui('deleting', lang) : ui('deleteAllAiAudio', lang)}`}
@@ -539,6 +545,8 @@ export default function ManageScreen() {
               { borderColor: colors.danger },
               (pressed || deletingAll) && { opacity: 0.6 },
             ]}
+            accessibilityRole="button"
+            accessibilityLabel={ui('resetAll', lang)}
           >
             <Text style={styles.dangerBtnStrongText}>
               {`🔄 ${deletingAll ? ui('deleting', lang) : ui('resetAll', lang)}`}
