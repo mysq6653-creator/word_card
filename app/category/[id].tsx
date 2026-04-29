@@ -140,19 +140,20 @@ export default function CategoryScreen() {
 
   const playWord = useCallback(async (w: Word) => {
     unlockAudio();
-    stopAudio();
-    const recUri = await loadRecordingUri(w.id, lang).catch(() => null);
+    stopSpeaking();
+    await stopPlayback().catch(() => {});
+    const [recUri, aiUri] = await Promise.all([
+      loadRecordingUri(w.id, lang).catch(() => null),
+      loadAiAudioUri(w.id, lang).catch(() => null),
+    ]);
     if (recUri) {
       playUri(recUri).catch(() => {});
-      return;
-    }
-    const aiUri = await loadAiAudioUri(w.id, lang).catch(() => null);
-    if (aiUri) {
+    } else if (aiUri) {
       playUri(aiUri).catch(() => {});
-      return;
+    } else {
+      speak(wordText(w, lang), lang, ttsRate);
     }
-    speak(wordText(w, lang), lang, ttsRate);
-  }, [lang, ttsRate, stopAudio]);
+  }, [lang, ttsRate]);
 
   useEffect(() => {
     if (!initialSpoken.current && word) {
@@ -218,21 +219,19 @@ export default function CategoryScreen() {
 
   const goNext = useCallback(() => {
     if (words.length === 0) return;
-    stopAudio();
     const next = (index + 1) % words.length;
     setIndex(next);
     const w = words[next];
-    if (w) playWord(w);
-  }, [words, index, stopAudio, playWord]);
+    if (w) { playWord(w).catch(() => {}); }
+  }, [words, index, playWord]);
 
   const goPrev = useCallback(() => {
     if (words.length === 0) return;
-    stopAudio();
     const prev = (index - 1 + words.length) % words.length;
     setIndex(prev);
     const w = words[prev];
-    if (w) playWord(w);
-  }, [words, index, stopAudio, playWord]);
+    if (w) { playWord(w).catch(() => {}); }
+  }, [words, index, playWord]);
 
   const handleNext = useCallback(() => {
     if (words.length === 0) return;
@@ -240,7 +239,7 @@ export default function CategoryScreen() {
     const next = (index + 1) % words.length;
     const nextWord = words[next];
     setIndex(next);
-    if (nextWord) playWord(nextWord);
+    if (nextWord) { playWord(nextWord).catch(() => {}); }
   }, [words, index, pauseAutoplay, playWord]);
 
   const handlePrev = useCallback(() => {
@@ -249,7 +248,7 @@ export default function CategoryScreen() {
     const prev = (index - 1 + words.length) % words.length;
     const prevWord = words[prev];
     setIndex(prev);
-    if (prevWord) playWord(prevWord);
+    if (prevWord) { playWord(prevWord).catch(() => {}); }
   }, [words, index, pauseAutoplay, playWord]);
 
   const handleReplaceImage = useCallback(async () => {
@@ -322,7 +321,7 @@ export default function CategoryScreen() {
       setIndex((i) => {
         const next = (i + 1) % words.length;
         const nextWord = words[next];
-        if (nextWord) playWord(nextWord);
+        if (nextWord) { playWord(nextWord).catch(() => {}); }
         return next;
       });
     }, autoplaySpeed);
