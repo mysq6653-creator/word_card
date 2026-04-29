@@ -138,12 +138,27 @@ export default function CategoryScreen() {
 
   const word = words[index];
 
+  const playWord = useCallback(async (w: Word) => {
+    unlockAudio();
+    stopAudio();
+    const recUri = await loadRecordingUri(w.id, lang).catch(() => null);
+    if (recUri) {
+      playUri(recUri).catch(() => {});
+      return;
+    }
+    const aiUri = await loadAiAudioUri(w.id, lang).catch(() => null);
+    if (aiUri) {
+      playUri(aiUri).catch(() => {});
+      return;
+    }
+    speak(wordText(w, lang), lang, ttsRate);
+  }, [lang, ttsRate, stopAudio]);
+
   useEffect(() => {
     if (!initialSpoken.current && word) {
       initialSpoken.current = true;
       const timer = setTimeout(() => {
-        unlockAudio();
-        speak(wordText(word, lang), lang, ttsRate);
+        playWord(word);
       }, 400);
       return () => clearTimeout(timer);
     }
@@ -207,8 +222,8 @@ export default function CategoryScreen() {
     const next = (index + 1) % words.length;
     setIndex(next);
     const w = words[next];
-    if (w) speak(wordText(w, lang), lang, ttsRate);
-  }, [words, index, lang, ttsRate, stopAudio]);
+    if (w) playWord(w);
+  }, [words, index, stopAudio, playWord]);
 
   const goPrev = useCallback(() => {
     if (words.length === 0) return;
@@ -216,34 +231,26 @@ export default function CategoryScreen() {
     const prev = (index - 1 + words.length) % words.length;
     setIndex(prev);
     const w = words[prev];
-    if (w) speak(wordText(w, lang), lang, ttsRate);
-  }, [words, index, lang, ttsRate, stopAudio]);
+    if (w) playWord(w);
+  }, [words, index, stopAudio, playWord]);
 
   const handleNext = useCallback(() => {
     if (words.length === 0) return;
     pauseAutoplay();
-    unlockAudio();
-    stopAudio();
     const next = (index + 1) % words.length;
     const nextWord = words[next];
     setIndex(next);
-    if (nextWord) {
-      speak(wordText(nextWord, lang), lang, ttsRate);
-    }
-  }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
+    if (nextWord) playWord(nextWord);
+  }, [words, index, pauseAutoplay, playWord]);
 
   const handlePrev = useCallback(() => {
     if (words.length === 0) return;
     pauseAutoplay();
-    unlockAudio();
-    stopAudio();
     const prev = (index - 1 + words.length) % words.length;
     const prevWord = words[prev];
     setIndex(prev);
-    if (prevWord) {
-      speak(wordText(prevWord, lang), lang, ttsRate);
-    }
-  }, [words, index, lang, ttsRate, pauseAutoplay, stopAudio]);
+    if (prevWord) playWord(prevWord);
+  }, [words, index, pauseAutoplay, playWord]);
 
   const handleReplaceImage = useCallback(async () => {
     if (!word) return;
@@ -315,17 +322,14 @@ export default function CategoryScreen() {
       setIndex((i) => {
         const next = (i + 1) % words.length;
         const nextWord = words[next];
-        if (nextWord) {
-          stopSpeaking();
-          speak(wordText(nextWord, lang), lang, ttsRate);
-        }
+        if (nextWord) playWord(nextWord);
         return next;
       });
     }, autoplaySpeed);
     return () => {
       if (autoplayRef.current) clearInterval(autoplayRef.current);
     };
-  }, [autoplay, words, lang, autoplaySpeed, ttsRate]);
+  }, [autoplay, words, autoplaySpeed, playWord]);
 
   useEffect(() => {
     return () => {
