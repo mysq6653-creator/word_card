@@ -87,8 +87,18 @@
           "tagForUnderAgeOfConsent": true
         }
       ],
-      "react-native-iap"
+      "react-native-iap",
+      "expo-updates"
     ],
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/YOUR_PROJECT_ID",
+      "enabled": true,
+      "fallbackToCacheTimeout": 0,
+      "checkAutomatically": "ON_LOAD"
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
