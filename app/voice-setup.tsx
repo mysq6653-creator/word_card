@@ -10,9 +10,10 @@ import { usePremiumStore } from '../src/store/usePremiumStore';
 import { isConfigured, cloneVoice, generateSpeech, deleteClonedVoice, ElevenLabsError } from '../src/lib/elevenlabs';
 import { requestPermission, startRecording } from '../src/lib/recorder';
 import { saveAiAudio } from '../src/lib/aiAudioStorage';
-import { getAllWords, wordText } from '../src/data/words';
+import { getAllWordsMerged, wordText } from '../src/data/words';
 import { ui, uiFmt } from '../src/data/ui';
 import type { Lang, Word } from '../src/data/words';
+import { useCustomCardStore } from '../src/store/useCustomCardStore';
 import type { RecorderHandle } from '../src/lib/recorder';
 
 function showAlert(message: string, title?: string) {
@@ -106,6 +107,7 @@ export default function VoiceSetupScreen() {
   const removeVoice = useVoiceStore((s) => s.removeVoice);
   const setActiveVoice = useVoiceStore((s) => s.setActiveVoice);
 
+  const customWords = useCustomCardStore((s) => s.customWords);
   const isPremium = usePremiumStore((s) => s.isPremium);
 
   const [isRecording, setIsRecording] = useState(false);
@@ -127,6 +129,10 @@ export default function VoiceSetupScreen() {
   useEffect(() => {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
+      if (recorderRef.current) {
+        recorderRef.current.stopAndGetUri().catch(() => {});
+        recorderRef.current = null;
+      }
     };
   }, []);
 
@@ -160,10 +166,14 @@ export default function VoiceSetupScreen() {
     setIsRecording(false);
 
     if (recorderRef.current) {
-      const uri = await recorderRef.current.stopAndGetUri();
-      recorderRef.current = null;
-      if (uri) {
-        setRecordedUri(uri);
+      try {
+        const uri = await recorderRef.current.stopAndGetUri();
+        recorderRef.current = null;
+        if (uri) {
+          setRecordedUri(uri);
+        }
+      } catch {
+        recorderRef.current = null;
       }
     }
   }, []);
@@ -217,7 +227,7 @@ export default function VoiceSetupScreen() {
       return;
     }
 
-    const allWords: Word[] = getAllWords();
+    const allWords: Word[] = getAllWordsMerged(customWords);
     const total = allWords.length;
     setGenTotal(total);
     setGenProgress(0);
@@ -245,7 +255,7 @@ export default function VoiceSetupScreen() {
     if (!cancelledRef.current) {
       showAlert(uiFmt('generateComplete', lang, { count: String(completed) }));
     }
-  }, [activeVoiceId, lang]);
+  }, [activeVoiceId, lang, customWords]);
 
   const handleCancelGeneration = useCallback(() => {
     cancelledRef.current = true;
@@ -257,7 +267,7 @@ export default function VoiceSetupScreen() {
       return;
     }
 
-    const allWords = getAllWords();
+    const allWords = getAllWordsMerged(customWords);
     if (allWords.length === 0) return;
     const word = allWords[0];
     const text = wordText(word, lang);
@@ -275,7 +285,7 @@ export default function VoiceSetupScreen() {
     } finally {
       setIsGenerating(false);
     }
-  }, [activeVoiceId, lang]);
+  }, [activeVoiceId, lang, customWords]);
 
   const formatDate = (ts: number): string => {
     const d = new Date(ts);
@@ -578,7 +588,7 @@ export default function VoiceSetupScreen() {
             )}
 
             <Text style={[styles.noteText, { color: colors.textMuted }]}>
-              {uiFmt('totalWordsCount', lang, { count: String(getAllWords().length) })}
+              {uiFmt('totalWordsCount', lang, { count: String(getAllWordsMerged(customWords).length) })}
             </Text>
           </View>
         )}

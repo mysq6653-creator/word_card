@@ -32,6 +32,17 @@ export async function showRewardedAd(): Promise<boolean> {
 
   return new Promise<boolean>((resolve) => {
     let rewarded = false;
+    let settled = false;
+
+    const cleanup = () => {
+      if (settled) return;
+      settled = true;
+      unsubEarned();
+      unsubClose();
+      unsubError();
+      adLoaded = false;
+      loadRewardedAd();
+    };
 
     const unsubEarned = rewardedAd!.addAdEventListener(
       RewardedAdEventType.EARNED_REWARD,
@@ -43,14 +54,24 @@ export async function showRewardedAd(): Promise<boolean> {
     const unsubClose = rewardedAd!.addAdEventListener(
       AdEventType.CLOSED,
       () => {
-        unsubEarned();
-        unsubClose();
-        adLoaded = false;
-        loadRewardedAd();
+        cleanup();
         resolve(rewarded);
       },
     );
 
-    rewardedAd!.show();
+    const unsubError = rewardedAd!.addAdEventListener(
+      AdEventType.ERROR,
+      () => {
+        cleanup();
+        resolve(false);
+      },
+    );
+
+    try {
+      rewardedAd!.show();
+    } catch {
+      cleanup();
+      resolve(false);
+    }
   });
 }

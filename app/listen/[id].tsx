@@ -10,8 +10,8 @@ import Animated, {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
-  getAllWords,
-  getCategoryById,
+  getAllWordsMerged,
+  getCategoryByIdMerged,
   getQuizChoices,
   shuffleWords,
   wordText,
@@ -23,6 +23,7 @@ import { QuizLimitBlock } from '../../src/components/LimitGate';
 import { dimCategoryColor, radius, useIsDark, useThemeColors } from '../../src/lib/theme';
 import { speak, unlockAudio } from '../../src/lib/tts';
 import { useCardStore } from '../../src/store/useCardStore';
+import { useCustomCardStore } from '../../src/store/useCustomCardStore';
 import { usePremiumStore } from '../../src/store/usePremiumStore';
 
 const TOTAL_QUESTIONS = 10;
@@ -35,10 +36,12 @@ export default function ListenQuizScreen() {
   const isDark = useIsDark();
 
   const isAll = id === '_all';
-  const category = isAll ? null : getCategoryById(id ?? '');
+  const customCategories = useCustomCardStore((s) => s.customCategories);
+  const customWords = useCustomCardStore((s) => s.customWords);
+  const category = isAll ? null : getCategoryByIdMerged(id ?? '', customCategories, customWords);
   const pool = useMemo(
-    () => (isAll ? getAllWords() : category?.words ?? []),
-    [isAll, category],
+    () => (isAll ? getAllWordsMerged(customWords) : category?.words ?? []),
+    [isAll, category, customWords],
   );
 
   const lang = useCardStore((s) => s.lang);

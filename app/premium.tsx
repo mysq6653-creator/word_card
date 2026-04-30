@@ -44,6 +44,8 @@ export default function PremiumScreen() {
         const isCredit = [PRODUCT_IDS.CREDITS_50, PRODUCT_IDS.CREDITS_150, PRODUCT_IDS.CREDITS_500].includes(productId as any);
         notify(isCredit ? ui('aiCredits', lang) + ' +' : ui('premiumActivated', lang));
       }
+    } catch {
+      notify(ui('networkError', lang));
     } finally {
       setPurchasing(false);
     }
@@ -60,6 +62,8 @@ export default function PremiumScreen() {
         ? ui('networkError', lang)
         : ui('noPurchase', lang);
       notify(msg);
+    } catch {
+      notify(ui('networkError', lang));
     } finally {
       setPurchasing(false);
     }

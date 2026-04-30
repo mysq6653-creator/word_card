@@ -3,12 +3,12 @@ import * as ImagePicker from 'expo-image-picker';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
-  Dimensions,
   Image,
   Platform,
   Pressable,
   StyleSheet,
   Text,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import {
@@ -95,7 +95,7 @@ export default function CategoryScreen() {
   const translateX = useSharedValue(0);
   const opacity = useSharedValue(1);
 
-  const width = Dimensions.get('window').width;
+  const { width } = useWindowDimensions();
 
   const stopAudio = useCallback(() => {
     stopSpeaking();
@@ -227,28 +227,28 @@ export default function CategoryScreen() {
   const goNext = useCallback(() => {
     if (words.length === 0) return;
     navPlayRef.current = true;
-    setIndex((index + 1) % words.length);
-  }, [words.length, index]);
+    setIndex((i) => (i + 1) % words.length);
+  }, [words.length]);
 
   const goPrev = useCallback(() => {
     if (words.length === 0) return;
     navPlayRef.current = true;
-    setIndex((index - 1 + words.length) % words.length);
-  }, [words.length, index]);
+    setIndex((i) => (i - 1 + words.length) % words.length);
+  }, [words.length]);
 
   const handleNext = useCallback(() => {
     if (words.length === 0) return;
     pauseAutoplay();
     navPlayRef.current = true;
-    setIndex((index + 1) % words.length);
-  }, [words.length, index, pauseAutoplay]);
+    setIndex((i) => (i + 1) % words.length);
+  }, [words.length, pauseAutoplay]);
 
   const handlePrev = useCallback(() => {
     if (words.length === 0) return;
     pauseAutoplay();
     navPlayRef.current = true;
-    setIndex((index - 1 + words.length) % words.length);
-  }, [words.length, index, pauseAutoplay]);
+    setIndex((i) => (i - 1 + words.length) % words.length);
+  }, [words.length, pauseAutoplay]);
 
   const handleReplaceImage = useCallback(async () => {
     if (!word) return;

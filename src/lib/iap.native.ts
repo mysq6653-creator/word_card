@@ -44,6 +44,7 @@ function handlePurchaseSuccess(purchase: Purchase) {
 }
 
 export async function initIAP(): Promise<void> {
+  if (purchaseListener) return;
   try {
     await initConnection();
 

@@ -148,7 +148,7 @@ export default function AddCardScreen() {
     } finally {
       setSaving(false);
     }
-  }, [canSave, saving, selectedCatId, isNewCategory, newCatKo, newCatEn, newCatEmoji, newCatColor, imageUri, ko, en, emoji, addCategory, addWord, bump, router]);
+  }, [canSave, saving, selectedCatId, isNewCategory, newCatKo, newCatEn, newCatEmoji, newCatColor, imageUri, ko, en, emoji, addCategory, addWord, bump, lang, router]);
 
   return (
     <ScrollView

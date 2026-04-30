@@ -142,7 +142,7 @@ export const usePremiumStore = create<State & Actions>((set, get) => ({
   useAiCredit: () => {
     const s = get();
     if (s.aiCredits <= 0) return false;
-    set({ aiCredits: s.aiCredits - 1 });
+    set((prev) => ({ aiCredits: Math.max(0, prev.aiCredits - 1) }));
     persistPremium(get());
     return true;
   },

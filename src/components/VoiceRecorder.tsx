@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Lang, Word } from '../data/words';
@@ -38,6 +38,8 @@ function showMessage(message: string) {
 export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
   const router = useRouter();
   const [state, setState] = useState<RecState>({ kind: 'idle' });
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const [hasRec, setHasRec] = useState(false);
   const [recCount, setRecCount] = useState(0);
   const [showAdModal, setShowAdModal] = useState(false);
@@ -69,6 +71,14 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
       cancelled = true;
     };
   }, [recordingVersion]);
+
+  useEffect(() => {
+    return () => {
+      if (stateRef.current.kind === 'recording') {
+        stateRef.current.handle.stopAndGetUri().catch(() => {});
+      }
+    };
+  }, []);
 
   const handlePress = async () => {
     if (state.kind === 'recording') {
@@ -113,8 +123,12 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
   };
 
   const handleDelete = async () => {
-    await deleteRecording(word.id, lang);
-    bumpRecordingVersion();
+    try {
+      await deleteRecording(word.id, lang);
+      bumpRecordingVersion();
+    } catch {
+      // ignore deletion errors
+    }
   };
 
   const isRecording = state.kind === 'recording';

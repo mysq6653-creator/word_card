@@ -47,6 +47,7 @@ export function ToastProvider() {
     _show = show;
     return () => {
       _show = null;
+      if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [show]);
 
