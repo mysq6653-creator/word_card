@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Alert, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ui, uiFmt } from '../data/ui';
 import type { Lang, Word } from '../data/words';
 import {
   deleteRecording,
@@ -90,7 +91,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
           bumpRecordingVersion();
         }
       } catch {
-        showMessage(lang === 'ko' ? '녹음 저장에 실패했어요' : 'Failed to save recording');
+        showMessage(ui('recordFailed', lang));
       } finally {
         setState({ kind: 'idle' });
       }
@@ -106,18 +107,14 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
 
       const granted = await requestPermission();
       if (!granted) {
-        showMessage(
-          lang === 'ko'
-            ? '마이크 권한이 필요해요'
-            : 'Microphone permission is required',
-        );
+        showMessage(ui('micPermission', lang));
         return;
       }
       try {
         const handle = await startRecording();
         setState({ kind: 'recording', handle });
       } catch {
-        showMessage(lang === 'ko' ? '녹음을 시작할 수 없어요' : 'Cannot start recording');
+        showMessage(ui('cannotRecord', lang));
       }
     }
   };
@@ -138,7 +135,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
     return (
       <View style={styles.limitContainer}>
         <Text style={[styles.limitText, { color: colors.textMuted }]}>
-          🎙️ {lang === 'ko' ? `녹음 ${recCount}/${recordLimit.limit}` : `Recordings ${recCount}/${recordLimit.limit}`}
+          🎙️ {uiFmt('recLimit', lang, { used: String(recCount), limit: String(recordLimit.limit) })}
         </Text>
         <View style={styles.limitRow}>
           <Pressable
@@ -150,7 +147,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
             ]}
           >
             <Text style={styles.adBtnText}>
-              📺 {lang === 'ko' ? '광고 +1' : 'Ad +1'}
+              📺 {ui('adPlus1', lang)}
             </Text>
           </Pressable>
           <Pressable
@@ -184,15 +181,15 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
           isRecording && { backgroundColor: colors.danger, borderColor: colors.danger },
           pressed && { opacity: 0.7 },
         ]}
-        accessibilityLabel={isRecording ? (lang === 'ko' ? '녹음 중지' : 'Stop recording') : (lang === 'ko' ? '녹음 시작' : 'Start recording')}
+        accessibilityLabel={isRecording ? ui('stopRecording', lang) : ui('startRecording', lang)}
       >
         <Text style={styles.recIcon}>{isRecording ? '⏺' : '🎙️'}</Text>
         <Text style={[styles.recLabel, { color: colors.text }]}>
           {isRecording
-            ? lang === 'ko' ? '녹음 중...' : 'Recording...'
+            ? ui('recording', lang)
             : hasRec
-            ? lang === 'ko' ? '다시 녹음' : 'Re-record'
-            : lang === 'ko' ? '내 목소리' : 'Record'}
+            ? ui('reRecord', lang)
+            : ui('record', lang)}
         </Text>
       </Pressable>
 
@@ -204,7 +201,7 @@ export function VoiceRecorder({ word, lang, onRecordStart }: Props) {
             { backgroundColor: colors.surface, borderColor: colors.textMuted },
             pressed && { opacity: 0.7 },
           ]}
-          accessibilityLabel={lang === 'ko' ? '녹음 삭제' : 'Delete recording'}
+          accessibilityLabel={ui('deleteRecording', lang)}
         >
           <Text style={styles.deleteIcon}>🗑️</Text>
         </Pressable>

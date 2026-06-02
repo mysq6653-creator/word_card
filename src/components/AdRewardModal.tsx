@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Platform, Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ui, uiFmt } from '../data/ui';
 import { showRewardedAd, isRewardedAdReady, loadRewardedAd } from '../lib/admob';
 import { useThemeColors } from '../lib/theme';
 import { useCardStore } from '../store/useCardStore';
@@ -77,7 +78,7 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
         <View style={styles.overlay}>
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <Text style={[styles.countdownText, { color: colors.text }]}>
-              {lang === 'ko' ? '광고 로딩 중...' : 'Loading ad...'}
+              {ui('adLoading', lang)}
             </Text>
           </View>
         </View>
@@ -92,11 +93,11 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             <Text style={styles.adEmoji}>📺</Text>
             <Text style={[styles.countdownText, { color: colors.text }]}>
-              {lang === 'ko' ? '광고를 불러올 수 없어요\n잠시 후 다시 시도해주세요' : 'Ad not available\nPlease try again later'}
+              {ui('adNotAvailable', lang)}
             </Text>
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <Text style={[styles.closeBtnText, { color: colors.primary }]}>
-                {lang === 'ko' ? '닫기' : 'Close'}
+                {ui('close', lang)}
               </Text>
             </Pressable>
           </View>
@@ -110,14 +111,16 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
     <Modal transparent animationType="fade" visible={visible} onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={[styles.card, { backgroundColor: colors.surface }]}>
-          <Text style={styles.adLabel}>AD</Text>
+          <Text style={[styles.adLabel, { color: colors.textMuted }]}>AD</Text>
 
-          <View style={styles.adBox}>
-            <Text style={styles.adEmoji}>📺</Text>
-            <Text style={[styles.adText, { color: colors.textMuted }]}>
-              {lang === 'ko' ? '광고 영역 (테스트)' : 'Ad Space (Test)'}
-            </Text>
-          </View>
+          {__DEV__ && (
+            <View style={[styles.adBox, { backgroundColor: colors.surface }]}>
+              <Text style={styles.adEmoji}>📺</Text>
+              <Text style={[styles.adText, { color: colors.textMuted }]}>
+                Ad Space (Test)
+              </Text>
+            </View>
+          )}
 
           {done ? (
             <Pressable
@@ -129,19 +132,19 @@ export function AdRewardModal({ visible, onReward, onClose }: Props) {
               ]}
             >
               <Text style={styles.rewardBtnText}>
-                🎁 {lang === 'ko' ? '보상 받기' : 'Collect Reward'}
+                🎁 {ui('collectReward', lang)}
               </Text>
             </Pressable>
           ) : (
             <Text style={[styles.countdownText, { color: colors.textMuted }]}>
-              {lang === 'ko' ? `${countdown}초 후 보상 받기` : `Reward in ${countdown}s`}
+              {uiFmt('rewardIn', lang, { countdown: String(countdown) })}
             </Text>
           )}
 
           {done && (
             <Pressable onPress={onClose} style={styles.closeBtn}>
               <Text style={[styles.closeBtnText, { color: colors.textMuted }]}>
-                {lang === 'ko' ? '닫기' : 'Close'}
+                {ui('close', lang)}
               </Text>
             </Pressable>
           )}
@@ -170,14 +173,12 @@ const styles = StyleSheet.create({
   adLabel: {
     fontSize: 12,
     fontWeight: '800',
-    color: '#999',
     letterSpacing: 2,
   },
   adBox: {
     width: '100%',
     height: 200,
     borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 8,

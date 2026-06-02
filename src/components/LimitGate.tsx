@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { ui } from '../data/ui';
 import { useThemeColors } from '../lib/theme';
 import { useCardStore } from '../store/useCardStore';
 
@@ -21,9 +22,7 @@ export function LimitBanner({ used, limit, featureLabel, onWatchAd, onUpgrade }:
         {featureLabel} {used}/{limit}
       </Text>
       <Text style={[styles.desc, { color: colors.textMuted }]}>
-        {lang === 'ko'
-          ? '무료 한도에 도달했어요'
-          : 'Free limit reached'}
+        {ui('freeLimitReached', lang)}
       </Text>
       <View style={styles.actions}>
         <Pressable
@@ -35,7 +34,7 @@ export function LimitBanner({ used, limit, featureLabel, onWatchAd, onUpgrade }:
           ]}
         >
           <Text style={styles.adBtnText}>
-            📺 {lang === 'ko' ? '광고 보고 +1' : 'Watch Ad +1'}
+            📺 {ui('watchAdPlus1', lang)}
           </Text>
         </Pressable>
         <Pressable
@@ -47,7 +46,7 @@ export function LimitBanner({ used, limit, featureLabel, onWatchAd, onUpgrade }:
           ]}
         >
           <Text style={styles.upgradeBtnText}>
-            ⭐ {lang === 'ko' ? '프리미엄' : 'Premium'}
+            ⭐ {ui('premium', lang)}
           </Text>
         </Pressable>
       </View>
@@ -63,12 +62,10 @@ export function QuizLimitBlock({ onUpgrade, onBack }: { onUpgrade: () => void; o
     <View style={[styles.block, { backgroundColor: colors.bg }]}>
       <Text style={styles.blockEmoji}>🔒</Text>
       <Text style={[styles.blockTitle, { color: colors.text }]}>
-        {lang === 'ko' ? '오늘의 퀴즈를 다 했어요!' : "Today's quiz is done!"}
+        {ui('quizDoneToday', lang)}
       </Text>
       <Text style={[styles.blockDesc, { color: colors.textMuted }]}>
-        {lang === 'ko'
-          ? '무료 버전은 하루 1회 퀴즈를 할 수 있어요'
-          : 'Free version allows 1 quiz per day'}
+        {ui('freeQuizLimit', lang)}
       </Text>
       <Pressable
         onPress={onUpgrade}
@@ -79,7 +76,7 @@ export function QuizLimitBlock({ onUpgrade, onBack }: { onUpgrade: () => void; o
         ]}
       >
         <Text style={styles.upgradeBtnText}>
-          ⭐ {lang === 'ko' ? '프리미엄으로 무제한 퀴즈' : 'Unlimited with Premium'}
+          ⭐ {ui('unlimitedQuizPremium', lang)}
         </Text>
       </Pressable>
       {onBack && (
@@ -92,7 +89,7 @@ export function QuizLimitBlock({ onUpgrade, onBack }: { onUpgrade: () => void; o
           ]}
         >
           <Text style={[styles.backBtnText, { color: colors.text }]}>
-            ← {lang === 'ko' ? '돌아가기' : 'Go Back'}
+            ← {ui('back', lang)}
           </Text>
         </Pressable>
       )}

@@ -251,8 +251,8 @@ export default function ListenQuizScreen() {
               style={({ pressed }) => [
                 styles.choiceBtn,
                 { backgroundColor: colors.surface, borderColor },
-                answered && isChosen && isCorrect && { backgroundColor: '#d4edda' },
-                answered && isChosen && !isCorrect && { backgroundColor: '#f8d7da' },
+                answered && isChosen && isCorrect && { backgroundColor: isDark ? 'rgba(107,203,119,0.25)' : '#d4edda' },
+                answered && isChosen && !isCorrect && { backgroundColor: isDark ? 'rgba(232,93,117,0.25)' : '#f8d7da' },
                 pressed && !answered && { transform: [{ scale: 0.95 }] },
               ]}
             >

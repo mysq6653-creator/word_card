@@ -74,6 +74,7 @@ export default function RootLayout() {
             <Stack.Screen name="quiz/[id]" />
             <Stack.Screen name="listen/[id]" />
             <Stack.Screen name="premium" />
+            <Stack.Screen name="voice-setup" />
           </Stack>
           <ToastProvider />
           <StatusBar style={isDark ? 'light' : 'dark'} />

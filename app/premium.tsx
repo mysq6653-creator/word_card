@@ -15,7 +15,8 @@ export default function PremiumScreen() {
   const colors = useThemeColors();
   const lang = useCardStore((s) => s.lang);
   const isPremium = usePremiumStore((s) => s.isPremium);
-  const aiCredits = usePremiumStore((s) => s.aiCredits);
+  // AI voice: uncomment when AI features are enabled
+  // const aiCredits = usePremiumStore((s) => s.aiCredits);
   const [purchasing, setPurchasing] = useState(false);
 
   const benefits = [
@@ -23,7 +24,8 @@ export default function PremiumScreen() {
     { icon: '🎙️', text: ui('unlimitedRecordings', lang) },
     { icon: '🧩', text: ui('unlimitedQuiz', lang) },
     { icon: '🚫', text: ui('noAds', lang) },
-    { icon: '🤖', text: `100 ${ui('aiCredits', lang)}` },
+    // AI voice: uncomment when AI features are enabled
+    // { icon: '🤖', text: `100 ${ui('aiCredits', lang)}` },
     { icon: '💖', text: ui('supportDev', lang) },
   ];
 
@@ -112,9 +114,9 @@ export default function PremiumScreen() {
       </View>
 
       {isPremium ? (
-        <View style={[styles.activeCard, { backgroundColor: '#d4edda' }]}>
+        <View style={[styles.activeCard, { backgroundColor: colors.success, opacity: 0.85 }]}>
           <Text style={styles.activeEmoji}>{'✅'}</Text>
-          <Text style={styles.activeText}>
+          <Text style={[styles.activeText, { color: colors.text }]}>
             {ui('premiumActive', lang)}
           </Text>
         </View>
@@ -140,7 +142,7 @@ export default function PremiumScreen() {
         </View>
       )}
 
-      {/* AI Credit Packs */}
+      {/* AI Credit Packs — hidden until AI voice features are enabled
       <Text style={[styles.creditSectionTitle, { color: colors.text }]}>
         {`🤖 ${ui('aiCredits', lang)}`}
       </Text>
@@ -197,6 +199,7 @@ export default function PremiumScreen() {
           <Text style={[styles.creditPrice, { color: colors.primary }]}>$9.99</Text>
         </Pressable>
       </View>
+      */}
 
       {/* Restore */}
       <Pressable
@@ -229,7 +232,7 @@ const styles = StyleSheet.create({
   benefitText: { fontSize: 18, fontWeight: '700', flex: 1 },
   activeCard: { borderRadius: 20, padding: 24, alignItems: 'center', gap: 8, marginTop: 24 },
   activeEmoji: { fontSize: 40 },
-  activeText: { fontSize: 20, fontWeight: '800', color: '#155724' },
+  activeText: { fontSize: 20, fontWeight: '800' },
   purchaseArea: { gap: 12, marginTop: 24 },
   purchaseBtn: { borderRadius: 20, padding: 20, alignItems: 'center', position: 'relative' as const },
   purchaseBtnTitle: { fontSize: 18, fontWeight: '800', color: '#fff' },

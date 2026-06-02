@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { radius, useThemeColors } from '../src/lib/theme';
@@ -193,19 +193,19 @@ export default function SettingsScreen() {
         onPress={() => router.push('/premium')}
         style={({ pressed }) => [
           styles.premiumBtn,
-          { backgroundColor: isPremium ? '#d4edda' : '#FFF3CD' },
+          { backgroundColor: isPremium ? colors.success : colors.accent },
           pressed && { opacity: 0.7 },
         ]}
       >
-        <Text style={styles.premiumBtnText}>
+        <Text style={[styles.premiumBtnText, { color: colors.text }]}>
           {isPremium
             ? `✅ ${ui('premiumActive', lang)}`
             : `⭐ ${ui('upgradePremium', lang)}`}
         </Text>
-        <Text style={[styles.manageArrow, { color: '#666' }]}>→</Text>
+        <Text style={[styles.manageArrow, { color: colors.textMuted }]}>→</Text>
       </Pressable>
 
-      {/* AI Voice setup */}
+      {/* AI Voice setup — hidden until launch, set ENABLE_AI_VOICE = true to re-enable
       <Pressable
         onPress={() => router.push('/voice-setup')}
         style={({ pressed }) => [
@@ -219,6 +219,7 @@ export default function SettingsScreen() {
         </Text>
         <Text style={[styles.manageArrow, { color: colors.textMuted }]}>→</Text>
       </Pressable>
+      */}
 
       {/* Data management */}
       <Text style={[styles.sectionLabel, { color: colors.textMuted }]}>
@@ -251,13 +252,13 @@ export default function SettingsScreen() {
         </Text>
       </Pressable>
 
-      <Pressable onPress={() => { if (__DEV__ || Platform.OS === 'web') setDebugTaps((t) => t + 1); }}>
+      <Pressable onPress={() => { if (__DEV__) setDebugTaps((t) => t + 1); }}>
         <Text style={[styles.versionText, { color: colors.textMuted }]}>
           {ui('wordCard', lang)} v1.0.0
         </Text>
       </Pressable>
 
-      {(__DEV__ || Platform.OS === 'web') && showDebug && (
+      {__DEV__ && showDebug && (
         <View style={[styles.debugBox, { backgroundColor: colors.surface }]}>
           <Text style={[styles.debugTitle, { color: colors.text }]}>
             {`🛠 ${ui('testMode', lang)}`}
@@ -310,7 +311,7 @@ const styles = StyleSheet.create({
   langFlag: { fontSize: 18 },
   langLabel: { fontSize: 13, fontWeight: '700' },
   premiumBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md, marginTop: 24 },
-  premiumBtnText: { fontSize: 17, fontWeight: '800', color: '#333' },
+  premiumBtnText: { fontSize: 17, fontWeight: '800' },
   manageBtn: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 18, borderRadius: radius.md },
   manageBtnText: { fontSize: 17, fontWeight: '700' },
   manageArrow: { fontSize: 20, fontWeight: '700' },

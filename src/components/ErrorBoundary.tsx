@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Appearance, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { ui } from '../data/ui';
 import { useCardStore } from '../store/useCardStore';
@@ -13,6 +13,17 @@ function getLang(): Lang {
     return useCardStore.getState().lang;
   } catch {
     return 'en';
+  }
+}
+
+function getIsDark(): boolean {
+  try {
+    const colorMode = useCardStore.getState().colorMode;
+    const system = Appearance.getColorScheme();
+    const resolved = colorMode === 'auto' ? (system ?? 'light') : colorMode;
+    return resolved === 'dark';
+  } catch {
+    return false;
   }
 }
 
@@ -30,14 +41,15 @@ export class ErrorBoundary extends React.Component<Props, State> {
   render() {
     if (this.state.hasError) {
       const lang = getLang();
+      const isDark = getIsDark();
       return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: isDark ? '#1A1A2E' : '#fff' }]}>
           <Text style={styles.emoji}>😢</Text>
-          <Text style={styles.title}>{ui('errorOops', lang)}</Text>
-          <Text style={styles.message}>{ui('errorMessage', lang)}</Text>
+          <Text style={[styles.title, { color: isDark ? '#F0ECE8' : '#333' }]}>{ui('errorOops', lang)}</Text>
+          <Text style={[styles.message, { color: isDark ? '#A09A96' : '#666' }]}>{ui('errorMessage', lang)}</Text>
           <Pressable
             onPress={this.handleReset}
-            style={({ pressed }) => [styles.button, pressed && { opacity: 0.7 }]}
+            style={({ pressed }) => [styles.button, { backgroundColor: '#FF8FA3' }, pressed && { opacity: 0.7 }]}
             accessibilityRole="button"
             accessibilityLabel={ui('errorRetry', lang)}
           >
@@ -55,16 +67,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
     padding: 32,
     gap: 12,
   },
   emoji: { fontSize: 64 },
-  title: { fontSize: 28, fontWeight: '800', color: '#333' },
-  message: { fontSize: 16, fontWeight: '500', color: '#666', textAlign: 'center' },
+  title: { fontSize: 28, fontWeight: '800' },
+  message: { fontSize: 16, fontWeight: '500', textAlign: 'center' },
   button: {
     marginTop: 16,
-    backgroundColor: '#4A90D9',
     paddingHorizontal: 32,
     paddingVertical: 14,
     borderRadius: 12,
