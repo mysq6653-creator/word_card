@@ -10,331 +10,259 @@ import type { Lang } from '../src/data/words';
 const privacyBody: Record<Lang, string> = {
   ko: `낱말 카드 앱 개인정보 처리방침
 
-최종 수정일: 2026년 4월
+최종 수정일: 2026년 6월
+
+본 앱은 회원가입이나 로그인이 없으며, 이름·이메일·전화번호 등 개인 식별 정보를 수집하지 않습니다.
 
 1. 수집하는 정보
-본 앱은 사용자의 마이크를 통해 음성을 녹음할 수 있습니다. 녹음된 음성은 기기 내부에만 저장되며, 외부 서버로 전송되지 않습니다.
-사진 앨범에서 선택한 이미지는 기기 내부에만 저장됩니다.
-AI 음성 기능을 사용하는 경우, 텍스트 데이터가 ElevenLabs API로 전송되어 음성이 생성됩니다. 생성된 AI 음성 파일은 기기 내부에만 저장됩니다.
+- 마이크 녹음: 부모님이 낱말 발음을 직접 녹음할 수 있습니다. 녹음 파일은 기기 내부에만 저장되며 외부 서버로 전송되지 않습니다.
+- 사진: 나만의 카드에 사진을 추가할 수 있습니다. 선택한 이미지는 기기 내부에만 저장됩니다.
 
-2. 정보의 사용 목적
-녹음된 음성은 낱말 카드의 발음 재생에만 사용됩니다. 부모님이 직접 녹음한 목소리로 아이에게 단어를 들려줄 수 있습니다.
-AI 음성 기능은 8개 언어(한국어, 영어, 일본어, 스페인어, 중국어, 프랑스어, 독일어, 포르투갈어)로 단어의 발음을 생성합니다.
+2. 정보의 저장 및 삭제
+모든 녹음·사진·커스텀 카드는 기기 내부 저장소(웹은 브라우저 IndexedDB)에만 보관되며, 앱 삭제 시 함께 삭제됩니다. 설정 > 데이터 관리에서 언제든지 직접 삭제할 수 있습니다.
 
-3. 정보의 저장
-- 모바일: 기기 내부 저장소 (앱 삭제 시 함께 삭제)
-- 웹: 브라우저 IndexedDB (브라우저 데이터 삭제 시 함께 삭제)
-음성 녹음 및 사진은 외부 서버에 저장되거나 전송되지 않습니다. AI 음성 생성 시 텍스트 데이터만 ElevenLabs 서버로 전송되며, 생성된 음성 파일은 기기에만 저장됩니다.
+3. 아동 개인정보 보호 (COPPA / GDPR-K 준수)
+본 앱은 영유아 교육을 목적으로 하며, 아동의 개인정보를 수집하지 않습니다. 계정 생성이나 로그인이 필요하지 않으며, 아동의 정보가 외부로 유출되지 않습니다.
 
-4. 정보의 삭제
-설정 > 데이터 관리에서 녹음, AI 음성, 사진, 커스텀 카드를 삭제할 수 있습니다. 개별 카드의 녹음 및 AI 음성은 각 카드 편집 화면에서 삭제할 수 있습니다.
+4. 광고
+본 앱은 Google AdMob을 통해 보상형 광고를 표시할 수 있습니다. 광고는 이용자가 직접 시청을 선택한 경우에만 표시됩니다. 아동 대상 앱 정책(COPPA)에 따라 개인 맞춤화되지 않은 광고만 제공됩니다.
 
-5. 아동 개인정보 보호 (COPPA 준수)
-본 앱은 영유아 교육을 목적으로 합니다. 아동의 개인정보를 수집하지 않으며, 계정 생성이나 로그인이 필요하지 않습니다. 아동의 정보가 외부로 유출되지 않습니다.
+5. 인앱 구매
+프리미엄 영구 이용권(Lifetime Pass) 1회성 구매가 제공됩니다. 자동 갱신 구독 상품은 없습니다. 결제는 Google Play를 통해 안전하게 처리되며, 본 앱은 결제 정보를 수집하거나 저장하지 않습니다.
 
-6. 광고
-본 앱은 Google AdMob을 통해 보상형 광고를 표시할 수 있습니다. 광고는 아동 대상 설정(COPPA)에 따라 개인화되지 않은 광고만 표시됩니다. 광고 시청은 사용자가 직접 선택한 경우에만 표시됩니다.
-
-7. 인앱 구매
-프리미엄 영구 구매(Lifetime Pass) 및 AI 크레딧 팩이 제공됩니다. 구독 상품은 없습니다. 결제는 Apple App Store 또는 Google Play Store를 통해 안전하게 처리되며, 결제 정보는 본 앱에서 수집하지 않습니다.
-
-8. 제3자 SDK
+6. 제3자 서비스
 - Google AdMob: 보상형 광고 표시 (비개인화 광고만)
-- Apple StoreKit / Google Play Billing: 인앱 구매 처리
-- ElevenLabs API: AI 음성 생성 (텍스트를 음성으로 변환)
+- Google Play 결제: 인앱 구매 처리
 
-9. 변경 사항
-본 방침이 변경될 경우 앱 업데이트를 통해 안내합니다.
+7. 변경 사항
+본 방침이 변경될 경우 앱 업데이트 또는 본 페이지를 통해 안내합니다.
 
-10. 문의
-개인정보 관련 문의사항이 있으시면 앱스토어 리뷰 또는 개발자 연락처로 문의해 주세요.`,
+8. 문의
+개인정보 관련 문의: mysq6653@gmail.com`,
 
   en: `Word Card App Privacy Policy
 
-Last updated: April 2026
+Last updated: June 2026
+
+The app has no sign-up or login and does not collect any personally identifiable information such as name, email, or phone number.
 
 1. Information We Collect
-This app can record audio through your device's microphone. All recordings are stored locally on your device only and are never sent to any external server.
-Images selected from your photo album are also stored locally only.
-When using the AI voice feature, text data is sent to the ElevenLabs API to generate speech. The generated AI audio files are stored only on your device.
+- Microphone recordings: Parents may record word pronunciations. Recordings are stored only on the device and are never sent to any external server.
+- Photos: You may add photos to your own cards. Selected images are stored only on the device.
 
-2. How We Use Information
-Recorded audio is used solely for playing pronunciation on word cards. Parents can record their own voice to play for their child.
-The AI voice feature generates pronunciation in 8 languages (Korean, English, Japanese, Spanish, Chinese, French, German, Portuguese).
+2. Data Storage and Deletion
+All recordings, photos, and custom cards are stored only in the device's internal storage (or the browser's IndexedDB on web) and are removed when the app is uninstalled. You can also delete them anytime via Settings > Data Manager.
 
-3. Data Storage
-- Mobile: Device internal storage (deleted when app is uninstalled)
-- Web: Browser IndexedDB (deleted when browser data is cleared)
-Voice recordings and photos are never stored on or transmitted to external servers. When generating AI voice, only text data is sent to ElevenLabs servers; the resulting audio files are stored only on your device.
+3. Children's Privacy (COPPA / GDPR-K Compliance)
+This app is designed for early childhood education and does not collect any personal information from children. No account creation or login is required, and no child data is exposed externally.
 
-4. Data Deletion
-You can delete recordings, AI audio, photos, and custom cards through Settings > Data Manager. Individual card recordings and AI audio can be deleted from each card's edit screen.
+4. Advertising
+This app may display rewarded ads through Google AdMob. Ads appear only when the user explicitly chooses to watch them. In compliance with child-directed policies (COPPA), only non-personalized ads are served.
 
-5. Children's Privacy (COPPA Compliance)
-This app is designed for early childhood education. We do not collect any personal information from children. No account creation or login is required. No child data is exposed externally.
+5. In-App Purchases
+A one-time Premium Lifetime Pass is offered. There are no auto-renewing subscriptions. Payments are processed securely through Google Play, and the app does not collect or store any payment information.
 
-6. Advertising
-This app may display rewarded ads through Google AdMob. Ads are shown only when the user explicitly chooses to watch them. In compliance with COPPA, only non-personalized ads are served.
-
-7. In-App Purchases
-A Lifetime Pass (one-time purchase) and AI credit packs are available. There are no subscriptions. Payments are processed securely through Apple App Store or Google Play Store. No payment information is collected by this app.
-
-8. Third-Party SDKs
+6. Third-Party Services
 - Google AdMob: Rewarded ad display (non-personalized ads only)
-- Apple StoreKit / Google Play Billing: In-app purchase processing
-- ElevenLabs API: AI voice generation (text-to-speech)
+- Google Play Billing: In-app purchase processing
 
-9. Changes
-Any changes to this policy will be communicated through app updates.
+7. Changes
+Any changes to this policy will be communicated through app updates or on this page.
 
-10. Contact
-For privacy-related inquiries, please reach out through the app store review or developer contact.`,
+8. Contact
+Privacy inquiries: mysq6653@gmail.com`,
 
   ja: `単語カード アプリ プライバシーポリシー
 
-最終更新日: 2026年4月
+最終更新日: 2026年6月
+
+本アプリは会員登録やログインがなく、氏名・メールアドレス・電話番号などの個人識別情報を収集しません。
 
 1. 収集する情報
-本アプリはデバイスのマイクを通じて音声を録音できます。録音された音声はデバイス内部にのみ保存され、外部サーバーに送信されることはありません。
-フォトアルバムから選択した画像もデバイス内部にのみ保存されます。
-AI音声機能を使用する場合、テキストデータがElevenLabs APIに送信され音声が生成されます。生成されたAI音声ファイルはデバイス内部にのみ保存されます。
+- マイク録音: 保護者が単語の発音を録音できます。録音ファイルはデバイス内部にのみ保存され、外部サーバーに送信されません。
+- 写真: カスタムカードに写真を追加できます。選択した画像はデバイス内部にのみ保存されます。
 
-2. 情報の使用目的
-録音された音声は、単語カードの発音再生にのみ使用されます。保護者が自分の声を録音してお子様に聞かせることができます。
-AI音声機能は8言語（韓国語、英語、日本語、スペイン語、中国語、フランス語、ドイツ語、ポルトガル語）で発音を生成します。
+2. 情報の保存と削除
+すべての録音・写真・カスタムカードはデバイス内部ストレージ（Webの場合はブラウザのIndexedDB）にのみ保存され、アプリ削除時に削除されます。設定 > データ管理からいつでも削除できます。
 
-3. 情報の保存
-- モバイル: デバイス内部ストレージ（アプリ削除時に削除）
-- Web: ブラウザIndexedDB（ブラウザデータ削除時に削除）
-音声録音や写真は外部サーバーに保存・送信されません。AI音声生成時はテキストデータのみがElevenLabsサーバーに送信され、生成された音声ファイルはデバイスにのみ保存されます。
+3. お子様のプライバシー（COPPA / GDPR-K準拠）
+本アプリは幼児教育を目的としており、お子様の個人情報を収集しません。アカウント作成やログインは不要で、お子様の情報が外部に漏れることはありません。
 
-4. 情報の削除
-設定 > データ管理から録音、AI音声、写真、カスタムカードを削除できます。個別のカードの録音やAI音声は各カードの編集画面から削除できます。
+4. 広告
+本アプリはGoogle AdMobを通じてリワード広告を表示することがあります。広告はユーザーが視聴を選択した場合のみ表示されます。児童向けポリシー（COPPA）に準拠し、パーソナライズされていない広告のみ表示されます。
 
-5. お子様のプライバシー（COPPA準拠）
-本アプリは幼児教育を目的としています。お子様の個人情報を収集しません。アカウント作成やログインは不要です。
+5. アプリ内購入
+プレミアム永久購入（Lifetime Pass）の一回限りの購入が提供されます。自動更新サブスクリプションはありません。決済はGoogle Playを通じて安全に処理され、本アプリは決済情報を収集・保存しません。
 
-6. 広告
-Google AdMobを通じてリワード広告を表示することがあります。COPPAに準拠し、パーソナライズされていない広告のみ表示されます。広告はユーザーが選択した場合のみ表示されます。
-
-7. アプリ内購入
-プレミアム永久購入（Lifetime Pass）およびAIクレジットパックがあります。サブスクリプションはありません。決済はApple App StoreまたはGoogle Play Storeを通じて安全に処理されます。決済情報は本アプリでは収集しません。
-
-8. サードパーティSDK
+6. 第三者サービス
 - Google AdMob: リワード広告表示（非パーソナライズ広告のみ）
-- Apple StoreKit / Google Play Billing: アプリ内購入処理
-- ElevenLabs API: AI音声生成（テキスト読み上げ）
+- Google Play決済: アプリ内購入処理
 
-9. 変更事項
-本ポリシーの変更はアプリのアップデートを通じてお知らせします。
+7. 変更事項
+本ポリシーの変更はアプリのアップデートまたは本ページを通じてお知らせします。
 
-10. お問い合わせ
-プライバシーに関するお問い合わせは、アプリストアのレビューまたは開発者連絡先までご連絡ください。`,
+8. お問い合わせ
+プライバシーに関するお問い合わせ: mysq6653@gmail.com`,
 
   es: `Política de Privacidad de la App Tarjeta de Palabras
 
-Última actualización: abril de 2026
+Última actualización: junio de 2026
+
+La app no tiene registro ni inicio de sesión y no recopila información de identificación personal como nombre, correo o teléfono.
 
 1. Información que recopilamos
-Esta app puede grabar audio a través del micrófono de su dispositivo. Todas las grabaciones se almacenan localmente en su dispositivo y nunca se envían a ningún servidor externo.
-Las imágenes seleccionadas de su álbum de fotos también se almacenan solo localmente.
-Al usar la función de voz IA, se envían datos de texto a la API de ElevenLabs para generar voz. Los archivos de audio IA generados se almacenan solo en su dispositivo.
+- Grabaciones de micrófono: Los padres pueden grabar pronunciaciones. Las grabaciones se almacenan solo en el dispositivo y nunca se envían a servidores externos.
+- Fotos: Puede agregar fotos a sus tarjetas. Las imágenes seleccionadas se almacenan solo en el dispositivo.
 
-2. Cómo usamos la información
-El audio grabado se usa únicamente para reproducir la pronunciación en las tarjetas de palabras. Los padres pueden grabar su propia voz para reproducirla a sus hijos.
-La función de voz IA genera pronunciación en 8 idiomas (coreano, inglés, japonés, español, chino, francés, alemán, portugués).
+2. Almacenamiento y eliminación de datos
+Todas las grabaciones, fotos y tarjetas personalizadas se almacenan solo en el almacenamiento interno del dispositivo (o IndexedDB del navegador en web) y se eliminan al desinstalar la app. También puede eliminarlas en cualquier momento en Ajustes > Gestión de datos.
 
-3. Almacenamiento de datos
-- Móvil: Almacenamiento interno del dispositivo (se elimina al desinstalar la app)
-- Web: IndexedDB del navegador (se elimina al borrar datos del navegador)
-Las grabaciones de voz y fotos nunca se almacenan ni transmiten a servidores externos. Al generar voz IA, solo se envían datos de texto a los servidores de ElevenLabs; los archivos de audio resultantes se almacenan solo en su dispositivo.
+3. Privacidad infantil (Cumplimiento COPPA / GDPR-K)
+Esta app está diseñada para la educación infantil temprana y no recopila información personal de niños. No se requiere cuenta ni inicio de sesión, y ningún dato infantil se expone externamente.
 
-4. Eliminación de datos
-Puede eliminar grabaciones, audio IA, fotos y tarjetas personalizadas en Ajustes > Gestión de datos. Las grabaciones y audio IA individuales se pueden eliminar desde la pantalla de edición de cada tarjeta.
+4. Publicidad
+Esta app puede mostrar anuncios con recompensa a través de Google AdMob. Los anuncios aparecen solo cuando el usuario elige verlos. Conforme a las políticas para niños (COPPA), solo se muestran anuncios no personalizados.
 
-5. Privacidad infantil (Cumplimiento COPPA)
-Esta app está diseñada para la educación infantil temprana. No recopilamos información personal de niños. No se requiere creación de cuenta ni inicio de sesión.
+5. Compras dentro de la app
+Se ofrece una compra única Premium de por vida (Lifetime Pass). No hay suscripciones de renovación automática. Los pagos se procesan de forma segura a través de Google Play, y la app no recopila ni almacena información de pago.
 
-6. Publicidad
-Esta app puede mostrar anuncios con recompensa a través de Google AdMob. Solo se muestran anuncios no personalizados, cumpliendo con COPPA. Los anuncios solo se muestran cuando el usuario elige verlos.
-
-7. Compras dentro de la app
-Se ofrece una compra premium permanente (Lifetime Pass) y paquetes de créditos IA. No hay suscripciones. Los pagos se procesan de forma segura a través de Apple App Store o Google Play Store. Esta app no recopila información de pago.
-
-8. SDKs de terceros
+6. Servicios de terceros
 - Google AdMob: Anuncios con recompensa (solo no personalizados)
-- Apple StoreKit / Google Play Billing: Procesamiento de compras
-- ElevenLabs API: Generación de voz IA (texto a voz)
+- Google Play Billing: Procesamiento de compras
 
-9. Cambios
-Los cambios en esta política se comunicarán a través de actualizaciones de la app.
+7. Cambios
+Los cambios en esta política se comunicarán mediante actualizaciones de la app o en esta página.
 
-10. Contacto
-Para consultas sobre privacidad, comuníquese a través de la reseña de la tienda de apps o el contacto del desarrollador.`,
+8. Contacto
+Consultas de privacidad: mysq6653@gmail.com`,
 
   zh: `单词卡片应用隐私政策
 
-最后更新日期：2026年4月
+最后更新日期：2026年6月
+
+本应用没有注册或登录，不收集姓名、邮箱、电话等个人身份信息。
 
 1. 我们收集的信息
-本应用可以通过设备麦克风录制音频。所有录音仅存储在您的设备本地，不会发送到任何外部服务器。
-从相册选择的图片也仅存储在本地。
-使用AI语音功能时，文本数据会发送至ElevenLabs API以生成语音。生成的AI音频文件仅存储在您的设备上。
+- 麦克风录音：家长可以录制单词发音。录音文件仅存储在设备本地，不会发送到任何外部服务器。
+- 照片：您可以向自定义卡片添加照片。所选图片仅存储在设备本地。
 
-2. 信息使用方式
-录制的音频仅用于单词卡片的发音播放。家长可以录制自己的声音播放给孩子听。
-AI语音功能支持8种语言（韩语、英语、日语、西班牙语、中文、法语、德语、葡萄牙语）生成发音。
+2. 数据存储与删除
+所有录音、照片和自定义卡片仅存储在设备内部存储（网页端为浏览器IndexedDB），卸载应用时一并删除。您也可以随时在设置 > 数据管理中删除。
 
-3. 数据存储
-- 移动端：设备内部存储（卸载应用时删除）
-- 网页端：浏览器IndexedDB（清除浏览器数据时删除）
-语音录音和照片不会存储或传输至外部服务器。生成AI语音时，仅文本数据发送至ElevenLabs服务器；生成的音频文件仅存储在您的设备上。
+3. 儿童隐私（COPPA / GDPR-K合规）
+本应用面向幼儿教育，不收集任何儿童个人信息。无需创建账户或登录，儿童信息不会外泄。
 
-4. 数据删除
-您可以通过设置 > 数据管理删除录音、AI音频、照片和自定义卡片。单个卡片的录音和AI音频可以从每张卡片的编辑界面中删除。
+4. 广告
+本应用可能通过Google AdMob展示激励广告。广告仅在用户主动选择观看时显示。遵循儿童相关政策（COPPA），仅展示非个性化广告。
 
-5. 儿童隐私（COPPA合规）
-本应用面向幼儿教育。我们不收集任何儿童个人信息。无需创建账户或登录。
+5. 应用内购买
+提供高级版永久购买（Lifetime Pass）一次性购买。没有自动续费订阅。付款通过Google Play安全处理，本应用不收集或存储任何付款信息。
 
-6. 广告
-本应用可能通过Google AdMob展示激励广告。遵循COPPA规定，仅展示非个性化广告。广告仅在用户主动选择观看时展示。
-
-7. 应用内购买
-提供高级版永久购买（Lifetime Pass）和AI积分包。没有订阅项目。付款通过Apple App Store或Google Play Store安全处理。本应用不收集任何付款信息。
-
-8. 第三方SDK
+6. 第三方服务
 - Google AdMob：激励广告展示（仅非个性化广告）
-- Apple StoreKit / Google Play Billing：应用内购买处理
-- ElevenLabs API：AI语音生成（文本转语音）
+- Google Play结算：应用内购买处理
 
-9. 变更
-本政策的任何变更将通过应用更新通知。
+7. 变更
+本政策的任何变更将通过应用更新或本页面通知。
 
-10. 联系方式
-如有隐私相关问题，请通过应用商店评论或开发者联系方式联系我们。`,
+8. 联系方式
+隐私相关问题：mysq6653@gmail.com`,
 
   fr: `Politique de confidentialité de l'application Carte de Mots
 
-Dernière mise à jour : avril 2026
+Dernière mise à jour : juin 2026
+
+L'application n'a ni inscription ni connexion et ne collecte aucune information d'identification personnelle telle que nom, e-mail ou téléphone.
 
 1. Informations collectées
-Cette application peut enregistrer de l'audio via le microphone de votre appareil. Tous les enregistrements sont stockés uniquement sur votre appareil et ne sont jamais envoyés à un serveur externe.
-Les images sélectionnées depuis votre album photo sont également stockées uniquement en local.
-Lors de l'utilisation de la fonction vocale IA, des données textuelles sont envoyées à l'API ElevenLabs pour générer la parole. Les fichiers audio IA générés sont stockés uniquement sur votre appareil.
+- Enregistrements micro : Les parents peuvent enregistrer des prononciations. Les enregistrements sont stockés uniquement sur l'appareil et ne sont jamais envoyés à des serveurs externes.
+- Photos : Vous pouvez ajouter des photos à vos cartes. Les images sélectionnées sont stockées uniquement sur l'appareil.
 
-2. Utilisation des informations
-L'audio enregistré est utilisé uniquement pour la lecture de la prononciation sur les cartes de mots. Les parents peuvent enregistrer leur propre voix pour la faire écouter à leur enfant.
-La fonction vocale IA génère la prononciation dans 8 langues (coréen, anglais, japonais, espagnol, chinois, français, allemand, portugais).
+2. Stockage et suppression des données
+Tous les enregistrements, photos et cartes personnalisées sont stockés uniquement dans le stockage interne de l'appareil (ou l'IndexedDB du navigateur sur le web) et sont supprimés lors de la désinstallation. Vous pouvez aussi les supprimer à tout moment via Paramètres > Gestion des données.
 
-3. Stockage des données
-- Mobile : Stockage interne de l'appareil (supprimé lors de la désinstallation)
-- Web : IndexedDB du navigateur (supprimé lors de l'effacement des données)
-Les enregistrements vocaux et photos ne sont jamais stockés ou transmis à des serveurs externes. Lors de la génération vocale IA, seules les données textuelles sont envoyées aux serveurs ElevenLabs ; les fichiers audio résultants sont stockés uniquement sur votre appareil.
+3. Vie privée des enfants (Conformité COPPA / GDPR-K)
+Cette application est conçue pour l'éducation de la petite enfance et ne collecte aucune information personnelle des enfants. Aucune création de compte ni connexion n'est requise, et aucune donnée d'enfant n'est exposée à l'extérieur.
 
-4. Suppression des données
-Vous pouvez supprimer les enregistrements, l'audio IA, les photos et les cartes personnalisées dans Paramètres > Gestion des données. Les enregistrements et l'audio IA individuels peuvent être supprimés depuis l'écran d'édition de chaque carte.
+4. Publicité
+Cette application peut afficher des publicités récompensées via Google AdMob. Les publicités n'apparaissent que lorsque l'utilisateur choisit de les regarder. Conformément aux politiques pour enfants (COPPA), seules des publicités non personnalisées sont diffusées.
 
-5. Vie privée des enfants (Conformité COPPA)
-Cette application est conçue pour l'éducation de la petite enfance. Nous ne collectons aucune information personnelle des enfants. Aucune création de compte ni connexion n'est requise.
+5. Achats intégrés
+Un achat unique Premium à vie (Lifetime Pass) est proposé. Il n'y a pas d'abonnement à renouvellement automatique. Les paiements sont traités de manière sécurisée via Google Play, et l'application ne collecte ni ne stocke aucune information de paiement.
 
-6. Publicité
-Cette application peut afficher des publicités récompensées via Google AdMob. Conformément à la COPPA, seules des publicités non personnalisées sont diffusées. Les publicités ne s'affichent que lorsque l'utilisateur choisit de les regarder.
-
-7. Achats intégrés
-Un achat premium permanent (Lifetime Pass) et des packs de crédits IA sont disponibles. Il n'y a pas d'abonnement. Les paiements sont traités de manière sécurisée via l'Apple App Store ou le Google Play Store. Cette application ne collecte aucune information de paiement.
-
-8. SDK tiers
+6. Services tiers
 - Google AdMob : Publicités récompensées (non personnalisées uniquement)
-- Apple StoreKit / Google Play Billing : Traitement des achats
-- ElevenLabs API : Génération vocale IA (synthèse vocale)
+- Google Play Billing : Traitement des achats
 
-9. Modifications
-Toute modification de cette politique sera communiquée via les mises à jour de l'application.
+7. Modifications
+Toute modification de cette politique sera communiquée via les mises à jour de l'application ou sur cette page.
 
-10. Contact
-Pour toute question relative à la vie privée, veuillez nous contacter via l'avis de l'App Store ou le contact du développeur.`,
+8. Contact
+Questions de confidentialité : mysq6653@gmail.com`,
 
   de: `Datenschutzrichtlinie der Wortkarte-App
 
-Letzte Aktualisierung: April 2026
+Letzte Aktualisierung: Juni 2026
+
+Die App hat keine Registrierung oder Anmeldung und erfasst keine personenbezogenen Daten wie Name, E-Mail oder Telefonnummer.
 
 1. Erfasste Informationen
-Diese App kann Audio über das Mikrofon Ihres Geräts aufnehmen. Alle Aufnahmen werden nur lokal auf Ihrem Gerät gespeichert und niemals an externe Server gesendet.
-Aus dem Fotoalbum ausgewählte Bilder werden ebenfalls nur lokal gespeichert.
-Bei Nutzung der KI-Sprachfunktion werden Textdaten an die ElevenLabs-API gesendet, um Sprache zu erzeugen. Die erzeugten KI-Audiodateien werden nur auf Ihrem Gerät gespeichert.
+- Mikrofonaufnahmen: Eltern können Aussprachen aufnehmen. Aufnahmen werden nur auf dem Gerät gespeichert und niemals an externe Server gesendet.
+- Fotos: Sie können Ihren Karten Fotos hinzufügen. Ausgewählte Bilder werden nur auf dem Gerät gespeichert.
 
-2. Verwendung der Informationen
-Aufgenommenes Audio wird ausschließlich für die Aussprache-Wiedergabe auf Wortkarten verwendet. Eltern können ihre eigene Stimme aufnehmen, um sie ihrem Kind vorzuspielen.
-Die KI-Sprachfunktion erzeugt Aussprache in 8 Sprachen (Koreanisch, Englisch, Japanisch, Spanisch, Chinesisch, Französisch, Deutsch, Portugiesisch).
+2. Datenspeicherung und -löschung
+Alle Aufnahmen, Fotos und benutzerdefinierten Karten werden nur im internen Gerätespeicher (bzw. der IndexedDB des Browsers im Web) gespeichert und bei der Deinstallation entfernt. Sie können sie auch jederzeit unter Einstellungen > Datenverwaltung löschen.
 
-3. Datenspeicherung
-- Mobil: Interner Gerätespeicher (wird bei App-Deinstallation gelöscht)
-- Web: Browser-IndexedDB (wird beim Löschen der Browserdaten gelöscht)
-Sprachaufnahmen und Fotos werden niemals auf externen Servern gespeichert oder übertragen. Bei der KI-Sprachgenerierung werden nur Textdaten an ElevenLabs-Server gesendet; die resultierenden Audiodateien werden nur auf Ihrem Gerät gespeichert.
+3. Datenschutz für Kinder (COPPA / GDPR-K-Konformität)
+Diese App dient der frühkindlichen Bildung und erfasst keine persönlichen Informationen von Kindern. Keine Kontoerstellung oder Anmeldung erforderlich, und keine Kinderdaten werden extern offengelegt.
 
-4. Datenlöschung
-Sie können Aufnahmen, KI-Audio, Fotos und benutzerdefinierte Karten unter Einstellungen > Datenverwaltung löschen. Einzelne Aufnahmen und KI-Audio können über den Bearbeitungsbildschirm jeder Karte gelöscht werden.
+4. Werbung
+Diese App kann Belohnungswerbung über Google AdMob anzeigen. Werbung erscheint nur, wenn der Benutzer sich aktiv dafür entscheidet. Gemäß kinderbezogenen Richtlinien (COPPA) werden nur nicht personalisierte Anzeigen geschaltet.
 
-5. Datenschutz für Kinder (COPPA-Konformität)
-Diese App dient der frühkindlichen Bildung. Wir erfassen keine persönlichen Informationen von Kindern. Keine Kontoerstellung oder Anmeldung erforderlich.
+5. In-App-Käufe
+Ein einmaliger Premium-Kauf auf Lebenszeit (Lifetime Pass) wird angeboten. Es gibt keine automatisch verlängerten Abonnements. Zahlungen werden sicher über Google Play abgewickelt, und die App erfasst oder speichert keine Zahlungsinformationen.
 
-6. Werbung
-Diese App kann Belohnungswerbung über Google AdMob anzeigen. Gemäß COPPA werden nur nicht personalisierte Anzeigen geschaltet. Werbung wird nur angezeigt, wenn der Benutzer sich aktiv dafür entscheidet.
-
-7. In-App-Käufe
-Ein dauerhafter Premium-Kauf (Lifetime Pass) und KI-Kredit-Pakete sind verfügbar. Es gibt keine Abonnements. Zahlungen werden sicher über den Apple App Store oder Google Play Store abgewickelt. Diese App erfasst keine Zahlungsinformationen.
-
-8. Drittanbieter-SDKs
+6. Drittanbieterdienste
 - Google AdMob: Belohnungswerbung (nur nicht personalisiert)
-- Apple StoreKit / Google Play Billing: In-App-Kauf-Verarbeitung
-- ElevenLabs API: KI-Sprachgenerierung (Text-to-Speech)
+- Google Play Billing: In-App-Kauf-Verarbeitung
 
-9. Änderungen
-Änderungen an dieser Richtlinie werden über App-Updates mitgeteilt.
+7. Änderungen
+Änderungen an dieser Richtlinie werden über App-Updates oder auf dieser Seite mitgeteilt.
 
-10. Kontakt
-Bei datenschutzbezogenen Anfragen kontaktieren Sie uns bitte über die App-Store-Bewertung oder den Entwicklerkontakt.`,
+8. Kontakt
+Datenschutzanfragen: mysq6653@gmail.com`,
 
   pt: `Política de Privacidade do App Cartão de Palavras
 
-Última atualização: abril de 2026
+Última atualização: junho de 2026
+
+O app não tem cadastro ou login e não coleta nenhuma informação de identificação pessoal como nome, e-mail ou telefone.
 
 1. Informações que coletamos
-Este app pode gravar áudio através do microfone do seu dispositivo. Todas as gravações são armazenadas apenas localmente no seu dispositivo e nunca são enviadas para qualquer servidor externo.
-Imagens selecionadas do seu álbum de fotos também são armazenadas apenas localmente.
-Ao usar o recurso de voz IA, dados de texto são enviados à API da ElevenLabs para gerar fala. Os arquivos de áudio IA gerados são armazenados apenas no seu dispositivo.
+- Gravações de microfone: Os pais podem gravar pronúncias. As gravações são armazenadas apenas no dispositivo e nunca enviadas a servidores externos.
+- Fotos: Você pode adicionar fotos aos seus cartões. As imagens selecionadas são armazenadas apenas no dispositivo.
 
-2. Como usamos as informações
-O áudio gravado é usado exclusivamente para reproduzir a pronúncia nos cartões de palavras. Os pais podem gravar sua própria voz para reproduzir para seus filhos.
-O recurso de voz IA gera pronúncia em 8 idiomas (coreano, inglês, japonês, espanhol, chinês, francês, alemão, português).
+2. Armazenamento e exclusão de dados
+Todas as gravações, fotos e cartões personalizados são armazenados apenas no armazenamento interno do dispositivo (ou IndexedDB do navegador na web) e são removidos ao desinstalar o app. Você também pode excluí-los a qualquer momento em Configurações > Gerenciador de dados.
 
-3. Armazenamento de dados
-- Móvel: Armazenamento interno do dispositivo (excluído ao desinstalar o app)
-- Web: IndexedDB do navegador (excluído ao limpar dados do navegador)
-Gravações de voz e fotos nunca são armazenadas ou transmitidas para servidores externos. Ao gerar voz IA, apenas dados de texto são enviados aos servidores da ElevenLabs; os arquivos de áudio resultantes são armazenados apenas no seu dispositivo.
+3. Privacidade infantil (Conformidade COPPA / GDPR-K)
+Este app é projetado para educação infantil e não coleta informações pessoais de crianças. Não é necessária criação de conta ou login, e nenhum dado infantil é exposto externamente.
 
-4. Exclusão de dados
-Você pode excluir gravações, áudio IA, fotos e cartões personalizados em Configurações > Gerenciador de dados. Gravações e áudio IA individuais podem ser excluídos na tela de edição de cada cartão.
+4. Publicidade
+Este app pode exibir anúncios com recompensa através do Google AdMob. Os anúncios aparecem apenas quando o usuário escolhe assisti-los. Em conformidade com as políticas para crianças (COPPA), apenas anúncios não personalizados são exibidos.
 
-5. Privacidade infantil (Conformidade COPPA)
-Este app é projetado para educação infantil. Não coletamos informações pessoais de crianças. Não é necessária criação de conta ou login.
+5. Compras no app
+Uma compra única Premium vitalícia (Lifetime Pass) é oferecida. Não há assinaturas de renovação automática. Os pagamentos são processados com segurança através do Google Play, e o app não coleta nem armazena informações de pagamento.
 
-6. Publicidade
-Este app pode exibir anúncios com recompensa através do Google AdMob. Em conformidade com a COPPA, apenas anúncios não personalizados são exibidos. Os anúncios são mostrados apenas quando o usuário escolhe assisti-los.
-
-7. Compras no app
-Uma compra premium permanente (Lifetime Pass) e pacotes de créditos IA estão disponíveis. Não há assinaturas. Os pagamentos são processados com segurança através da Apple App Store ou Google Play Store. Este app não coleta informações de pagamento.
-
-8. SDKs de terceiros
+6. Serviços de terceiros
 - Google AdMob: Exibição de anúncios com recompensa (apenas não personalizados)
-- Apple StoreKit / Google Play Billing: Processamento de compras
-- ElevenLabs API: Geração de voz IA (texto para fala)
+- Google Play Billing: Processamento de compras
 
-9. Alterações
-Quaisquer alterações nesta política serão comunicadas através de atualizações do app.
+7. Alterações
+Quaisquer alterações nesta política serão comunicadas através de atualizações do app ou nesta página.
 
-10. Contato
-Para consultas relacionadas à privacidade, entre em contato através da avaliação da loja de apps ou contato do desenvolvedor.`,
+8. Contato
+Consultas de privacidade: mysq6653@gmail.com`,
 };
 
 export default function PrivacyScreen() {
