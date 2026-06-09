@@ -10,9 +10,10 @@
     "newArchEnabled": true,
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "0aca20b1-3bad-4f50-a223-45800792ca7b"
       },
-      "elevenLabsApiKey": "YOUR_API_KEY_HERE"
+      "elevenLabsApiKey": "YOUR_API_KEY_HERE",
+      "router": {}
     },
     "ios": {
       "supportsTablet": true,
@@ -43,7 +44,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
-        "RECORD_AUDIO",
+        "android.permission.RECORD_AUDIO",
         "com.android.vending.BILLING"
       ]
     },
@@ -104,6 +105,7 @@
     },
     "locales": {
       "ko": "./assets/locales/ko.json"
-    }
+    },
+    "owner": "mysq6653"
   }
 }
