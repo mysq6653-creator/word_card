@@ -11,7 +11,7 @@ import {
 // (형식: 'ca-app-pub-0000000000000000/0000000000')
 // 개발 중(__DEV__)에는 항상 Google 테스트 광고가 사용됩니다.
 // ──────────────────────────────────────────────────────────────
-const REWARDED_AD_UNIT_ANDROID = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
+const REWARDED_AD_UNIT_ANDROID = 'ca-app-pub-5026993506594072/5465878426';
 const REWARDED_AD_UNIT_IOS = 'ca-app-pub-XXXXXXXXXXXXXXXX/XXXXXXXXXX';
 
 const REWARDED_AD_UNIT = __DEV__
