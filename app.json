@@ -85,7 +85,8 @@
         }
       ],
       "react-native-iap",
-      "expo-updates"
+      "expo-updates",
+      "./plugins/withReleaseLintFix.js"
     ],
     "runtimeVersion": {
       "policy": "appVersion"
@@ -99,9 +100,6 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    },
-    "locales": {
-      "ko": "./assets/locales/ko.json"
     },
     "owner": "mysq6653"
   }
